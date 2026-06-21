@@ -1,0 +1,304 @@
+{
+  "metadata": {
+    "description": {
+      "ja": "Rational Flow の List モード用プリセット比率集。",
+      "en": "Preset ratio sets for Rational Flow List mode."
+    },
+    "version": 1
+  },
+  "presets": [
+    {
+      "id": "harmonic-core",
+      "name": {
+        "ja": "Harmonic Core",
+        "en": "Harmonic Core"
+      },
+      "description": {
+        "ja": "オクターブ、完全五度、長三度を中心にした基本セットです。純正律の安定した響きから探索を始められます。長三和音を中心に、上下のオクターブ配置を含めた小さな比率セットです。3-limit と 5-limit の安定した響きを感じることができます。",
+        "en": "A basic set centered on octaves, perfect fifths, and major thirds. It starts from stable just-intonation colors and includes compact triadic ratios across upper and lower octave placements, revealing the grounded sound of 3-limit and 5-limit harmony."
+      },
+      "ratios": [
+        "2/1",
+        "1/2",
+        "4/1",
+        "1/4",
+        "3/2",
+        "5/2",
+        "5/4"
+      ]
+    },
+    {
+      "id": "overtone-ladder",
+      "name": {
+        "ja": "Overtone Ladder",
+        "en": "Overtone Ladder"
+      },
+      "description": {
+        "ja": "倍音列を上方向へたどるセットです。音が積み重なるにつれて自然倍音の色彩が徐々に現れます。",
+        "en": "A set that climbs upward through the overtone series. As notes accumulate, the color of natural harmonics gradually comes forward."
+      },
+      "ratios": [
+        "1/2",
+        "1/4",
+        "1/8",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13"
+      ]
+    },
+    {
+      "id": "undertone-ladder",
+      "name": {
+        "ja": "Undertone Ladder",
+        "en": "Undertone Ladder"
+      },
+      "description": {
+        "ja": "倍音列を鏡映したような下方倍音セットです。通常の倍音列とは異なる独特な重力感を持つ響きを作ります。",
+        "en": "A downward-harmonic set that mirrors the overtone series. It creates a distinctive sense of gravity unlike the usual upward harmonic spectrum."
+      },
+      "ratios": [
+        "2",
+        "4",
+        "8",
+        "1/2",
+        "1/3",
+        "1/4",
+        "1/5",
+        "1/6",
+        "1/7",
+        "1/8",
+        "1/9",
+        "1/10",
+        "1/11",
+        "1/12",
+        "1/13"
+      ]
+    },
+    {
+      "id": "circle-of-fifth",
+      "name": {
+        "ja": "Circle of Fifth",
+        "en": "Circle of Fifth"
+      },
+      "description": {
+        "ja": "完全五度を連続して積み重ねるセットです。Pythagorean 的な広がりや comma の発生を観察できます。",
+        "en": "A set built by stacking perfect fifths. It makes Pythagorean expansion and comma formation easy to observe."
+      },
+      "ratios": [
+        "1/4",
+        "1/2",
+        "2",
+        "4",
+        "3/16",
+        "3/8",
+        "3/4",
+        "3/2",
+        "3",
+        "6",
+        "12"
+      ]
+    },
+    {
+      "id": "earthy-seventh",
+      "name": {
+        "ja": "Earthy Seventh",
+        "en": "Earthy Seventh"
+      },
+      "description": {
+        "ja": "7倍音由来の音程を中心にしたセットです。純正律の安定感の中に、素朴で少し荒い色彩を加えます。",
+        "en": "A set centered on intervals derived from the 7th harmonic. It adds a plain, slightly rough septimal color to the stability of just intonation."
+      },
+      "ratios": [
+        "1/4",
+        "1/2",
+        "2",
+        "4",
+        "7/8",
+        "7/4",
+        "7/2",
+        "7/1"
+      ]
+    },
+    {
+      "id": "odd-lights",
+      "name": {
+        "ja": "Odd Lights",
+        "en": "Odd Lights"
+      },
+      "description": {
+        "ja": "9倍音と11倍音を組み合わせたセットです。明るい大全音の響きと中性的な11-limitの響きが交差します。",
+        "en": "A set combining 9-based and 11-based ratios. Bright major-tone colors cross with the neutral flavor of 11-limit harmony."
+      },
+      "ratios": [
+        "1/4",
+        "1/2",
+        "2",
+        "4",
+        "9/2",
+        "9/4",
+        "9/8",
+        "11/2",
+        "11/4",
+        "11/8",
+        "11/16"
+      ]
+    },
+    {
+      "id": "7-limit",
+      "name": {
+        "ja": "7-limit",
+        "en": "7-limit"
+      },
+      "description": {
+        "ja": "2・3・5・7を材料とする典型的な7-limitセットです。協和性と色彩性のバランスがよく、多様な純正律和音を試せます。",
+        "en": "A typical 7-limit set using 2, 3, 5, and 7 as materials. It balances consonance and color, making a variety of just-intonation chords available."
+      },
+      "ratios": [
+        "1/4",
+        "1/2",
+        "2",
+        "4",
+        "3/2",
+        "4/3",
+        "5/4",
+        "6/5",
+        "7/4",
+        "7/6",
+        "7/5",
+        "8/7",
+        "9/8",
+        "10/7"
+      ]
+    },
+    {
+      "id": "11-limit",
+      "name": {
+        "ja": "11-limit",
+        "en": "11-limit"
+      },
+      "description": {
+        "ja": "7-limitの世界に11倍音を加えたセットです。長短の中間を思わせる中性的な響きが現れます。",
+        "en": "A set that adds 11th-harmonic ratios to the 7-limit world. Neutral intervals appear between the familiar major and minor regions."
+      },
+      "ratios": [
+        "1/4",
+        "1/2",
+        "2",
+        "4",
+        "3/2",
+        "4/3",
+        "5/4",
+        "6/5",
+        "7/4",
+        "8/7",
+        "11/8",
+        "11/6",
+        "11/5",
+        "12/11",
+        "16/11"
+      ]
+    },
+    {
+      "id": "13-limit",
+      "name": {
+        "ja": "13-limit",
+        "en": "13-limit"
+      },
+      "description": {
+        "ja": "13倍音まで拡張した色彩的なセットです。純正律の中心から離れた透明感や複雑なうなりを探れます。",
+        "en": "A more colorful set extended through the 13th harmonic. It lets you explore transparent, complex beating and branches that sit farther from the just-intonation center."
+      },
+      "ratios": [
+        "1/4",
+        "1/2",
+        "2",
+        "4",
+        "3/2",
+        "5/4",
+        "7/4",
+        "11/8",
+        "13/8",
+        "13/10",
+        "13/11",
+        "14/13",
+        "16/13",
+        "26/13"
+      ]
+    },
+    {
+      "id": "icy",
+      "name": {
+        "ja": "Icy",
+        "en": "Icy"
+      },
+      "description": {
+        "ja": "非対称な比率を独自に集めた色彩セットです。冷たく静かな緊張感や、不安定な反射のような響きを生みます。",
+        "en": "A sparse, asymmetric color set with a custom name. It creates a cold, quiet tension and a sense of unstable reflection."
+      },
+      "ratios": [
+        "1/4",
+        "1/2",
+        "2",
+        "4",
+        "9/16",
+        "9/22",
+        "8/11"
+      ]
+    },
+    {
+      "id": "comma-bait",
+      "name": {
+        "ja": "Comma Bait",
+        "en": "Comma Bait"
+      },
+      "description": {
+        "ja": "互いに近接した比率を集めたセットです。微小なズレやコンマによる揺らぎ、うなり、融合と分離を体験できます。",
+        "en": "A set of ratios that tend to come close to one another. It is useful for experiencing tiny offsets, comma shimmer, beating, fusion, and separation."
+      },
+      "ratios": [
+        "1/2",
+        "2",
+        "3/2",
+        "4/3",
+        "5/4",
+        "6/5",
+        "7/6",
+        "8/7",
+        "9/8",
+        "10/9",
+        "11/10",
+        "12/11",
+        "13/12",
+        "16/15"
+      ]
+    },
+    {
+      "id": "outer-harmonics",
+      "name": {
+        "ja": "Outer Harmonics",
+        "en": "Outer Harmonics"
+      },
+      "description": {
+        "ja": "倍音列の中心から少し離れた場所にある比率を集めたセットです。馴染みのある協和から距離を置きながら、未知の響きの枝を探索できます。",
+        "en": "A set of ratios slightly away from the center of the overtone series. It moves beyond familiar consonance and explores stranger harmonic branches."
+      },
+      "ratios": [
+        "7/5",
+        "11/9",
+        "8/11",
+        "7/9",
+        "13/4",
+        "10/13"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,807 @@
+{
+  "metadata": {
+    "description": "Named frequency ratios under 100 cents for comma/diesis marker labeling. Includes comma-like intervals and selected named pitch intervals from List of pitch intervals.",
+    "maxCents": 100,
+    "namesLanguage": "en",
+    "primarySource": "huygens-fokker-list-of-intervals",
+    "sources": {
+      "huygens-fokker-list-of-intervals": "https://www.huygens-fokker.org/docs/intervals.html",
+      "wikipedia-comma": "https://en.wikipedia.org/wiki/Comma_(music)",
+      "wikipedia-septimal-comma": "https://en.wikipedia.org/wiki/Septimal_comma",
+      "wikipedia-syntonic-comma": "https://en.wikipedia.org/wiki/Syntonic_comma",
+      "wikipedia-pythagorean-comma": "https://en.wikipedia.org/wiki/Pythagorean_comma",
+      "wikipedia-semicomma": "https://en.wikipedia.org/wiki/Semicomma",
+      "wikipedia-list-of-pitch-intervals": "https://en.wikipedia.org/wiki/List_of_pitch_intervals"
+    }
+  },
+  "intervals": [
+    {
+      "id": "ragisma",
+      "name": "Ragisma",
+      "aliases": [],
+      "ratio": "4375/4374",
+      "cents": 0.3958,
+      "category": "comma",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "breedsma",
+      "name": "Breedsma",
+      "aliases": [],
+      "ratio": "2401/2400",
+      "cents": 0.7212,
+      "category": "comma",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "ibnsinma",
+      "name": "Ibnsinma",
+      "aliases": [],
+      "ratio": "2080/2079",
+      "cents": 0.8325,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "xenisma",
+      "name": "Xenisma",
+      "aliases": [],
+      "ratio": "2058/2057",
+      "cents": 0.8414,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "ramajunanisma",
+      "name": "Ramajunanisma",
+      "aliases": [],
+      "ratio": "1729/1728",
+      "cents": 1.0016,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "schisma",
+      "name": "Schisma",
+      "aliases": [
+        "Skhisma"
+      ],
+      "ratio": "32805/32768",
+      "cents": 1.9537,
+      "category": "schisma",
+      "source": "wikipedia-comma"
+    },
+    {
+      "id": "undevicesimal-comma",
+      "name": "Undevicesimal comma",
+      "aliases": [
+        "Boethius' comma"
+      ],
+      "ratio": "513/512",
+      "cents": 3.378,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "werckmeister-undecimal-septenarian-schisma",
+      "name": "Werckmeister's undecimal septenarian schisma",
+      "aliases": [],
+      "ratio": "441/440",
+      "cents": 3.9302,
+      "category": "schisma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "undecimal-kleisma",
+      "name": "Undecimal kleisma",
+      "aliases": [
+        "Keemun comma"
+      ],
+      "ratio": "385/384",
+      "cents": 4.5026,
+      "category": "kleisma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "septendecimal-minor-second-comma",
+      "name": "Septendecimal minor second comma",
+      "aliases": [],
+      "ratio": "289/288",
+      "cents": 6.0008,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "septendecimal-kleisma",
+      "name": "Septendecimal kleisma",
+      "aliases": [],
+      "ratio": "256/255",
+      "cents": 6.7759,
+      "category": "kleisma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "neutral-third-comma",
+      "name": "Neutral third comma",
+      "aliases": [
+        "Rastma"
+      ],
+      "ratio": "243/242",
+      "cents": 7.1391,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "septimal-kleisma",
+      "name": "Septimal kleisma",
+      "aliases": [],
+      "ratio": "225/224",
+      "cents": 7.7115,
+      "category": "kleisma",
+      "source": "wikipedia-comma"
+    },
+    {
+      "id": "kleisma",
+      "name": "Kleisma",
+      "aliases": [
+        "Semicomma majeur"
+      ],
+      "ratio": "15625/15552",
+      "cents": 8.1073,
+      "category": "kleisma",
+      "source": "wikipedia-comma"
+    },
+    {
+      "id": "septendecimal-schisma",
+      "name": "Septendecimal schisma",
+      "aliases": [],
+      "ratio": "2187/2176",
+      "cents": 8.7296,
+      "category": "schisma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "undecimal-semicomma",
+      "name": "Undecimal semicomma",
+      "aliases": [
+        "Pentacircle"
+      ],
+      "ratio": "896/891",
+      "cents": 9.688,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "semicomma",
+      "name": "Semicomma",
+      "aliases": [
+        "Fokker's comma"
+      ],
+      "ratio": "2109375/2097152",
+      "cents": 10.061,
+      "category": "comma",
+      "source": "wikipedia-semicomma"
+    },
+    {
+      "id": "difference-between-5-3-and-53-32",
+      "name": "Difference between 5:3 and 53:32",
+      "aliases": [],
+      "ratio": "160/159",
+      "cents": 10.8542,
+      "category": "difference",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "difference-between-29-16-and-9-5",
+      "name": "Difference between 29:16 and 9:5",
+      "aliases": [],
+      "ratio": "145/144",
+      "cents": 11.9809,
+      "category": "difference",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "hundred-twenty-ninth-harmonic",
+      "name": "Hundred-twenty-ninth harmonic",
+      "aliases": [],
+      "ratio": "129/128",
+      "cents": 13.4727,
+      "category": "harmonic",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "septimal-semicomma",
+      "name": "Septimal semicomma",
+      "aliases": [
+        "Starling comma"
+      ],
+      "ratio": "126/125",
+      "cents": 13.7948,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "minor-bp-diesis",
+      "name": "Minor BP diesis",
+      "aliases": [
+        "Sensamagic comma"
+      ],
+      "ratio": "245/243",
+      "cents": 14.1905,
+      "category": "diesis",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "undecimal-seconds-comma",
+      "name": "Undecimal seconds comma",
+      "aliases": [
+        "Biyatisma"
+      ],
+      "ratio": "121/120",
+      "cents": 14.3672,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "tridecimal-neutral-third-comma",
+      "name": "Tridecimal neutral third comma",
+      "aliases": [],
+      "ratio": "512/507",
+      "cents": 16.9897,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "ptolemy-comma",
+      "name": "Ptolemy's comma",
+      "aliases": [
+        "Small undecimal comma"
+      ],
+      "ratio": "100/99",
+      "cents": 17.3995,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "small-undecimal-comma",
+      "name": "Small undecimal comma",
+      "aliases": [],
+      "ratio": "99/98",
+      "cents": 17.5761,
+      "category": "comma",
+      "source": "wikipedia-comma"
+    },
+    {
+      "id": "19th-partial-chroma",
+      "name": "19th-partial chroma",
+      "aliases": [],
+      "ratio": "96/95",
+      "cents": 18.1283,
+      "category": "chroma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "medium-tridecimal-comma",
+      "name": "Medium tridecimal comma",
+      "aliases": [
+        "Superleap"
+      ],
+      "ratio": "91/90",
+      "cents": 19.1299,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "diaschisma",
+      "name": "Diaschisma",
+      "aliases": [
+        "Diacisma"
+      ],
+      "ratio": "2048/2025",
+      "cents": 19.5526,
+      "category": "comma",
+      "source": "wikipedia-comma"
+    },
+    {
+      "id": "monk-comma",
+      "name": "Monk comma",
+      "aliases": [],
+      "ratio": "85/84",
+      "cents": 20.4882,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "syntonic-comma",
+      "name": "Syntonic comma",
+      "aliases": [
+        "Didymus comma",
+        "Didymean comma",
+        "Ptolemaic comma",
+        "Diatonic comma",
+        "Chromatic diesis"
+      ],
+      "ratio": "81/80",
+      "cents": 21.5063,
+      "category": "comma",
+      "source": "wikipedia-syntonic-comma"
+    },
+    {
+      "id": "pythagorean-comma",
+      "name": "Pythagorean comma",
+      "aliases": [
+        "Ditonic comma"
+      ],
+      "ratio": "531441/524288",
+      "cents": 23.46,
+      "category": "comma",
+      "source": "wikipedia-pythagorean-comma"
+    },
+    {
+      "id": "septimal-comma",
+      "name": "Septimal comma",
+      "aliases": [
+        "Archytas' comma"
+      ],
+      "ratio": "64/63",
+      "cents": 27.2641,
+      "category": "comma",
+      "source": "wikipedia-septimal-comma"
+    },
+    {
+      "id": "hendrix-comma",
+      "name": "Hendrix comma",
+      "aliases": [],
+      "ratio": "57/56",
+      "cents": 30.6421,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "undecimal-diesis",
+      "name": "Undecimal diesis",
+      "aliases": [
+        "Konbini comma"
+      ],
+      "ratio": "56/55",
+      "cents": 31.1943,
+      "category": "diesis",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "17th-partial-chroma",
+      "name": "17th-partial chroma",
+      "aliases": [],
+      "ratio": "51/50",
+      "cents": 34.283,
+      "category": "chroma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "tritonic-diesis",
+      "name": "Tritonic diesis",
+      "aliases": [
+        "Erlich's decatonic comma",
+        "Septimal sixth-tone"
+      ],
+      "ratio": "50/49",
+      "cents": 34.9756,
+      "category": "diesis",
+      "source": "wikipedia-septimal-comma"
+    },
+    {
+      "id": "tricesoprimal-comma",
+      "name": "Tricesoprimal comma",
+      "aliases": [],
+      "ratio": "248/243",
+      "cents": 35.2606,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "slendro-diesis",
+      "name": "Slendro diesis",
+      "aliases": [
+        "Septimal diesis"
+      ],
+      "ratio": "49/48",
+      "cents": 35.6968,
+      "category": "diesis",
+      "source": "wikipedia-septimal-comma"
+    },
+    {
+      "id": "23rd-partial-chroma",
+      "name": "23rd-partial chroma",
+      "aliases": [],
+      "ratio": "46/45",
+      "cents": 38.0506,
+      "category": "chroma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "minor-diesis",
+      "name": "Minor diesis",
+      "aliases": [
+        "Diesis",
+        "Lesser diesis"
+      ],
+      "ratio": "128/125",
+      "cents": 41.0589,
+      "category": "diesis",
+      "source": "wikipedia-comma"
+    },
+    {
+      "id": "lesser-41-limit-fifth-tone",
+      "name": "Lesser 41-limit fifth tone",
+      "aliases": [],
+      "ratio": "42/41",
+      "cents": 41.7185,
+      "category": "fifth-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "greater-41-limit-fifth-tone",
+      "name": "Greater 41-limit fifth tone",
+      "aliases": [],
+      "ratio": "41/40",
+      "cents": 42.7487,
+      "category": "fifth-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "tridecimal-minor-diesis",
+      "name": "Tridecimal minor diesis",
+      "aliases": [],
+      "ratio": "40/39",
+      "cents": 43.8311,
+      "category": "diesis",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "superior-quarter-tone",
+      "name": "Superior quarter-tone",
+      "aliases": [
+        "Novendecimal fifth tone"
+      ],
+      "ratio": "39/38",
+      "cents": 44.9696,
+      "category": "quarter-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "alpharabian-parachromatic-semilimma",
+      "name": "Alpharabian parachromatic semilimma",
+      "aliases": [],
+      "ratio": "1331/1296",
+      "cents": 46.1338,
+      "category": "limma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "lesser-37-limit-quarter-tone",
+      "name": "Lesser 37-limit quarter tone",
+      "aliases": [],
+      "ratio": "38/37",
+      "cents": 46.169,
+      "category": "quarter-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "greater-37-limit-quarter-tone",
+      "name": "Greater 37-limit quarter tone",
+      "aliases": [],
+      "ratio": "37/36",
+      "cents": 47.434,
+      "category": "quarter-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "tridecimal-major-diesis",
+      "name": "Tridecimal major diesis",
+      "aliases": [],
+      "ratio": "1053/1024",
+      "cents": 48.3477,
+      "category": "diesis",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "septimal-diesis",
+      "name": "Septimal diesis",
+      "aliases": [
+        "Septimal quarter tone"
+      ],
+      "ratio": "36/35",
+      "cents": 48.7704,
+      "category": "diesis",
+      "source": "wikipedia-septimal-comma"
+    },
+    {
+      "id": "maximal-diesis",
+      "name": "Maximal diesis",
+      "aliases": [
+        "Porcupine comma"
+      ],
+      "ratio": "250/243",
+      "cents": 49.1661,
+      "category": "diesis",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "just-quarter-tone",
+      "name": "Just quarter tone",
+      "aliases": [],
+      "ratio": "246/239",
+      "cents": 49.9772,
+      "category": "quarter-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "lesser-17-limit-quarter-tone",
+      "name": "Lesser 17-limit quarter tone",
+      "aliases": [
+        "ET quarter-tone approximation"
+      ],
+      "ratio": "35/34",
+      "cents": 50.1842,
+      "category": "quarter-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "harrisons-comma",
+      "name": "Harrison's comma",
+      "aliases": [
+        "10 P5s - 1 H7"
+      ],
+      "ratio": "59049/57344",
+      "cents": 50.7241,
+      "category": "comma",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "greater-17-limit-quarter-tone",
+      "name": "Greater 17-limit quarter tone",
+      "aliases": [],
+      "ratio": "34/33",
+      "cents": 51.6825,
+      "category": "quarter-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "undecimal-comma",
+      "name": "Undecimal comma",
+      "aliases": [
+        "Al-Farabi's quarter-tone"
+      ],
+      "ratio": "33/32",
+      "cents": 53.2729,
+      "category": "comma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "inferior-quarter-tone",
+      "name": "Inferior quarter-tone",
+      "aliases": [
+        "Thirty-first subharmonic"
+      ],
+      "ratio": "32/31",
+      "cents": 54.9644,
+      "category": "quarter-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "five-hundred-twenty-ninth-harmonic",
+      "name": "Five-hundred-twenty-ninth harmonic",
+      "aliases": [],
+      "ratio": "529/512",
+      "cents": 56.5487,
+      "category": "harmonic",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "greater-quarter-tone",
+      "name": "Greater quarter-tone",
+      "aliases": [
+        "Difference between 31:16 and 15:8"
+      ],
+      "ratio": "31/30",
+      "cents": 56.7669,
+      "category": "quarter-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "lesser-29-limit-quarter-tone",
+      "name": "Lesser 29-limit quarter tone",
+      "aliases": [],
+      "ratio": "30/29",
+      "cents": 58.6915,
+      "category": "quarter-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "greater-29-limit-quarter-tone",
+      "name": "Greater 29-limit quarter tone",
+      "aliases": [],
+      "ratio": "29/28",
+      "cents": 60.7513,
+      "category": "quarter-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "greater-diesis",
+      "name": "Greater diesis",
+      "aliases": [
+        "Major diesis"
+      ],
+      "ratio": "648/625",
+      "cents": 62.5651,
+      "category": "diesis",
+      "source": "wikipedia-comma"
+    },
+    {
+      "id": "septimal-minor-second",
+      "name": "Septimal minor second",
+      "aliases": [
+        "Small minor second",
+        "Inferior quarter tone"
+      ],
+      "ratio": "28/27",
+      "cents": 62.9609,
+      "category": "semitone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "tridecimal-comma",
+      "name": "Tridecimal comma",
+      "aliases": [
+        "Tridecimal third-tone"
+      ],
+      "ratio": "27/26",
+      "cents": 65.3373,
+      "category": "comma",
+      "source": "wikipedia-comma"
+    },
+    {
+      "id": "one-hundred-thirty-third-harmonic",
+      "name": "One-hundred-thirty-third harmonic",
+      "aliases": [],
+      "ratio": "133/128",
+      "cents": 66.3389,
+      "category": "harmonic",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "tridecimal-third-tone",
+      "name": "Tridecimal third tone",
+      "aliases": [
+        "Third tone"
+      ],
+      "ratio": "26/25",
+      "cents": 67.9002,
+      "category": "third-tone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "minor-chroma",
+      "name": "Minor chroma",
+      "aliases": [
+        "Classic chromatic semitone",
+        "Lesser chromatic semitone"
+      ],
+      "ratio": "25/24",
+      "cents": 70.6724,
+      "category": "chroma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "lesser-23-limit-semitone",
+      "name": "Lesser 23-limit semitone",
+      "aliases": [],
+      "ratio": "24/23",
+      "cents": 73.6807,
+      "category": "semitone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "greater-23-limit-semitone",
+      "name": "Greater 23-limit semitone",
+      "aliases": [],
+      "ratio": "23/22",
+      "cents": 76.9564,
+      "category": "semitone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "sixty-seventh-harmonic",
+      "name": "Sixty-seventh harmonic",
+      "aliases": [],
+      "ratio": "67/64",
+      "cents": 79.307,
+      "category": "harmonic",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "hard-semitone",
+      "name": "Hard semitone",
+      "aliases": [
+        "Two-fifth tone small semitone"
+      ],
+      "ratio": "22/21",
+      "cents": 80.537,
+      "category": "semitone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "septimal-chromatic-semitone",
+      "name": "Septimal chromatic semitone",
+      "aliases": [
+        "Minor semitone"
+      ],
+      "ratio": "21/20",
+      "cents": 84.4672,
+      "category": "semitone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "novendecimal-augmented-unison",
+      "name": "Novendecimal augmented unison",
+      "aliases": [],
+      "ratio": "20/19",
+      "cents": 88.8007,
+      "category": "semitone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "limma",
+      "name": "Limma",
+      "aliases": [
+        "Pythagorean minor second"
+      ],
+      "ratio": "256/243",
+      "cents": 90.225,
+      "category": "limma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "major-chroma",
+      "name": "Major chroma",
+      "aliases": [
+        "Major limma"
+      ],
+      "ratio": "135/128",
+      "cents": 92.1787,
+      "category": "chroma",
+      "source": "huygens-fokker-list-of-intervals"
+    },
+    {
+      "id": "novendecimal-minor-second",
+      "name": "Novendecimal minor second",
+      "aliases": [],
+      "ratio": "19/18",
+      "cents": 93.603,
+      "category": "semitone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "undecimal-minor-second",
+      "name": "Undecimal minor second",
+      "aliases": [
+        "121st subharmonic"
+      ],
+      "ratio": "128/121",
+      "cents": 97.3641,
+      "category": "semitone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    },
+    {
+      "id": "just-minor-semitone",
+      "name": "Just minor semitone",
+      "aliases": [
+        "Arabic lute index finger"
+      ],
+      "ratio": "18/17",
+      "cents": 98.9546,
+      "category": "semitone",
+      "source": "wikipedia-list-of-pitch-intervals"
+    }
+  ]
+}
