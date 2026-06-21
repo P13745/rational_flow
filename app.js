@@ -38,6 +38,11 @@ const els = {
   parentBiasDirection: document.querySelector("#parentBiasDirection"),
   parentBiasCurve: document.querySelector("#parentBiasCurve"),
   parentBiasStrength: document.querySelector("#parentBiasStrength"),
+  vibratoEnabled: document.querySelector("#vibratoEnabled"),
+  vibratoRateMin: document.querySelector("#vibratoRateMin"),
+  vibratoRateMax: document.querySelector("#vibratoRateMax"),
+  vibratoDepthMin: document.querySelector("#vibratoDepthMin"),
+  vibratoDepthMax: document.querySelector("#vibratoDepthMax"),
   detailsOpen: document.querySelector("#detailsOpen"),
   detailsClose: document.querySelector("#detailsClose"),
   detailsDialog: document.querySelector("#detailsDialog"),
@@ -164,6 +169,13 @@ const i18nHelpTargets = [
   ["#detailsDialog .setting-block:nth-child(3) p", "dialogs.ratioSourceText"],
   ["#detailsDialog .setting-block:nth-child(4) h3", "dialogs.timingTitle"],
   ["#detailsDialog .setting-block:nth-child(4) p", "dialogs.timingText"],
+  ["#detailsDialog .setting-block:nth-child(5) h3", "dialogs.vibratoTitle"],
+  ["#detailsDialog .setting-block:nth-child(5) p", "dialogs.vibratoText"],
+  ["#vibratoEnabled", "labels.vibratoEnabled", "checkbox-label"],
+  ['label[for="vibratoRateMin"]', "labels.vibratoRateMin"],
+  ['label[for="vibratoRateMax"]', "labels.vibratoRateMax"],
+  ['label[for="vibratoDepthMin"]', "labels.vibratoDepthMin"],
+  ['label[for="vibratoDepthMax"]', "labels.vibratoDepthMax"],
   ["#helpAppOverview h3", "help.appTitle"],
   ["#helpAppOverview p", "help.appText"],
   ["#helpTerms h3", "help.termsTitle"],
@@ -217,6 +229,8 @@ const i18nHelpTargets = [
   ["#helpParentBias li:nth-child(5) span", "help.parentLinear"],
   ["#helpParentBias li:nth-child(6) span", "help.parentExponential"],
   ["#helpParentBias li:nth-child(7) span", "help.parentStrength"],
+  ["#helpVibrato h3", "dialogs.vibratoTitle"],
+  ["#helpVibrato p", "help.vibratoText"],
   ["#helpDepth h3", "help.depthTitle"],
   ["#helpDepth p", "help.depthText"],
   ["#helpActiveRatio h3", "help.activeRatioTitle"],
@@ -471,6 +485,10 @@ function getSettings() {
   const maxDur = Math.max(minDur, Number(els.maxDur.value) || 20);
   const nextMin = Math.max(0.05, Number(els.nextMin.value) || 1);
   const nextMax = Math.max(nextMin, Number(els.nextMax.value) || 3);
+  const vibratoRateMin = Math.max(0, Number(els.vibratoRateMin.value) || 0);
+  const vibratoRateMax = Math.max(vibratoRateMin, Number(els.vibratoRateMax.value) || 0);
+  const vibratoDepthMin = Math.max(0, Number(els.vibratoDepthMin.value) || 0);
+  const vibratoDepthMax = Math.max(vibratoDepthMin, Number(els.vibratoDepthMax.value) || 0);
   return {
     minFreq,
     maxFreq,
@@ -490,6 +508,11 @@ function getSettings() {
     parentBiasDirection: els.parentBiasDirection.value === "none" ? "low" : els.parentBiasDirection.value,
     parentBiasCurve: els.parentBiasCurve.value === "none" ? "linear" : els.parentBiasCurve.value,
     parentBiasStrength: Math.max(0, Number(els.parentBiasStrength.value) || 0),
+    vibratoEnabled: els.vibratoEnabled.checked,
+    vibratoRateMin,
+    vibratoRateMax,
+    vibratoDepthMin,
+    vibratoDepthMax,
   };
 }
 
@@ -576,9 +599,12 @@ function ensureAudio() {
 
 function scheduleAudio(note) {
   if (note.nodes) return;
+  const settings = getSettings();
   const ctx = ensureAudio();
   const oscillator = ctx.createOscillator();
   const gain = ctx.createGain();
+  let vibratoOscillator = null;
+  let vibratoGain = null;
   const startAt = Math.max(ctx.currentTime + 0.01, note.start - performance.now() / 1000 + ctx.currentTime);
   const isDrone = !Number.isFinite(note.duration);
   const attack = isDrone ? 0.45 : Math.min(0.5, note.duration * 0.2);
@@ -587,6 +613,19 @@ function scheduleAudio(note) {
 
   oscillator.type = "triangle";
   oscillator.frequency.value = note.frequency;
+  if (settings.vibratoEnabled && settings.vibratoRateMax > 0 && settings.vibratoDepthMax > 0) {
+    const rate = randomBetween(settings.vibratoRateMin, settings.vibratoRateMax);
+    const depth = randomBetween(settings.vibratoDepthMin, settings.vibratoDepthMax);
+    if (rate > 0 && depth > 0) {
+      vibratoOscillator = ctx.createOscillator();
+      vibratoGain = ctx.createGain();
+      vibratoOscillator.type = "sine";
+      vibratoOscillator.frequency.value = rate;
+      vibratoGain.gain.value = depth;
+      vibratoOscillator.connect(vibratoGain).connect(oscillator.detune);
+      vibratoOscillator.start(startAt);
+    }
+  }
   gain.gain.value = 0;
   gain.gain.setValueAtTime(0, startAt);
   gain.gain.linearRampToValueAtTime(note.volume, startAt + attack);
@@ -596,8 +635,17 @@ function scheduleAudio(note) {
   }
   oscillator.connect(gain).connect(ctx.destination);
   oscillator.start(startAt);
-  note.nodes = { oscillator, gain, startAt };
+  note.nodes = { oscillator, gain, startAt, vibratoOscillator, vibratoGain };
   oscillator.onended = () => {
+    if (vibratoOscillator) {
+      try {
+        vibratoOscillator.stop();
+      } catch (_) {
+        // The vibrato oscillator may already have been stopped explicitly.
+      }
+      vibratoOscillator.disconnect();
+    }
+    if (vibratoGain) vibratoGain.disconnect();
     oscillator.disconnect();
     gain.disconnect();
     if (note.nodes?.oscillator === oscillator) {
@@ -691,14 +739,16 @@ function estimatedGainAt(note, time) {
 
 function stopNode(note, fadeSeconds = 0.45) {
   if (!note.nodes || !audioContext) return;
+  const nodes = note.nodes;
   const audioNow = audioContext.currentTime;
   const wallNow = performance.now() / 1000;
-  const gainParam = note.nodes.gain.gain;
+  const gainParam = nodes.gain.gain;
   try {
     if (note.start > wallNow + 0.02) {
       gainParam.cancelScheduledValues(audioNow);
       gainParam.setValueAtTime(0, audioNow);
-      note.nodes.oscillator.stop(audioNow + 0.01);
+      nodes.oscillator.stop(audioNow + 0.01);
+      if (nodes.vibratoOscillator) nodes.vibratoOscillator.stop(audioNow + 0.01);
       note.nodes = null;
       return;
     }
@@ -710,7 +760,8 @@ function stopNode(note, fadeSeconds = 0.45) {
       gainParam.setValueAtTime(estimatedGainAt(note, wallNow), audioNow);
     }
     gainParam.linearRampToValueAtTime(0, audioNow + fadeSeconds);
-    note.nodes.oscillator.stop(audioNow + fadeSeconds + 0.03);
+    nodes.oscillator.stop(audioNow + fadeSeconds + 0.03);
+    if (nodes.vibratoOscillator) nodes.vibratoOscillator.stop(audioNow + fadeSeconds + 0.03);
   } catch (_) {
     // The node may have finished naturally.
   }
@@ -1564,6 +1615,7 @@ function updateLabels() {
   els.listControls.classList.toggle("hidden", mode !== "list");
   updateRatioCurveState();
   updateParentDirectionLabels();
+  updateVibratoState();
 
   if (!selected) {
     els.detailLabel.textContent = "---";
@@ -1718,6 +1770,18 @@ function updateRatioCurveState() {
   if (!isEqual && els.ratioBiasCurve.value === "none") els.ratioBiasCurve.value = "linear";
 }
 
+function updateVibratoState() {
+  const disabled = !els.vibratoEnabled.checked;
+  [
+    els.vibratoRateMin,
+    els.vibratoRateMax,
+    els.vibratoDepthMin,
+    els.vibratoDepthMax,
+  ].forEach((input) => {
+    input.disabled = disabled;
+  });
+}
+
 els.startStop.addEventListener("click", () => {
   if (isRunning || isPaused || isDraining) stop();
   else start();
@@ -1817,6 +1881,11 @@ els.diesisLimitFilter.addEventListener("change", () => {
   els.parentBiasDirection,
   els.parentBiasCurve,
   els.parentBiasStrength,
+  els.vibratoEnabled,
+  els.vibratoRateMin,
+  els.vibratoRateMax,
+  els.vibratoDepthMin,
+  els.vibratoDepthMax,
 ].forEach((el) => el.addEventListener("input", render));
 
 window.addEventListener("resize", drawCanvas);

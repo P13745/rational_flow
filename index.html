@@ -240,6 +240,38 @@
               右端までの予定を先に埋めます。Duration min sec / max sec は音の長さ、window は画面に見える時間幅です。
             </p>
           </div>
+
+          <div class="setting-block">
+            <h3>Vibrato</h3>
+            <p>
+              メイン再生音だけに、ゆっくりした pitch の揺れを加えます。プレビュー音には適用されません。
+              Rate は揺れの速さ、Depth は cents 単位の幅です。
+            </p>
+            <label class="check">
+              <input id="vibratoEnabled" type="checkbox" />
+              enable vibrato
+            </label>
+            <div class="split">
+              <div class="control-group">
+                <label for="vibratoRateMin">rate min Hz</label>
+                <input id="vibratoRateMin" type="number" min="0" max="30" step="0.1" value="0" />
+              </div>
+              <div class="control-group">
+                <label for="vibratoRateMax">rate max Hz</label>
+                <input id="vibratoRateMax" type="number" min="0" max="30" step="0.1" value="5" />
+              </div>
+            </div>
+            <div class="split">
+              <div class="control-group">
+                <label for="vibratoDepthMin">depth min cents</label>
+                <input id="vibratoDepthMin" type="number" min="0" max="100" step="0.1" value="0" />
+              </div>
+              <div class="control-group">
+                <label for="vibratoDepthMax">depth max cents</label>
+                <input id="vibratoDepthMax" type="number" min="0" max="100" step="0.1" value="3" />
+              </div>
+            </div>
+          </div>
         </section>
       </form>
     </dialog>
@@ -363,6 +395,13 @@
               <li><strong>Exponential</strong><span>偏りを強くします。選択傾向がはっきり出ます。</span></li>
               <li><strong>strength</strong><span>Parent bias の効き具合です。0 に近いほど Equal に近づきます。</span></li>
             </ul>
+          </div>
+          <div id="helpVibrato" class="setting-block help-block" data-help-page="settings">
+            <h3>Vibrato</h3>
+            <p>
+              メイン再生音にだけ pitch の揺れを加えます。Rate は揺れの周波数、Depth は cents 単位の幅です。
+              canvas / table / diesis のプレビュー音には適用されません。
+            </p>
           </div>
           <div id="helpDepth" class="setting-block help-block" data-help-page="about">
             <h3>Depth</h3>
