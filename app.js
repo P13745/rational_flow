@@ -85,6 +85,8 @@ let ratioBias = "simple";
 let notes = [];
 let rafId = null;
 let schedulerTimer = null;
+let wakeLockSentinel = null;
+let wakeLockRequestPending = false;
 let startTime = performance.now() / 1000;
 let nextEventTime = null;
 let selectedNoteId = null;
@@ -1751,11 +1753,46 @@ function render(forceTable = false) {
   }
 }
 
+function shouldHoldWakeLock() {
+  return isRunning || isPaused || isDraining;
+}
+
+async function requestWakeLock() {
+  if (wakeLockSentinel || wakeLockRequestPending) return;
+  if (!("wakeLock" in navigator) || document.visibilityState !== "visible") return;
+  wakeLockRequestPending = true;
+  try {
+    wakeLockSentinel = await navigator.wakeLock.request("screen");
+    wakeLockSentinel.addEventListener("release", () => {
+      wakeLockSentinel = null;
+      if (shouldHoldWakeLock() && document.visibilityState === "visible") {
+        window.setTimeout(requestWakeLock, 0);
+      }
+    });
+  } catch (_) {
+    wakeLockSentinel = null;
+  } finally {
+    wakeLockRequestPending = false;
+  }
+}
+
+function releaseWakeLock() {
+  const sentinel = wakeLockSentinel;
+  wakeLockSentinel = null;
+  if (sentinel) sentinel.release().catch(() => {});
+}
+
+function syncWakeLock() {
+  if (shouldHoldWakeLock()) requestWakeLock();
+  else releaseWakeLock();
+}
+
 function tick() {
   trimNotes();
   if (isDraining && !notes.length) {
     isDraining = false;
     selectedNoteId = null;
+    syncWakeLock();
   }
   render();
   rafId = isRunning || isDraining ? window.requestAnimationFrame(tick) : null;
@@ -1779,6 +1816,7 @@ function start() {
   scheduleVisibleAudio();
   fillEventQueue();
   queueScheduler(0.5);
+  syncWakeLock();
   render(true);
   if (!rafId) tick();
 }
@@ -1801,6 +1839,7 @@ function clearAll() {
   notes.forEach(stopNode);
   notes = [];
   selectedNoteId = null;
+  syncWakeLock();
   render(true);
 }
 
@@ -1817,6 +1856,7 @@ function pause() {
   cancelFutureAudio(pausedAt);
   if (rafId) window.cancelAnimationFrame(rafId);
   rafId = null;
+  syncWakeLock();
   render(true);
 }
 
@@ -1837,6 +1877,7 @@ function resume() {
     fillEventQueue();
     queueScheduler(0.5);
   }
+  syncWakeLock();
   if (!rafId) tick();
 }
 
@@ -2023,6 +2064,9 @@ els.diesisLimitFilter.addEventListener("change", () => {
 ].forEach((el) => el.addEventListener("input", render));
 
 window.addEventListener("resize", drawCanvas);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") syncWakeLock();
+});
 document.addEventListener("keydown", (event) => {
   const tagName = document.activeElement?.tagName;
   if (["INPUT", "TEXTAREA", "SELECT"].includes(tagName)) return;
