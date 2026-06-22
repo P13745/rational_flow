@@ -12,6 +12,12 @@ window.RF_I18N = {
       clearTitle: "クリア",
       clear: "Clear",
     },
+    mobile: {
+      ariaLabel: "モバイル表示切替",
+      controls: "設定",
+      main: "メイン",
+      list: "リスト",
+    },
     hints: {
       fractionMode: "比率の作り方。Auto は範囲から生成、List は指定した比率だけを使います。",
       ratioBias: "比率候補の偏り方。Simple は小さな整数比、Complex は大きな整数比、Equal は均等です。",
@@ -171,6 +177,12 @@ window.RF_I18N = {
       seedTitle: "Add seed",
       clearTitle: "Clear",
       clear: "Clear",
+    },
+    mobile: {
+      ariaLabel: "Mobile view",
+      controls: "Controls",
+      main: "Main",
+      list: "List",
     },
     hints: {
       fractionMode: "Ratio source. Auto generates ratios from a range; List uses only the ratios you type.",

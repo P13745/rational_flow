@@ -1,5 +1,8 @@
 const els = {
   languageToggle: document.querySelector("#languageToggle"),
+  mobileControlsView: document.querySelector("#mobileControlsView"),
+  mobileMainView: document.querySelector("#mobileMainView"),
+  mobileListView: document.querySelector("#mobileListView"),
   startStop: document.querySelector("#startStop"),
   pauseResume: document.querySelector("#pauseResume"),
   seedMode: document.querySelector("#seedMode"),
@@ -100,6 +103,10 @@ const germanPitchClasses = ["C", "Cis/Des", "D", "Dis/Es", "E", "F", "Fis/Ges", 
 const i18nTargets = [
   ["header > div > p", "subtitle"],
   ["header .transport", "transport.label", "aria-label"],
+  [".mobile-view-switch", "mobile.ariaLabel", "aria-label"],
+  ["#mobileControlsView", "mobile.controls"],
+  ["#mobileMainView", "mobile.main"],
+  ["#mobileListView", "mobile.list"],
   ["#startStop", "transport.startStopTitle", "title"],
   ["#pauseResume", "transport.pauseTitle", "title"],
   ["#seedMode", "transport.seedModeTitle", "title"],
@@ -309,6 +316,20 @@ function toggleLanguage() {
   currentLanguage = currentLanguage === "ja" ? "en" : "ja";
   localStorage.setItem("rationalFlowLanguage", currentLanguage);
   applyLanguage();
+}
+
+function setMobileView(view) {
+  const nextView = ["controls", "main", "list"].includes(view) ? view : "main";
+  document.body.dataset.mobileView = nextView;
+  [
+    [els.mobileControlsView, "controls"],
+    [els.mobileMainView, "main"],
+    [els.mobileListView, "list"],
+  ].forEach(([button, buttonView]) => {
+    button.classList.toggle("active", buttonView === nextView);
+  });
+  if (nextView === "list") renderTable();
+  window.requestAnimationFrame(drawCanvas);
 }
 
 function setHelpPage(page) {
@@ -1788,6 +1809,13 @@ els.startStop.addEventListener("click", () => {
   else start();
 });
 els.languageToggle.addEventListener("click", toggleLanguage);
+[
+  els.mobileControlsView,
+  els.mobileMainView,
+  els.mobileListView,
+].forEach((button) => {
+  button.addEventListener("click", () => setMobileView(button.dataset.mobileView));
+});
 els.pauseResume.addEventListener("click", togglePause);
 els.seedMode.addEventListener("change", () => setSeedMode(els.seedMode.value));
 els.seed.addEventListener("click", addManualNote);

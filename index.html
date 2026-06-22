@@ -6,7 +6,7 @@
     <title>Rational Flow</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body data-mobile-view="main">
     <main class="app">
       <header class="topbar">
         <div class="brand">
@@ -28,6 +28,12 @@
           <button id="clear" type="button" title="クリア">Clear</button>
         </div>
       </header>
+
+      <nav class="mobile-view-switch" aria-label="mobile view">
+        <button id="mobileControlsView" type="button" data-mobile-view="controls">設定</button>
+        <button id="mobileMainView" class="active" type="button" data-mobile-view="main">メイン</button>
+        <button id="mobileListView" type="button" data-mobile-view="list">リスト</button>
+      </nav>
 
       <section class="workbench">
         <aside class="controls" aria-label="controls">
