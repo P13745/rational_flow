@@ -490,18 +490,24 @@ function installNamedCommas(data) {
   namedCommaIntervals = data.intervals;
   namedCommaByRatio = new Map(data.intervals.map((entry) => [entry.ratio, entry]));
   loadDiesisCollection();
+  if (els.diesisDialog.open) {
+    renderDiesisControls();
+    renderDiesisList();
+  }
   return true;
 }
 
 async function loadNamedCommas() {
+  const hasFallback = installNamedCommas(window.NAMED_COMMAS_DATA);
+  if (hasFallback) render();
   try {
     const response = await fetch("named_commas.json");
     if (!response.ok) throw new Error("named commas unavailable");
     const data = await response.json();
     if (installNamedCommas(data)) render();
   } catch (_) {
-    // Opening the HTML directly may block local JSON fetches; use the generated JS fallback.
-    if (installNamedCommas(window.NAMED_COMMAS_DATA)) render();
+    // The generated JS fallback is installed before fetch, so direct file opening still works.
+    if (!hasFallback && installNamedCommas(window.NAMED_COMMAS_DATA)) render();
   }
 }
 

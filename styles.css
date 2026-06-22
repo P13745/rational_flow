@@ -63,6 +63,7 @@ textarea {
 
 h1 {
   margin: 0;
+  min-width: 0;
   font-size: 21px;
   line-height: 1.1;
   letter-spacing: 0;
@@ -75,8 +76,15 @@ h1 {
 .title-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   min-width: 0;
+}
+
+.title-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
 }
 
 .version-label {
@@ -411,7 +419,7 @@ canvas {
 .list-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   min-width: 0;
   padding: 9px 10px;
@@ -427,16 +435,6 @@ canvas {
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.list-toolbar-button {
-  height: 30px;
-  min-width: 0;
-  padding: 0 10px;
-  color: #ffd2cc;
-  font-size: 12px;
-  background: rgba(240, 87, 76, 0.1);
-  border-color: rgba(240, 87, 76, 0.34);
 }
 
 .event-table-wrap {
@@ -947,8 +945,12 @@ td:nth-child(6) {
     gap: 8px;
   }
 
+  .title-actions {
+    gap: 5px;
+  }
+
   h1 {
-    min-width: 0;
+    flex: 1 1 auto;
     font-size: 18px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -962,6 +964,7 @@ td:nth-child(6) {
   .top-help-button {
     flex: 0 0 auto;
     height: 30px;
+    padding: 0 8px;
   }
 
   .brand p {
@@ -1065,6 +1068,10 @@ td:nth-child(6) {
     max-height: calc(100dvh - 12px);
   }
 
+  .diesis-panel {
+    grid-template-rows: auto minmax(0, auto) minmax(220px, 1fr);
+  }
+
   .details-head {
     gap: 10px;
     padding: 12px;
@@ -1108,8 +1115,9 @@ td:nth-child(6) {
 
   .diesis-toolbar {
     grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 10px 12px;
+    gap: 8px;
+    padding: 8px 12px;
+    overflow: auto;
   }
 
   .diesis-list {
