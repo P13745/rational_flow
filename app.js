@@ -172,6 +172,7 @@ const i18nHelpTargets = [
   ["#detailsDialog .setting-block:nth-child(5) h3", "dialogs.vibratoTitle"],
   ["#detailsDialog .setting-block:nth-child(5) p", "dialogs.vibratoText"],
   ["#vibratoEnabled", "labels.vibratoEnabled", "checkbox-label"],
+  [".vibrato-hint", "hints.vibrato"],
   ['label[for="vibratoRateMin"]', "labels.vibratoRateMin"],
   ['label[for="vibratoRateMax"]', "labels.vibratoRateMax"],
   ['label[for="vibratoDepthMin"]', "labels.vibratoDepthMin"],

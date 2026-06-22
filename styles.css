@@ -246,7 +246,7 @@ select {
 
 select:disabled,
 input:disabled {
-  opacity: 0.48;
+  opacity: 0.68;
   color: var(--muted);
   cursor: not-allowed;
 }

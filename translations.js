@@ -16,6 +16,7 @@ window.RF_I18N = {
       fractionMode: "比率の作り方。Auto は範囲から生成、List は指定した比率だけを使います。",
       ratioBias: "比率候補の偏り方。Simple は小さな整数比、Complex は大きな整数比、Equal は均等です。",
       parentBias: "parent の選び方。Rooted depth は root が消えた後も depth 0 を 1 本の tree にだけ引き継ぎます。",
+      vibrato: "enable vibrato をオンにすると下の値を編集できます。",
     },
     labels: {
       numeratorMax: "Numerator max",
@@ -175,6 +176,7 @@ window.RF_I18N = {
       fractionMode: "Ratio source. Auto generates ratios from a range; List uses only the ratios you type.",
       ratioBias: "How ratio candidates are weighted. Simple prefers smaller integer ratios, Complex prefers larger ones, and Equal treats them evenly.",
       parentBias: "How the parent note is chosen. Rooted depth lets one tree inherit depth 0 after the original root disappears.",
+      vibrato: "Turn on enable vibrato to edit the values below.",
     },
     labels: {
       numeratorMax: "Numerator max",
