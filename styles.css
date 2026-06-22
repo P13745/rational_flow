@@ -1005,6 +1005,25 @@ td:nth-child(6) {
     grid-template-columns: 1fr;
   }
 
+  .details-dialog {
+    width: calc(100vw - 12px);
+    max-height: calc(100dvh - 12px);
+  }
+
+  .details-head {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .details-head h2 {
+    font-size: 17px;
+  }
+
+  .details-head p {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
   .setting-block {
     border-right: 0;
   }
@@ -1024,12 +1043,49 @@ td:nth-child(6) {
   }
 
   .diesis-item {
-    grid-template-columns: 62px 64px minmax(96px, 1fr) 54px minmax(86px, 1fr);
-    gap: 7px;
-    padding: 7px;
+    grid-template-columns: auto 68px minmax(0, 1fr) 54px;
+    grid-template-areas:
+      "actions cents ratio limit"
+      "name name name name";
+    gap: 6px 7px;
+    padding: 8px;
   }
 
   .diesis-toolbar {
     grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .diesis-list {
+    min-height: 0;
+    padding: 10px 12px 12px;
+  }
+
+  .diesis-actions {
+    grid-area: actions;
+  }
+
+  .diesis-cents {
+    grid-area: cents;
+  }
+
+  .diesis-ratio {
+    grid-area: ratio;
+  }
+
+  .diesis-limit {
+    grid-area: limit;
+    font-size: 11px;
+  }
+
+  .diesis-name {
+    grid-area: name;
+    font-size: 12px;
+  }
+
+  .compact-button-row button {
+    height: 28px;
+    font-size: 11px;
   }
 }
