@@ -11,7 +11,7 @@
       <header class="topbar">
         <div class="brand">
           <div class="title-row">
-            <h1>Rational Flow <span class="version-label">v2.0.1</span></h1>
+            <h1>Rational Flow <span class="version-label">v2.0.2</span></h1>
             <button id="helpOpen" class="top-help-button" type="button">Help</button>
           </div>
           <p>slowly evolving harmonic currents</p>
@@ -428,8 +428,10 @@
           <div id="helpDiesisMarker" class="setting-block help-block" data-help-page="about">
             <h3>Diesis marker</h3>
             <p>
-              同時に鳴っている 2 音の差が 100¢ 未満で、完全な同一音ではない場合、
-              再生ヘッドに赤い印とその 2 音の比を表示します。複数の近接ペアがある場合は複数表示します。
+              同時に鳴っている2つの音がとても近い高さになると、再生ヘッドの近くに赤い印が表示されます。これは、完全に同じ音ではないけれど、差が 100 cents 未満に収まっている2音を示す印です。
+              このような近い音が重なると、単なる和音とは少し違う、ゆっくり揺れるようなうなりや、細かな濁りが生まれることがあります。
+              Diesis List では、こうした小さなズレのうち、名前の付いたものを一覧できます。表示は通常の比率だけでなく、素因数分解や累乗を使った形にも切り替えられるため、同じ diesis をいくつかの見方で確認できます。また、再生中にすでに見つけたものだけ、あるいはまだ見つけていないものだけに絞り込むこともできます。
+              再生中に名前の付いた diesis に出会うと、その記録はブラウザに保存されます。保存された diesis は一覧の右端に星が付き、あとから「どの小さなズレに出会ったか」を振り返れるようになります。
             </p>
           </div>
           <div id="helpTable" class="setting-block help-block" data-help-page="controls">
@@ -479,29 +481,48 @@
         </header>
 
         <section class="diesis-toolbar">
-          <div>
+          <div class="diesis-toolbar-group playback-group">
             <span class="toolbar-label">Base note</span>
             <div id="diesisBaseControls" class="compact-button-row" aria-label="base note"></div>
           </div>
-          <div>
-            <label class="toolbar-label" for="diesisLimitFilter">Limit filter</label>
-            <select id="diesisLimitFilter" class="compact-select">
-              <option value="all">All</option>
-              <option value="3">3-limit</option>
-              <option value="5">5-limit</option>
-              <option value="7">7-limit</option>
-              <option value="11">11-limit</option>
-              <option value="13">13-limit</option>
-              <option value="17">17-limit</option>
-              <option value="19">19-limit</option>
-            </select>
+          <div class="diesis-toolbar-group filter-group">
+            <div>
+              <label class="toolbar-label" for="diesisLimitFilter">Limit filter</label>
+              <select id="diesisLimitFilter" class="compact-select">
+                <option value="all">All</option>
+                <option value="3">3-limit</option>
+                <option value="5">5-limit</option>
+                <option value="7">7-limit</option>
+                <option value="11">11-limit</option>
+                <option value="13">13-limit</option>
+                <option value="17">17-limit</option>
+                <option value="19">19-limit</option>
+              </select>
+            </div>
+            <label class="check compact-check">
+              <input id="diesisDerivedToggle" type="checkbox" checked />
+              Derived
+            </label>
           </div>
-          <div>
+          <div class="diesis-toolbar-group display-group">
             <span class="toolbar-label">Ratio display</span>
             <div class="compact-button-row">
               <button id="diesisRatioMode" class="active" type="button">Ratio</button>
               <button id="diesisFactorMode" type="button">Factors</button>
             </div>
+            <label class="check compact-check">
+              <input id="diesisPowerToggle" type="checkbox" checked />
+              Power form
+            </label>
+          </div>
+          <div class="diesis-toolbar-group collection-group">
+            <label class="toolbar-label" for="diesisCollectionFilter">Collection</label>
+            <select id="diesisCollectionFilter" class="compact-select">
+              <option value="all">All</option>
+              <option value="seen">Seen</option>
+              <option value="unseen">Unseen</option>
+            </select>
+            <span id="diesisCollectionStats" class="collection-stats">0 / 0</span>
           </div>
         </section>
         <section class="diesis-list" id="diesisList" aria-label="diesis list"></section>

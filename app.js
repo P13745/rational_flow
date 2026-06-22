@@ -58,6 +58,10 @@ const els = {
   diesisList: document.querySelector("#diesisList"),
   diesisBaseControls: document.querySelector("#diesisBaseControls"),
   diesisLimitFilter: document.querySelector("#diesisLimitFilter"),
+  diesisDerivedToggle: document.querySelector("#diesisDerivedToggle"),
+  diesisPowerToggle: document.querySelector("#diesisPowerToggle"),
+  diesisCollectionFilter: document.querySelector("#diesisCollectionFilter"),
+  diesisCollectionStats: document.querySelector("#diesisCollectionStats"),
   diesisRatioMode: document.querySelector("#diesisRatioMode"),
   diesisFactorMode: document.querySelector("#diesisFactorMode"),
   noteCount: document.querySelector("#noteCount"),
@@ -96,9 +100,14 @@ let currentLanguage = ["ja", "en"].includes(localStorage.getItem("rationalFlowLa
 let diesisBaseOctave = 5;
 let diesisRatioDisplay = "ratio";
 let diesisLimitFilter = Infinity;
+let diesisShowDerived = true;
+let diesisShowPower = true;
+let diesisCollectionFilter = "all";
+let discoveredDiesisIndexes = new Set();
 
 const initialSeedDelay = 2;
 const tableRenderInterval = 180;
+const diesisCollectionCookie = "rf_diesis_seen";
 const germanPitchClasses = ["C", "Cis/Des", "D", "Dis/Es", "E", "F", "Fis/Ges", "G", "Gis/As", "A", "B", "H"];
 const i18nTargets = [
   ["header > div > p", "subtitle"],
@@ -156,9 +165,12 @@ const i18nTargets = [
   ["#diesisDialog h2", "dialogs.diesisTitle"],
   ["#diesisDialog .details-head p", "dialogs.diesisIntro"],
   ["#diesisClose", "dialogs.closeTitle", "title"],
-  [".diesis-toolbar > div:nth-child(1) .toolbar-label", "dialogs.baseNote"],
+  [".playback-group .toolbar-label", "dialogs.baseNote"],
   ['label[for="diesisLimitFilter"]', "dialogs.limitFilter"],
-  [".diesis-toolbar > div:nth-child(3) .toolbar-label", "dialogs.ratioDisplay"],
+  ["#diesisDerivedToggle", "dialogs.showDerived", "checkbox-label"],
+  ["#diesisPowerToggle", "dialogs.powerForm", "checkbox-label"],
+  ['label[for="diesisCollectionFilter"]', "dialogs.collection"],
+  [".display-group .toolbar-label", "dialogs.ratioDisplay"],
   ["#diesisRatioMode", "dialogs.ratioMode"],
   ["#diesisFactorMode", "dialogs.factorMode"],
 ];
@@ -332,6 +344,50 @@ function setMobileView(view) {
   window.requestAnimationFrame(drawCanvas);
 }
 
+function readCookie(name) {
+  const encoded = `${encodeURIComponent(name)}=`;
+  return document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(encoded))
+    ?.slice(encoded.length) || "";
+}
+
+function writeCookie(name, value, maxAgeDays = 3650) {
+  const maxAge = Math.max(1, Math.floor(maxAgeDays * 86400));
+  document.cookie = `${encodeURIComponent(name)}=${value}; max-age=${maxAge}; path=/; SameSite=Lax`;
+}
+
+function loadDiesisCollection() {
+  const raw = readCookie(diesisCollectionCookie);
+  discoveredDiesisIndexes = new Set(
+    raw
+      .split(".")
+      .map((part) => parseInt(part, 36))
+      .filter((value) => Number.isInteger(value) && value >= 0)
+  );
+}
+
+function saveDiesisCollection() {
+  const value = [...discoveredDiesisIndexes]
+    .sort((a, b) => a - b)
+    .map((index) => index.toString(36))
+    .join(".");
+  writeCookie(diesisCollectionCookie, value);
+}
+
+function diesisIndex(entry) {
+  return namedCommaIntervals.indexOf(entry);
+}
+
+function markDiesisDiscovered(entry) {
+  const index = diesisIndex(entry);
+  if (index < 0 || discoveredDiesisIndexes.has(index)) return;
+  discoveredDiesisIndexes.add(index);
+  saveDiesisCollection();
+  if (els.diesisDialog.open) renderDiesisList();
+}
+
 function setHelpPage(page) {
   document.querySelectorAll("[data-help-page]").forEach((element) => {
     const isTarget = element.dataset.helpPage === page;
@@ -397,6 +453,15 @@ function factorRatioLabel(ratio) {
   return `${factorIntegerLabel(frac.numerator)} / ${factorIntegerLabel(frac.denominator)}`;
 }
 
+function diesisRatioLabel(entry) {
+  if (diesisRatioDisplay === "factors") {
+    if (diesisShowPower && entry.display?.powerFactors) return entry.display.powerFactors;
+    return entry.display?.factors || factorRatioLabel(entry.ratio);
+  }
+  if (diesisShowPower && entry.display?.powerRatio) return entry.display.powerRatio;
+  return entry.display?.ratio || entry.ratio;
+}
+
 function cFrequency(octave) {
   return 261.6255653005986 * 2 ** (octave - 4);
 }
@@ -424,6 +489,7 @@ function installNamedCommas(data) {
   if (!data?.intervals) return false;
   namedCommaIntervals = data.intervals;
   namedCommaByRatio = new Map(data.intervals.map((entry) => [entry.ratio, entry]));
+  loadDiesisCollection();
   return true;
 }
 
@@ -1300,6 +1366,9 @@ function drawCanvas() {
   const h = rect.height;
   const activeNow = isRunning || isPaused || isDraining ? activeAt(now) : [];
   const closePairs = findCloseActivePairs(activeNow);
+  closePairs.forEach((pair) => {
+    if (pair.namedInterval) markDiesisDiscovered(pair.namedInterval);
+  });
   const closeNoteIds = new Set(closePairs.flatMap((pair) => [pair.low.id, pair.high.id]));
 
   ctx.clearRect(0, 0, w, h);
@@ -1567,6 +1636,9 @@ function renderDiesisControls() {
   }
   els.diesisRatioMode.classList.toggle("active", diesisRatioDisplay === "ratio");
   els.diesisFactorMode.classList.toggle("active", diesisRatioDisplay === "factors");
+  els.diesisDerivedToggle.checked = diesisShowDerived;
+  els.diesisPowerToggle.checked = diesisShowPower;
+  els.diesisCollectionFilter.value = diesisCollectionFilter;
   els.diesisLimitFilter.value = Number.isFinite(diesisLimitFilter) ? String(diesisLimitFilter) : "all";
 }
 
@@ -1574,12 +1646,24 @@ function renderDiesisList() {
   if (!els.diesisList) return;
   els.diesisList.textContent = "";
   const fragment = document.createDocumentFragment();
-  [...namedCommaIntervals]
-    .filter((entry) => ratioLimitValue(entry.ratio) <= diesisLimitFilter)
+  const visibleBase = namedCommaIntervals
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ entry }) => ratioLimitValue(entry.ratio) <= diesisLimitFilter)
+    .filter(({ entry }) => diesisShowDerived || entry.source !== "derived");
+  const discoveredVisible = visibleBase.filter(({ index }) => discoveredDiesisIndexes.has(index)).length;
+  els.diesisCollectionStats.textContent = `${discoveredVisible} / ${visibleBase.length}`;
+  visibleBase
+    .filter(({ index }) => {
+      if (diesisCollectionFilter === "seen") return discoveredDiesisIndexes.has(index);
+      if (diesisCollectionFilter === "unseen") return !discoveredDiesisIndexes.has(index);
+      return true;
+    })
+    .map(({ entry }) => entry)
     .sort((a, b) => b.cents - a.cents)
     .forEach((entry) => {
+      const discovered = discoveredDiesisIndexes.has(diesisIndex(entry));
       const row = document.createElement("div");
-      row.className = "diesis-item";
+      row.className = `diesis-item${discovered ? " discovered" : ""}`;
       const actions = document.createElement("div");
       actions.className = "diesis-actions";
       [
@@ -1600,14 +1684,17 @@ function renderDiesisList() {
       cents.textContent = `${Number(entry.cents).toFixed(2)}¢`;
       const ratio = document.createElement("span");
       ratio.className = "diesis-ratio";
-      ratio.textContent = diesisRatioDisplay === "factors" ? factorRatioLabel(entry.ratio) : entry.ratio;
+      ratio.textContent = diesisRatioLabel(entry);
       const limit = document.createElement("span");
       limit.className = "diesis-limit";
       limit.textContent = ratioLimitLabel(entry.ratio);
       const name = document.createElement("span");
       name.className = "diesis-name";
       name.textContent = entry.name;
-      row.append(actions, cents, ratio, limit, name);
+      const star = document.createElement("span");
+      star.className = "diesis-star";
+      star.textContent = discovered ? "⭐️" : "";
+      row.append(actions, cents, ratio, limit, name, star);
       fragment.appendChild(row);
     });
   els.diesisList.appendChild(fragment);
@@ -1883,6 +1970,18 @@ els.diesisRatioMode.addEventListener("click", () => {
 els.diesisFactorMode.addEventListener("click", () => {
   diesisRatioDisplay = "factors";
   renderDiesisControls();
+  renderDiesisList();
+});
+els.diesisDerivedToggle.addEventListener("input", () => {
+  diesisShowDerived = els.diesisDerivedToggle.checked;
+  renderDiesisList();
+});
+els.diesisPowerToggle.addEventListener("input", () => {
+  diesisShowPower = els.diesisPowerToggle.checked;
+  renderDiesisList();
+});
+els.diesisCollectionFilter.addEventListener("change", () => {
+  diesisCollectionFilter = els.diesisCollectionFilter.value;
   renderDiesisList();
 });
 els.diesisLimitFilter.addEventListener("change", () => {

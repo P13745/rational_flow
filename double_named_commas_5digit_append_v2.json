@@ -1,0 +1,488 @@
+{
+  "metadata": {
+    "description": "Append-only derived double intervals for named_commas.json. Each interval is the square of an existing named interval under 50 cents, with numerator and denominator at most 5 digits.",
+    "maxCents": 100,
+    "maxDigitsNumeratorDenominator": 5,
+    "derivation": "power",
+    "power": 2,
+    "count": 34
+  },
+  "intervals": [
+    {
+      "id": "double-septendecimal-minor-second-comma",
+      "name": "Double septendecimal minor second comma",
+      "aliases": [],
+      "ratio": "83521/82944",
+      "cents": 12.0016,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "septendecimal-minor-second-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-septendecimal-kleisma",
+      "name": "Double septendecimal kleisma",
+      "aliases": [],
+      "ratio": "65536/65025",
+      "cents": 13.5518,
+      "category": "kleisma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "septendecimal-kleisma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-neutral-third-comma",
+      "name": "Double neutral third comma",
+      "aliases": [],
+      "ratio": "59049/58564",
+      "cents": 14.2782,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "neutral-third-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-septimal-kleisma",
+      "name": "Double septimal kleisma",
+      "aliases": [],
+      "ratio": "50625/50176",
+      "cents": 15.423,
+      "category": "kleisma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "septimal-kleisma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-difference-between-5-3-and-53-32",
+      "name": "Double difference between 5:3 and 53:32",
+      "aliases": [],
+      "ratio": "25600/25281",
+      "cents": 21.7083,
+      "category": "difference",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "difference-between-5-3-and-53-32",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-difference-between-29-16-and-9-5",
+      "name": "Double difference between 29:16 and 9:5",
+      "aliases": [],
+      "ratio": "21025/20736",
+      "cents": 23.9618,
+      "category": "difference",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "difference-between-29-16-and-9-5",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-hundred-twenty-ninth-harmonic",
+      "name": "Double hundred-twenty-ninth harmonic",
+      "aliases": [],
+      "ratio": "16641/16384",
+      "cents": 26.9454,
+      "category": "harmonic",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "hundred-twenty-ninth-harmonic",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-septimal-semicomma",
+      "name": "Double septimal semicomma",
+      "aliases": [],
+      "ratio": "15876/15625",
+      "cents": 27.5895,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "septimal-semicomma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-minor-bp-diesis",
+      "name": "Double minor BP diesis",
+      "aliases": [],
+      "ratio": "60025/59049",
+      "cents": 28.381,
+      "category": "diesis",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "minor-bp-diesis",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-undecimal-seconds-comma",
+      "name": "Double undecimal seconds comma",
+      "aliases": [],
+      "ratio": "14641/14400",
+      "cents": 28.7343,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "undecimal-seconds-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-ptolemy-comma",
+      "name": "Double ptolemy's comma",
+      "aliases": [],
+      "ratio": "10000/9801",
+      "cents": 34.799,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "ptolemy-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-small-undecimal-comma",
+      "name": "Double small undecimal comma",
+      "aliases": [],
+      "ratio": "9801/9604",
+      "cents": 35.1523,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "small-undecimal-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-19th-partial-chroma",
+      "name": "Double 19th-partial chroma",
+      "aliases": [],
+      "ratio": "9216/9025",
+      "cents": 36.2565,
+      "category": "chroma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "19th-partial-chroma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-medium-tridecimal-comma",
+      "name": "Double medium tridecimal comma",
+      "aliases": [],
+      "ratio": "8281/8100",
+      "cents": 38.2597,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "medium-tridecimal-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-monk-comma",
+      "name": "Double monk comma",
+      "aliases": [],
+      "ratio": "7225/7056",
+      "cents": 40.9764,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "monk-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-syntonic-comma",
+      "name": "Double syntonic comma",
+      "aliases": [],
+      "ratio": "6561/6400",
+      "cents": 43.0126,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "syntonic-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-septimal-comma",
+      "name": "Double septimal comma",
+      "aliases": [],
+      "ratio": "4096/3969",
+      "cents": 54.5282,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "septimal-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-hendrix-comma",
+      "name": "Double hendrix comma",
+      "aliases": [],
+      "ratio": "3249/3136",
+      "cents": 61.2842,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "hendrix-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-undecimal-diesis",
+      "name": "Double undecimal diesis",
+      "aliases": [],
+      "ratio": "3136/3025",
+      "cents": 62.3885,
+      "category": "diesis",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "undecimal-diesis",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-17th-partial-chroma",
+      "name": "Double 17th-partial chroma",
+      "aliases": [],
+      "ratio": "2601/2500",
+      "cents": 68.566,
+      "category": "chroma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "17th-partial-chroma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-tritonic-diesis",
+      "name": "Double tritonic diesis",
+      "aliases": [],
+      "ratio": "2500/2401",
+      "cents": 69.9512,
+      "category": "diesis",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "tritonic-diesis",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-tricesoprimal-comma",
+      "name": "Double tricesoprimal comma",
+      "aliases": [],
+      "ratio": "61504/59049",
+      "cents": 70.5211,
+      "category": "comma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "tricesoprimal-comma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-slendro-diesis",
+      "name": "Double slendro diesis",
+      "aliases": [],
+      "ratio": "2401/2304",
+      "cents": 71.3936,
+      "category": "diesis",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "slendro-diesis",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-23rd-partial-chroma",
+      "name": "Double 23rd-partial chroma",
+      "aliases": [],
+      "ratio": "2116/2025",
+      "cents": 76.1013,
+      "category": "chroma",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "23rd-partial-chroma",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-minor-diesis",
+      "name": "Double minor diesis",
+      "aliases": [],
+      "ratio": "16384/15625",
+      "cents": 82.1177,
+      "category": "diesis",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "minor-diesis",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-lesser-41-limit-fifth-tone",
+      "name": "Double lesser 41-limit fifth tone",
+      "aliases": [],
+      "ratio": "1764/1681",
+      "cents": 83.437,
+      "category": "fifth-tone",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "lesser-41-limit-fifth-tone",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-greater-41-limit-fifth-tone",
+      "name": "Double greater 41-limit fifth tone",
+      "aliases": [],
+      "ratio": "1681/1600",
+      "cents": 85.4974,
+      "category": "fifth-tone",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "greater-41-limit-fifth-tone",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-tridecimal-minor-diesis",
+      "name": "Double tridecimal minor diesis",
+      "aliases": [],
+      "ratio": "1600/1521",
+      "cents": 87.6621,
+      "category": "diesis",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "tridecimal-minor-diesis",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-superior-quarter-tone",
+      "name": "Double superior quarter-tone",
+      "aliases": [],
+      "ratio": "1521/1444",
+      "cents": 89.9393,
+      "category": "quarter-tone",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "superior-quarter-tone",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-lesser-37-limit-quarter-tone",
+      "name": "Double lesser 37-limit quarter tone",
+      "aliases": [],
+      "ratio": "1444/1369",
+      "cents": 92.338,
+      "category": "quarter-tone",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "lesser-37-limit-quarter-tone",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-greater-37-limit-quarter-tone",
+      "name": "Double greater 37-limit quarter tone",
+      "aliases": [],
+      "ratio": "1369/1296",
+      "cents": 94.8681,
+      "category": "quarter-tone",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "greater-37-limit-quarter-tone",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-septimal-diesis",
+      "name": "Double septimal diesis",
+      "aliases": [],
+      "ratio": "1296/1225",
+      "cents": 97.5408,
+      "category": "diesis",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "septimal-diesis",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-maximal-diesis",
+      "name": "Double maximal diesis",
+      "aliases": [],
+      "ratio": "62500/59049",
+      "cents": 98.3323,
+      "category": "diesis",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "maximal-diesis",
+        "power": 2
+      }
+    },
+    {
+      "id": "double-just-quarter-tone",
+      "name": "Double just quarter tone",
+      "aliases": [],
+      "ratio": "60516/57121",
+      "cents": 99.9545,
+      "category": "quarter-tone",
+      "source": "derived",
+      "derived": {
+        "type": "power",
+        "baseId": "just-quarter-tone",
+        "power": 2
+      }
+    }
+  ]
+}
