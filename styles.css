@@ -1825,6 +1825,338 @@ td:nth-child(6) {
   }
 }
 
+/* Final transport breakpoint: use the compact two-row layout at intermediate widths too. */
+@media (max-width: 1120px) {
+  .transport {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "playback playback"
+      "tools session";
+    align-items: stretch;
+    justify-self: end;
+    justify-content: end;
+    justify-items: end;
+    width: min(100%, 780px);
+    gap: 6px;
+  }
+
+  .playback-group-top,
+  .diesis-group,
+  .session-group {
+    min-width: 0;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.035);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.01);
+  }
+
+  .playback-group-top {
+    grid-area: playback;
+    display: grid;
+    grid-template-columns: 58px 58px minmax(118px, 150px) 58px minmax(84px, 112px);
+    gap: 6px;
+    width: max-content;
+    max-width: 100%;
+    justify-content: end;
+  }
+
+  .diesis-group {
+    grid-area: tools;
+    display: grid;
+    grid-template-columns: minmax(150px, 210px) minmax(92px, 132px);
+    gap: 6px;
+    width: max-content;
+    max-width: 100%;
+    justify-self: end;
+  }
+
+  .session-group {
+    grid-area: session;
+    display: grid;
+    grid-template-columns: auto minmax(92px, auto);
+    gap: 6px;
+    justify-content: end;
+  }
+
+  .transport button,
+  .transport-select,
+  .timer-badge {
+    width: auto;
+    min-width: 0;
+    height: 34px;
+    padding-inline: 8px;
+  }
+
+  .timer-badge {
+    width: auto;
+    min-width: 42px;
+  }
+
+  .diesis-nav-button {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .transport {
+    justify-self: stretch;
+    justify-content: stretch;
+    justify-items: stretch;
+    width: 100%;
+  }
+
+  .playback-group-top {
+    width: 100%;
+    grid-template-columns: 1fr 1fr minmax(76px, 1.4fr) 1fr minmax(64px, 1.2fr);
+  }
+
+  .diesis-group {
+    width: 100%;
+    grid-template-columns: minmax(96px, 1fr) minmax(78px, 0.8fr);
+  }
+
+  .transport button,
+  .transport-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .transport {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "playback"
+      "tools"
+      "session";
+  }
+
+  .session-group {
+    grid-template-columns: auto minmax(86px, 1fr);
+    justify-content: stretch;
+  }
+
+  .playback-group-top {
+    grid-template-columns: 1fr 1fr minmax(70px, 1.35fr) 1fr minmax(58px, 1.15fr);
+  }
+}
+
+/* Mobile final layout: compact transport and Diesis controls. */
+@media (max-width: 560px) {
+  .topbar {
+    align-items: center;
+  }
+
+  .brand {
+    align-self: center;
+  }
+
+  .title-row {
+    align-items: center;
+  }
+
+  .title-row h1,
+  .title-actions {
+    align-self: center;
+  }
+
+  .transport {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "playback playback"
+      "tools session";
+    align-items: stretch;
+    justify-content: stretch;
+    justify-items: stretch;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .playback-group-top,
+  .diesis-group,
+  .session-group {
+    min-width: 0;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.035);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.01);
+  }
+
+  .playback-group-top {
+    grid-area: playback;
+    display: grid;
+    grid-template-columns: 1fr 1fr minmax(76px, 1.4fr) 1fr minmax(64px, 1.2fr);
+    gap: 6px;
+    width: 100%;
+  }
+
+  .diesis-group {
+    grid-area: tools;
+    display: grid;
+    grid-template-columns: minmax(96px, 1fr) minmax(78px, 0.8fr);
+    gap: 6px;
+    width: 100%;
+  }
+
+  .session-group {
+    grid-area: session;
+    display: grid;
+    grid-template-columns: auto minmax(72px, auto);
+    gap: 6px;
+    justify-content: end;
+  }
+
+  .transport button,
+  .transport-select,
+  .timer-badge {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding-inline: 6px;
+    font-size: 12px;
+  }
+
+  .timer-badge {
+    width: auto;
+    min-width: 42px;
+  }
+
+  .diesis-nav-button {
+    min-width: 0;
+  }
+
+  .diesis-toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .diesis-toolbar-group {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .diesis-toolbar-group .toolbar-label {
+    min-height: 0;
+    margin-bottom: 5px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 750;
+  }
+
+  .playback-group {
+    grid-column: 1 / -1;
+    grid-template-rows: auto auto;
+  }
+
+  .playback-group .compact-button-row {
+    grid-row: auto;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .playback-group .compact-button-row button {
+    min-width: 0;
+    height: 32px;
+    padding: 0 6px;
+  }
+
+  .filter-group,
+  .display-group,
+  .collection-group {
+    grid-template-rows: auto 30px 30px;
+    gap: 5px;
+  }
+
+  .diesis-toolbar-group .compact-select,
+  .diesis-toolbar-group .compact-check,
+  .diesis-toolbar-group .collection-stats {
+    width: 100%;
+    min-width: 0;
+    height: 30px;
+    min-height: 30px;
+    font-size: 12px;
+  }
+
+  .diesis-toolbar-group .compact-check {
+    padding-inline: 7px;
+  }
+
+  .collection-stats {
+    justify-content: center;
+    padding-inline: 6px;
+  }
+
+  .diesis-list {
+    padding-top: 8px;
+  }
+
+  .diesis-item {
+    grid-template-columns: 42px minmax(66px, 0.85fr) minmax(92px, 1.25fr) minmax(54px, 0.75fr) 26px;
+    grid-template-areas:
+      "actions cents ratio limit star"
+      "name name name name name";
+    align-items: center;
+    gap: 5px 7px;
+  }
+
+  .diesis-actions {
+    grid-area: actions;
+    justify-self: start;
+  }
+
+  .diesis-cents,
+  .diesis-ratio,
+  .diesis-limit {
+    text-align: center;
+    justify-self: stretch;
+  }
+
+  .diesis-name {
+    grid-area: name;
+    padding-top: 2px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+  }
+}
+
+@media (max-width: 390px) {
+  .transport {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "playback"
+      "tools"
+      "session";
+  }
+
+  .session-group {
+    grid-template-columns: auto minmax(86px, 1fr);
+  }
+
+  .diesis-toolbar {
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .diesis-toolbar-group .toolbar-label {
+    font-size: 12px;
+  }
+
+  .diesis-toolbar-group .compact-select,
+  .diesis-toolbar-group .compact-check,
+  .diesis-toolbar-group .collection-stats {
+    font-size: 11px;
+  }
+}
+
 /* Final viewport fit: keep the main surface and table stretched to the bottom. */
 .app {
   height: 100vh;
@@ -2075,5 +2407,285 @@ td:nth-child(6) {
 @media (max-width: 740px) {
   .diesis-toolbar-group {
     min-height: auto;
+  }
+}
+
+/* Last transport override: make intermediate widths use two rows without stretching controls. */
+@media (max-width: 1280px) {
+  .transport {
+    display: grid;
+    grid-template-columns: max-content;
+    grid-template-areas:
+      "playback"
+      "lower";
+    align-items: start;
+    justify-self: end;
+    justify-content: end;
+    justify-items: end;
+    width: max-content;
+    max-width: 100%;
+    gap: 6px;
+  }
+
+  .playback-group-top,
+  .diesis-group,
+  .session-group {
+    min-width: 0;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.035);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.01);
+  }
+
+  .playback-group-top {
+    grid-area: playback;
+    display: grid;
+    grid-template-columns: 58px 58px 140px 58px 104px;
+    gap: 6px;
+    width: max-content;
+    max-width: 100%;
+    justify-content: end;
+  }
+
+  .transport-lower {
+    grid-area: lower;
+    display: flex;
+    justify-content: flex-end;
+    align-items: stretch;
+    gap: 6px;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  .diesis-group {
+    display: grid;
+    grid-template-columns: 190px 128px;
+    gap: 6px;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  .session-group {
+    display: grid;
+    grid-template-columns: auto 104px;
+    gap: 6px;
+    justify-content: end;
+  }
+
+  .transport button,
+  .transport-select,
+  .timer-badge {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding-inline: 8px;
+  }
+
+  .timer-badge {
+    width: auto;
+    min-width: 42px;
+  }
+
+  .diesis-nav-button {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .transport {
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .transport-lower {
+    width: 100%;
+  }
+
+  .playback-group-top {
+    width: 100%;
+    grid-template-columns: 1fr 1fr minmax(76px, 1.4fr) 1fr minmax(64px, 1.2fr);
+  }
+
+  .diesis-group {
+    width: 100%;
+    grid-template-columns: minmax(96px, 1fr) minmax(78px, 0.8fr);
+  }
+
+  .session-group {
+    grid-template-columns: auto minmax(86px, 1fr);
+  }
+}
+
+@media (max-width: 390px) {
+  .transport-lower {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .session-group {
+    grid-template-columns: auto minmax(86px, 1fr);
+    justify-content: stretch;
+  }
+}
+
+/* Header sizing guard: keep transport controls at their natural size unless the viewport is truly narrow. */
+.transport-lower {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.playback-group-top,
+.diesis-group,
+.session-group {
+  flex-wrap: nowrap;
+}
+
+@media (min-width: 1681px) {
+  .transport {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    width: auto;
+    max-width: 100%;
+    gap: 8px;
+  }
+
+  .transport-lower {
+    width: auto;
+    max-width: 100%;
+  }
+
+  .playback-group-top,
+  .diesis-group,
+  .session-group {
+    display: flex;
+    width: auto;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .transport button,
+  .transport-select,
+  .timer-badge {
+    width: auto;
+    height: 38px;
+  }
+
+  .diesis-nav-button {
+    min-width: 154px;
+  }
+}
+
+@media (max-width: 1680px) {
+  .transport {
+    display: grid;
+    grid-template-columns: max-content;
+    grid-template-areas:
+      "playback"
+      "lower";
+    align-items: start;
+    justify-self: end;
+    justify-content: end;
+    justify-items: end;
+    width: max-content;
+    max-width: 100%;
+    gap: 6px;
+  }
+
+  .playback-group-top,
+  .diesis-group,
+  .session-group {
+    min-width: 0;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.035);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.01);
+  }
+
+  .playback-group-top {
+    grid-area: playback;
+    display: grid;
+    grid-template-columns: 58px 58px 140px 58px 104px;
+    gap: 6px;
+    width: max-content;
+    max-width: 100%;
+    justify-content: end;
+  }
+
+  .transport-lower {
+    grid-area: lower;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  .diesis-group {
+    display: grid;
+    grid-template-columns: 190px 128px;
+    gap: 6px;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  .session-group {
+    display: grid;
+    grid-template-columns: auto 104px;
+    gap: 6px;
+    justify-content: end;
+  }
+
+  .transport button,
+  .transport-select,
+  .timer-badge {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding-inline: 8px;
+  }
+
+  .timer-badge {
+    width: auto;
+    min-width: 42px;
+  }
+}
+
+@media (max-width: 720px) {
+  .transport {
+    grid-template-columns: 1fr;
+    justify-self: stretch;
+    justify-content: stretch;
+    justify-items: stretch;
+    width: 100%;
+  }
+
+  .transport-lower {
+    width: 100%;
+  }
+
+  .playback-group-top {
+    width: 100%;
+    grid-template-columns: 1fr 1fr minmax(76px, 1.4fr) 1fr minmax(64px, 1.2fr);
+  }
+
+  .diesis-group {
+    width: 100%;
+    grid-template-columns: minmax(96px, 1fr) minmax(78px, 0.8fr);
+  }
+
+  .session-group {
+    grid-template-columns: auto minmax(86px, 1fr);
+  }
+}
+
+@media (max-width: 390px) {
+  .transport-lower {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 }
