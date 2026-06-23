@@ -34,6 +34,9 @@ const els = {
   nextMin: document.querySelector("#nextMin"),
   nextMax: document.querySelector("#nextMax"),
   windowSize: document.querySelector("#windowSize"),
+  timerMinutes: document.querySelector("#timerMinutes"),
+  timerLabel: document.querySelector("#timerLabel"),
+  timerCancel: document.querySelector("#timerCancel"),
   volume: document.querySelector("#volume"),
   allowDuplication: document.querySelector("#allowDuplication"),
   rootedDepth: document.querySelector("#rootedDepth"),
@@ -46,6 +49,7 @@ const els = {
   vibratoRateMax: document.querySelector("#vibratoRateMax"),
   vibratoDepthMin: document.querySelector("#vibratoDepthMin"),
   vibratoDepthMax: document.querySelector("#vibratoDepthMax"),
+  collectionReset: document.querySelector("#collectionReset"),
   detailsOpen: document.querySelector("#detailsOpen"),
   detailsClose: document.querySelector("#detailsClose"),
   detailsDialog: document.querySelector("#detailsDialog"),
@@ -88,9 +92,12 @@ let schedulerTimer = null;
 let wakeLockSentinel = null;
 let wakeLockRequestPending = false;
 let startTime = performance.now() / 1000;
+let timerEndTime = null;
+let timerCompleted = false;
 let nextEventTime = null;
 let selectedNoteId = null;
 let nextId = 1;
+let lastGenerationNormalizeAt = -Infinity;
 let namedCommaByRatio = new Map();
 let namedCommaIntervals = [];
 let ratioPresets = [];
@@ -105,7 +112,8 @@ let diesisLimitFilter = Infinity;
 let diesisShowDerived = true;
 let diesisShowPower = true;
 let diesisCollectionFilter = "all";
-let discoveredDiesisIndexes = new Set();
+let discoveredDiesisCounts = new Map();
+let activeDiesisEncounterKeys = new Set();
 
 const initialSeedDelay = 2;
 const tableRenderInterval = 180;
@@ -136,17 +144,23 @@ const i18nTargets = [
   ['label[for="nextMin"]', "labels.nextMin"],
   ['label[for="nextMax"]', "labels.nextMax"],
   ['label[for="windowSize"]', "labels.window"],
+  ['label[for="timerMinutes"]', "labels.timerMinutes"],
+  ["#timerCancel", "labels.cancelTimer"],
   ['label[for="volume"]', "labels.volume"],
   ["#allowDuplication", "labels.duplicate", "checkbox-label"],
   ["#rootedDepth", "labels.rootedDepth", "checkbox-label"],
+  ["#collectionReset", "labels.resetCollection"],
+  ["#detailsCollection h3", "dialogs.collectionTitle"],
+  ["#detailsCollection p", "dialogs.collectionText"],
   ['label[for="parentBiasBasis"]', "labels.parentBias"],
   [".control-group small", "hints.parentBias"],
   ["#detailsOpen", "labels.settings"],
   ["#helpOpen", "labels.help"],
   ["#diesisOpen", "labels.diesis"],
   [".list-toolbar-title", "labels.timeline"],
-  [".readout div:nth-child(1) small", "labels.notes"],
-  [".readout div:nth-child(2) small", "labels.depth"],
+  [".timer-readout div:nth-child(1) small", "labels.timer"],
+  [".stats-readout div:nth-child(1) small", "labels.notes"],
+  [".stats-readout div:nth-child(2) small", "labels.depth"],
   ["thead th:nth-child(1)", "table.start"],
   ["thead th:nth-child(2)", "table.hz"],
   ["thead th:nth-child(3)", "table.duration"],
@@ -362,20 +376,33 @@ function writeCookie(name, value, maxAgeDays = 3650) {
 
 function loadDiesisCollection() {
   const raw = readCookie(diesisCollectionCookie);
-  discoveredDiesisIndexes = new Set(
-    raw
-      .split(".")
-      .map((part) => parseInt(part, 36))
-      .filter((value) => Number.isInteger(value) && value >= 0)
-  );
+  discoveredDiesisCounts = new Map();
+  raw
+    .split(".")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .forEach((part) => {
+      const [indexPart, countPart] = part.split(":");
+      const index = parseInt(indexPart, 36);
+      const count = countPart ? parseInt(countPart, 36) : 1;
+      if (Number.isInteger(index) && index >= 0) {
+        discoveredDiesisCounts.set(index, Math.max(1, Number.isInteger(count) ? count : 1));
+      }
+    });
 }
 
 function saveDiesisCollection() {
-  const value = [...discoveredDiesisIndexes]
-    .sort((a, b) => a - b)
-    .map((index) => index.toString(36))
+  const value = [...discoveredDiesisCounts.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([index, count]) => `${index.toString(36)}:${count.toString(36)}`)
     .join(".");
   writeCookie(diesisCollectionCookie, value);
+}
+
+function resetDiesisCollection() {
+  discoveredDiesisCounts = new Map();
+  saveDiesisCollection();
+  if (els.diesisDialog.open) renderDiesisList();
 }
 
 function diesisIndex(entry) {
@@ -384,8 +411,8 @@ function diesisIndex(entry) {
 
 function markDiesisDiscovered(entry) {
   const index = diesisIndex(entry);
-  if (index < 0 || discoveredDiesisIndexes.has(index)) return;
-  discoveredDiesisIndexes.add(index);
+  if (index < 0) return;
+  discoveredDiesisCounts.set(index, (discoveredDiesisCounts.get(index) || 0) + 1);
   saveDiesisCollection();
   if (els.diesisDialog.open) renderDiesisList();
 }
@@ -581,6 +608,7 @@ function getSettings() {
   const maxDur = Math.max(minDur, Number(els.maxDur.value) || 20);
   const nextMin = Math.max(0.05, Number(els.nextMin.value) || 1);
   const nextMax = Math.max(nextMin, Number(els.nextMax.value) || 3);
+  const timerMinutes = Math.max(0, Number(els.timerMinutes.value) || 0);
   const vibratoRateMin = Math.max(0, Number(els.vibratoRateMin.value) || 0);
   const vibratoRateMax = Math.max(vibratoRateMin, Number(els.vibratoRateMax.value) || 0);
   const vibratoDepthMin = Math.max(0, Number(els.vibratoDepthMin.value) || 0);
@@ -593,6 +621,7 @@ function getSettings() {
     nextMin,
     nextMax,
     windowSize: Math.max(4, Number(els.windowSize.value) || 8),
+    timerMinutes,
     volume: Math.max(0, Number(els.volume.value) || 0),
     nMax: clamp(Math.floor(Number(els.nMax.value) || 8), 2, 128),
     dMax: clamp(Math.floor(Number(els.dMax.value) || 8), 2, 128),
@@ -1099,6 +1128,7 @@ function startCanvasSeed(event) {
   if (isRunning || isPaused || isDraining) return;
   notes.forEach((note) => stopNode(note, 0.24));
   notes = [];
+  activeDiesisEncounterKeys = new Set();
   const note = seedNote(2, null, frequencyFromCanvasY(source.clientY));
   ensureAudio().resume();
   isRunning = true;
@@ -1107,11 +1137,15 @@ function startCanvasSeed(event) {
   pausedWasDraining = false;
   pausedAt = null;
   startTime = performance.now() / 1000;
+  const settings = getSettings();
+  timerEndTime = settings.timerMinutes > 0 ? startTime + settings.timerMinutes * 60 : null;
+  timerCompleted = false;
   nextEventTime = null;
   selectedNoteId = note.id;
   scheduleAudio(note);
   fillEventQueue();
   queueScheduler(0.5);
+  syncWakeLock();
   if (!rafId) tick();
   render(true);
 }
@@ -1144,6 +1178,10 @@ function firstSeedReadyTime(now) {
 function fillEventQueue() {
   const settings = getSettings();
   const now = performance.now() / 1000;
+  if (timerEndTime !== null && now >= timerEndTime) {
+    finishTimedRun();
+    return;
+  }
   const horizon = now + rightEdgeOffset();
   const readyAt = firstSeedReadyTime(now);
   if (!Number.isFinite(readyAt)) return;
@@ -1153,22 +1191,51 @@ function fillEventQueue() {
 
   let guard = 0;
   while (nextEventTime <= horizon && guard < 64) {
-    addGeneratedChild(nextEventTime);
+    if (timerEndTime !== null && nextEventTime >= timerEndTime) break;
+    if (Math.random() <= generationProbabilityAt(nextEventTime)) {
+      addGeneratedChild(nextEventTime);
+    }
     nextEventTime += sampleEventWait(settings);
     guard += 1;
   }
+}
+
+function generationProbabilityAt(time) {
+  if (timerEndTime === null) return 1;
+  const total = Math.max(1, timerEndTime - startTime);
+  const remaining = clamp((timerEndTime - time) / total, 0, 1);
+  return remaining;
+}
+
+function finishTimedRun() {
+  if (!isRunning) return;
+  isRunning = false;
+  isDraining = true;
+  timerEndTime = null;
+  timerCompleted = true;
+  nextEventTime = null;
+  window.clearTimeout(schedulerTimer);
+  schedulerTimer = null;
+  syncWakeLock();
 }
 
 function trimNotes() {
   const now = performance.now() / 1000;
   const settings = getSettings();
   const keepAfter = now - settings.windowSize * 1.35;
+  let removed = false;
   notes = notes.filter((note) => {
     const keep = note.start + note.duration >= keepAfter;
-    if (!keep) stopNode(note);
+    if (!keep) {
+      removed = true;
+      stopNode(note);
+    }
     return keep;
   });
-  normalizeGenerations(now);
+  if (removed || now - lastGenerationNormalizeAt > 0.5) {
+    normalizeGenerations(now);
+    lastGenerationNormalizeAt = now;
+  }
 }
 
 function normalizeGenerations(now = performance.now() / 1000) {
@@ -1254,11 +1321,15 @@ function exactRatioBetween(low, high) {
 }
 
 function findCloseActivePairs(activeNotes) {
+  const maxPairScanNotes = 72;
+  const scanNotes = activeNotes.length > maxPairScanNotes
+    ? [...activeNotes].sort((a, b) => b.volume - a.volume).slice(0, maxPairScanNotes)
+    : activeNotes;
   const pairs = [];
-  for (let i = 0; i < activeNotes.length; i += 1) {
-    for (let j = i + 1; j < activeNotes.length; j += 1) {
-      const low = activeNotes[i].frequency <= activeNotes[j].frequency ? activeNotes[i] : activeNotes[j];
-      const high = low === activeNotes[i] ? activeNotes[j] : activeNotes[i];
+  for (let i = 0; i < scanNotes.length; i += 1) {
+    for (let j = i + 1; j < scanNotes.length; j += 1) {
+      const low = scanNotes[i].frequency <= scanNotes[j].frequency ? scanNotes[i] : scanNotes[j];
+      const high = low === scanNotes[i] ? scanNotes[j] : scanNotes[i];
       const cents = 1200 * Math.log2(high.frequency / low.frequency);
       if (cents <= 0.01 || cents >= 100) continue;
       const exactRatio = exactRatioBetween(low, high);
@@ -1374,9 +1445,15 @@ function drawCanvas() {
   const h = rect.height;
   const activeNow = isRunning || isPaused || isDraining ? activeAt(now) : [];
   const closePairs = findCloseActivePairs(activeNow);
+  const nextEncounterKeys = new Set();
   closePairs.forEach((pair) => {
-    if (pair.namedInterval) markDiesisDiscovered(pair.namedInterval);
+    if (!pair.namedInterval) return;
+    const index = diesisIndex(pair.namedInterval);
+    const key = `${index}:${Math.min(pair.low.id, pair.high.id)}:${Math.max(pair.low.id, pair.high.id)}`;
+    nextEncounterKeys.add(key);
+    if (!activeDiesisEncounterKeys.has(key)) markDiesisDiscovered(pair.namedInterval);
   });
+  activeDiesisEncounterKeys = nextEncounterKeys;
   const closeNoteIds = new Set(closePairs.flatMap((pair) => [pair.low.id, pair.high.id]));
 
   ctx.clearRect(0, 0, w, h);
@@ -1658,18 +1735,19 @@ function renderDiesisList() {
     .map((entry, index) => ({ entry, index }))
     .filter(({ entry }) => ratioLimitValue(entry.ratio) <= diesisLimitFilter)
     .filter(({ entry }) => diesisShowDerived || entry.source !== "derived");
-  const discoveredVisible = visibleBase.filter(({ index }) => discoveredDiesisIndexes.has(index)).length;
+  const discoveredVisible = visibleBase.filter(({ index }) => discoveredDiesisCounts.has(index)).length;
   els.diesisCollectionStats.textContent = `${discoveredVisible} / ${visibleBase.length}`;
   visibleBase
     .filter(({ index }) => {
-      if (diesisCollectionFilter === "seen") return discoveredDiesisIndexes.has(index);
-      if (diesisCollectionFilter === "unseen") return !discoveredDiesisIndexes.has(index);
+      if (diesisCollectionFilter === "seen") return discoveredDiesisCounts.has(index);
+      if (diesisCollectionFilter === "unseen") return !discoveredDiesisCounts.has(index);
       return true;
     })
     .map(({ entry }) => entry)
     .sort((a, b) => b.cents - a.cents)
     .forEach((entry) => {
-      const discovered = discoveredDiesisIndexes.has(diesisIndex(entry));
+      const discoveryCount = discoveredDiesisCounts.get(diesisIndex(entry)) || 0;
+      const discovered = discoveryCount > 0;
       const row = document.createElement("div");
       row.className = `diesis-item${discovered ? " discovered" : ""}`;
       const actions = document.createElement("div");
@@ -1701,7 +1779,14 @@ function renderDiesisList() {
       name.textContent = entry.name;
       const star = document.createElement("span");
       star.className = "diesis-star";
-      star.textContent = discovered ? "⭐️" : "";
+      if (discovered) {
+        const starIcon = document.createElement("span");
+        starIcon.setAttribute("aria-hidden", "true");
+        starIcon.textContent = "⭐️";
+        const count = document.createElement("small");
+        count.textContent = String(discoveryCount);
+        star.append(starIcon, count);
+      }
       row.append(actions, cents, ratio, limit, name, star);
       fragment.appendChild(row);
     });
@@ -1722,6 +1807,8 @@ function updateLabels() {
   els.statusLabel.textContent = t(`status.${statusKey}`);
   els.noteCount.textContent = String(notes.length);
   els.lastDepth.textContent = String(selected?.generation ?? 0);
+  els.timerLabel.textContent = timerStatusText();
+  els.timerCancel.disabled = timerEndTime === null;
   els.activeRatioLabel.textContent = activeRatioText();
   els.autoMode.classList.toggle("active", mode === "auto");
   els.listMode.classList.toggle("active", mode === "list");
@@ -1743,6 +1830,15 @@ function updateLabels() {
   els.detailLabel.textContent = `${selected.frequency.toFixed(2)}Hz  ${nearestPitchLabel(selected.frequency)}  depth ${selected.generation}  ${selected.ratio || base}`;
 }
 
+function timerStatusText() {
+  if (timerCompleted) return "done";
+  if (timerEndTime === null) return "off";
+  const remaining = Math.max(0, timerEndTime - timelineNow());
+  const minutes = Math.floor(remaining / 60);
+  const seconds = Math.floor(remaining % 60);
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
 function render(forceTable = false) {
   updateLabels();
   drawCanvas();
@@ -1754,7 +1850,7 @@ function render(forceTable = false) {
 }
 
 function shouldHoldWakeLock() {
-  return isRunning || isPaused || isDraining;
+  return (isRunning || isPaused || isDraining) && !timerCompleted;
 }
 
 async function requestWakeLock() {
@@ -1788,10 +1884,15 @@ function syncWakeLock() {
 }
 
 function tick() {
+  if (isRunning && timerEndTime !== null && performance.now() / 1000 >= timerEndTime) {
+    finishTimedRun();
+  }
   trimNotes();
   if (isDraining && !notes.length) {
     isDraining = false;
     selectedNoteId = null;
+    timerEndTime = null;
+    timerCompleted = false;
     syncWakeLock();
   }
   render();
@@ -1800,11 +1901,13 @@ function tick() {
 
 function start() {
   ensureAudio().resume();
+  const settings = getSettings();
   window.clearTimeout(schedulerTimer);
   if (rafId) window.cancelAnimationFrame(rafId);
   rafId = null;
   notes.forEach(stopNode);
   notes = [];
+  activeDiesisEncounterKeys = new Set();
   seedNote(2);
   isRunning = true;
   isPaused = false;
@@ -1812,6 +1915,8 @@ function start() {
   pausedWasDraining = false;
   pausedAt = null;
   startTime = performance.now() / 1000;
+  timerEndTime = settings.timerMinutes > 0 ? startTime + settings.timerMinutes * 60 : null;
+  timerCompleted = false;
   nextEventTime = null;
   scheduleVisibleAudio();
   fillEventQueue();
@@ -1831,6 +1936,8 @@ function clearAll() {
   isDraining = false;
   pausedWasDraining = false;
   pausedAt = null;
+  timerEndTime = null;
+  timerCompleted = false;
   window.clearTimeout(schedulerTimer);
   schedulerTimer = null;
   nextEventTime = null;
@@ -1838,6 +1945,7 @@ function clearAll() {
   rafId = null;
   notes.forEach(stopNode);
   notes = [];
+  activeDiesisEncounterKeys = new Set();
   selectedNoteId = null;
   syncWakeLock();
   render(true);
@@ -1863,7 +1971,9 @@ function pause() {
 function resume() {
   if (!isPaused) return;
   const resumeToDraining = pausedWasDraining;
+  const pausedDuration = performance.now() / 1000 - pausedAt;
   applyPausedTimeShift();
+  if (timerEndTime !== null) timerEndTime += pausedDuration;
   const now = performance.now() / 1000;
   pausedAt = null;
   pausedWasDraining = false;
@@ -2036,6 +2146,13 @@ els.diesisLimitFilter.addEventListener("change", () => {
   diesisLimitFilter = value === "all" ? Infinity : Number(value);
   renderDiesisList();
 });
+els.timerCancel.addEventListener("click", () => {
+  timerEndTime = null;
+  timerCompleted = false;
+  syncWakeLock();
+  render(true);
+});
+els.collectionReset.addEventListener("click", resetDiesisCollection);
 
 [
   els.nMax,
@@ -2049,6 +2166,7 @@ els.diesisLimitFilter.addEventListener("change", () => {
   els.nextMin,
   els.nextMax,
   els.windowSize,
+  els.timerMinutes,
   els.volume,
   els.allowDuplication,
   els.rootedDepth,

@@ -14,13 +14,13 @@
             <h1>Rational Flow <span class="version-label">v2.0.2</span></h1>
             <div class="title-actions">
               <button id="helpOpen" class="top-help-button" type="button">Help</button>
-              <button id="diesisOpen" class="top-help-button" type="button">Diesis</button>
             </div>
           </div>
           <p>slowly evolving harmonic currents</p>
         </div>
         <div class="transport" aria-label="transport">
           <button id="languageToggle" type="button" title="Language">EN</button>
+          <button id="diesisOpen" class="diesis-nav-button" type="button">Diesis</button>
           <button id="startStop" class="primary" type="button" title="開始 / 停止">▶</button>
           <button id="pauseResume" type="button" title="一時停止 / 再開">Ⅱ</button>
           <select id="seedMode" class="transport-select" title="起点タイプ">
@@ -113,8 +113,20 @@
               <input id="windowSize" type="number" min="4" max="30" step="0.5" value="8" />
             </div>
             <div class="control-group">
-              <label for="volume">volume</label>
-              <input id="volume" type="range" min="0" max="0.08" step="0.001" value="0.025" />
+              <label for="timerMinutes">timer min</label>
+              <input id="timerMinutes" type="number" min="0" max="480" step="1" value="0" />
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="volume">volume</label>
+            <input id="volume" type="range" min="0" max="0.08" step="0.001" value="0.025" />
+          </div>
+
+          <div class="readout timer-readout">
+            <div><span id="timerLabel">off</span><small>timer</small></div>
+            <div class="control-group">
+              <button id="timerCancel" class="wide-button" type="button">Cancel timer</button>
             </div>
           </div>
 
@@ -142,7 +154,7 @@
             <button id="detailsOpen" class="wide-button" type="button">Advanced</button>
           </div>
 
-          <div class="readout">
+          <div class="readout stats-readout">
             <div><span id="noteCount">0</span><small>notes</small></div>
             <div><span id="lastDepth">0</span><small>depth</small></div>
           </div>
@@ -280,6 +292,14 @@
                 <input id="vibratoDepthMax" type="number" min="0" max="100" step="0.1" value="7" />
               </div>
             </div>
+          </div>
+
+          <div id="detailsCollection" class="setting-block">
+            <h3>Collection</h3>
+            <p>
+              Diesis List に保存された発見状況をリセットできます。星と出会った回数が消えます。
+            </p>
+            <button id="collectionReset" class="wide-button danger-button" type="button">Reset collection</button>
           </div>
         </section>
       </form>
@@ -433,7 +453,7 @@
               同時に鳴っている2つの音がとても近い高さになると、再生ヘッドの近くに赤い印が表示されます。これは、完全に同じ音ではないけれど、差が 100 cents 未満に収まっている2音を示す印です。
               このような近い音が重なると、単なる和音とは少し違う、ゆっくり揺れるようなうなりや、細かな濁りが生まれることがあります。
               Diesis List では、こうした小さなズレのうち、名前の付いたものを一覧できます。表示は通常の比率だけでなく、素因数分解や累乗を使った形にも切り替えられるため、同じ diesis をいくつかの見方で確認できます。また、再生中にすでに見つけたものだけ、あるいはまだ見つけていないものだけに絞り込むこともできます。
-              再生中に名前の付いた diesis に出会うと、その記録はブラウザに保存されます。保存された diesis は一覧の右端に星が付き、あとから「どの小さなズレに出会ったか」を振り返れるようになります。
+              再生中に名前の付いた diesis に出会うと、その記録はブラウザに保存されます。保存された diesis は一覧の右端に星と出会った回数が付き、あとから「どの小さなズレに何度出会ったか」を振り返れるようになります。記録は Advanced の Reset collection から消去できます。
             </p>
           </div>
           <div id="helpTable" class="setting-block help-block" data-help-page="controls">

@@ -103,6 +103,12 @@ h1 {
   background: transparent;
 }
 
+.diesis-nav-button {
+  border-color: rgba(239, 200, 74, 0.52);
+  background: rgba(239, 200, 74, 0.12);
+  color: #ffe38a;
+}
+
 p {
   margin: 4px 0 0;
   color: var(--muted);
@@ -304,6 +310,12 @@ input[type="range"] {
   font-size: 13px;
 }
 
+.danger-button {
+  border-color: rgba(240, 87, 76, 0.52);
+  background: rgba(240, 87, 76, 0.12);
+  color: #ffd2cc;
+}
+
 .button-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -315,6 +327,17 @@ input[type="range"] {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-top: 10px;
+}
+
+.timer-readout {
+  align-items: stretch;
+}
+
+.timer-readout .control-group {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
 }
 
 .readout div {
@@ -895,6 +918,14 @@ td:nth-child(6) {
   text-align: center;
   font-size: 13px;
   line-height: 1;
+}
+
+.diesis-star small {
+  display: block;
+  margin-top: 2px;
+  color: var(--accent);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
 }
 
 #presetRatios {
