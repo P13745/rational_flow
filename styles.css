@@ -1209,6 +1209,668 @@ td:nth-child(6) {
   }
 }
 
+/* UI structure pass: keep controls modular, readable, and wrap-safe. */
+.transport {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 6px;
+}
+
+.transport-group {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+.session-group {
+  align-items: center;
+}
+
+.timer-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  max-width: none;
+  padding: 0 9px;
+  border: 1px solid rgba(239, 200, 74, 0.34);
+  border-radius: 999px;
+  background: rgba(239, 200, 74, 0.1);
+  color: var(--accent);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.transport button,
+.transport-select,
+.top-help-button {
+  white-space: nowrap;
+}
+
+.diesis-nav-button {
+  min-width: max-content;
+}
+
+.details-head p {
+  line-height: 1.5;
+}
+
+#detailsClose,
+#timerClose,
+#helpClose,
+#presetsClose,
+#diesisClose {
+  flex: 0 0 auto;
+  width: 38px;
+  min-width: 38px;
+}
+
+.timer-panel {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.timer-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.timer-readout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.timer-readout .wide-button {
+  margin-top: 0;
+}
+
+.readonly-ratio-panel[readonly] {
+  cursor: text;
+  background: rgba(16, 20, 18, 0.72);
+}
+
+.diesis-toolbar-group {
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.toolbar-label {
+  margin-bottom: 2px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.help-tabs button,
+.compact-button-row button,
+.preset-item {
+  white-space: normal;
+}
+
+@media (max-width: 740px) {
+  .transport {
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+
+  .transport-group {
+    min-width: 0;
+  }
+
+  .transport-group + .transport-group {
+    padding-left: 8px;
+  }
+
+  .transport button,
+  .transport-select {
+    flex: 0 1 auto;
+  }
+
+  .timer-badge {
+    min-height: 28px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .details-grid,
+  .timer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .setting-list li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+  }
+
+  .setting-list strong,
+  .setting-list span {
+    overflow-wrap: anywhere;
+  }
+
+  .preset-preview {
+    overflow-wrap: anywhere;
+  }
+
+  .diesis-toolbar-group {
+    padding: 8px;
+  }
+
+  .diesis-ratio,
+  .diesis-name {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 430px) {
+  .topbar {
+    gap: 8px;
+  }
+
+  .transport {
+    justify-content: flex-start;
+  }
+
+  .transport-group + .transport-group {
+    width: 100%;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .transport button,
+  .transport-select {
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .details-head {
+    align-items: flex-start;
+  }
+}
+
+/* Layout tuning pass: stable two-line top controls and full-height workbench. */
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(260px, max-content) minmax(0, 1fr);
+  align-items: center;
+}
+
+.brand {
+  width: max-content;
+  max-width: min(460px, 42vw);
+}
+
+.title-row {
+  justify-content: flex-start;
+}
+
+.title-actions {
+  order: 2;
+}
+
+.transport {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) max-content;
+  grid-template-areas:
+    "playback session"
+    "tools tools";
+  justify-content: end;
+  justify-items: end;
+  align-items: center;
+  gap: 10px 12px;
+  overflow: visible;
+}
+
+.playback-group-top {
+  grid-area: playback;
+}
+
+.session-group {
+  grid-area: session;
+}
+
+.diesis-group {
+  grid-area: tools;
+}
+
+.transport-group + .transport-group {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.transport-group {
+  min-width: 0;
+}
+
+.timer-badge {
+  min-width: 42px;
+  justify-content: center;
+}
+
+.timer-badge.hidden {
+  display: inline-flex;
+}
+
+.stage,
+.controls,
+.list-wrap {
+  height: 100%;
+}
+
+.workbench {
+  height: auto;
+  min-height: 0;
+}
+
+@media (max-width: 1100px) {
+  .workbench {
+    grid-template-rows: minmax(0, 1fr) minmax(180px, 36vh);
+  }
+}
+
+@media (max-width: 920px) {
+  .topbar {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .brand {
+    width: 100%;
+    max-width: none;
+  }
+
+  .title-row {
+    justify-content: space-between;
+  }
+
+  .transport {
+    width: 100%;
+    justify-content: start;
+    justify-items: start;
+  }
+}
+
+@media (max-width: 740px) {
+  .transport {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "playback"
+      "session"
+      "tools";
+    gap: 7px;
+  }
+
+  .playback-group-top,
+  .session-group,
+  .diesis-group {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .transport button,
+  .transport-select {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 430px) {
+  .transport-group + .transport-group {
+    width: auto;
+  }
+}
+
+/* Responsive tuning pass: avoid accidental topbar splits, plan Diesis rows, and fill the app height. */
+.workbench {
+  height: 100%;
+  min-height: 0;
+}
+
+.event-table-wrap {
+  height: 100%;
+  min-height: 0;
+  background: var(--panel);
+}
+
+#timerDialog.details-dialog {
+  width: min(520px, calc(100vw - 28px));
+}
+
+#timerDialog .timer-grid,
+#timerDialog .details-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+#timerDialog .setting-block {
+  border-right: 0;
+}
+
+@media (max-width: 920px) {
+  .topbar {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .brand {
+    width: max-content;
+    max-width: 100%;
+  }
+
+  .title-row {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .transport {
+    width: 100%;
+    justify-content: start;
+    justify-items: start;
+  }
+
+  .diesis-item {
+    grid-template-columns: 40px minmax(82px, max-content) minmax(130px, 1fr) minmax(76px, max-content) 30px;
+    grid-template-areas:
+      "actions cents ratio limit star"
+      "actions name name name star";
+    gap: 6px 10px;
+    align-items: center;
+  }
+
+  .diesis-actions {
+    grid-area: actions;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .diesis-play {
+    width: 30px;
+    height: 30px;
+  }
+
+  .diesis-cents {
+    grid-area: cents;
+  }
+
+  .diesis-ratio {
+    grid-area: ratio;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  .diesis-limit {
+    grid-area: limit;
+  }
+
+  .diesis-name {
+    grid-area: name;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .diesis-star {
+    grid-area: star;
+  }
+}
+
+@media (max-width: 560px) {
+  .brand {
+    width: 100%;
+  }
+
+  .title-actions {
+    width: 100%;
+  }
+
+  .diesis-item {
+    grid-template-columns: 38px minmax(72px, max-content) minmax(0, 1fr) 28px;
+    grid-template-areas:
+      "actions cents ratio star"
+      "actions limit limit star"
+      "actions name name star";
+    gap: 5px 8px;
+  }
+
+  .diesis-limit {
+    justify-self: start;
+  }
+}
+
+/* Header and Diesis toolbar refinement pass. */
+.title-row {
+  display: grid;
+  grid-template-columns: max-content auto;
+  grid-template-areas: "title actions";
+  align-items: center;
+  justify-content: start;
+  column-gap: 18px;
+}
+
+.title-row h1 {
+  grid-area: title;
+  display: block;
+  line-height: 0.98;
+}
+
+.title-line {
+  display: block;
+  white-space: nowrap;
+}
+
+.title-actions {
+  grid-area: actions;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.brand p {
+  white-space: nowrap;
+}
+
+.topbar {
+  grid-template-columns: minmax(260px, max-content) minmax(0, 1fr);
+  align-items: start;
+}
+
+.brand {
+  width: max-content;
+  max-width: min(520px, 46vw);
+}
+
+.transport {
+  justify-self: end;
+}
+
+.transport-group {
+  max-width: 100%;
+}
+
+@media (max-width: 920px) and (min-width: 741px) {
+  .topbar {
+    grid-template-columns: minmax(240px, max-content) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .brand {
+    width: max-content;
+    max-width: min(420px, 46vw);
+  }
+
+  .title-row {
+    justify-content: start;
+    flex-wrap: nowrap;
+  }
+
+  .transport {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "playback"
+      "session"
+      "tools";
+    justify-self: end;
+    justify-content: end;
+    justify-items: end;
+  }
+
+  .playback-group-top,
+  .session-group,
+  .diesis-group {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 740px) {
+  .topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .brand {
+    width: max-content;
+    max-width: 100%;
+  }
+
+  .title-row {
+    grid-template-columns: max-content auto;
+    justify-content: start;
+    column-gap: 14px;
+  }
+
+  .title-actions {
+    width: auto;
+  }
+
+  .transport {
+    justify-self: end;
+    justify-content: end;
+    justify-items: end;
+  }
+
+  .playback-group-top,
+  .session-group,
+  .diesis-group {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 430px) {
+  .title-row {
+    column-gap: 10px;
+  }
+
+  .top-help-button {
+    min-width: 0;
+    padding: 0 8px;
+  }
+}
+
+.diesis-toolbar {
+  align-items: stretch;
+}
+
+.diesis-toolbar-group {
+  min-height: 92px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.diesis-toolbar-group .toolbar-label {
+  margin: 0;
+}
+
+.filter-group > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.filter-group,
+.display-group,
+.collection-group {
+  grid-template-rows: auto 30px 30px;
+  align-content: start;
+}
+
+.playback-group {
+  grid-template-rows: auto minmax(30px, 1fr);
+}
+
+.playback-group .compact-button-row {
+  align-content: start;
+}
+
+.collection-stats {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  margin-top: 0;
+  padding: 0 8px;
+  border: 1px solid rgba(239, 200, 74, 0.26);
+  border-radius: 6px;
+  background: rgba(239, 200, 74, 0.07);
+}
+
+@media (max-width: 740px) {
+  .diesis-toolbar-group {
+    min-height: auto;
+  }
+}
+
+/* Final viewport fit: keep the main surface and table stretched to the bottom. */
+.app {
+  height: 100vh;
+  height: 100dvh;
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.workbench {
+  height: 100%;
+  min-height: 0;
+  align-self: stretch;
+}
+
+.stage,
+.controls,
+.list-wrap {
+  min-height: 0;
+}
+
+.list-wrap {
+  height: 100%;
+  align-self: stretch;
+}
+
+.event-table-wrap {
+  height: 100%;
+  min-height: 0;
+}
+
+/* Keep the two-line title visually centered against wrapped transport controls. */
+.topbar {
+  align-items: center;
+}
+
+.brand,
+.transport {
+  align-self: center;
+}
+
+.title-row,
+.title-row h1,
+.title-actions {
+  align-items: center;
+  align-self: center;
+}
+
 /* Header split refinement: keep brand/actions on the left and controls on the right. */
 .topbar {
   display: grid;
@@ -1236,11 +1898,7 @@ td:nth-child(6) {
 .title-row h1 {
   grid-area: title;
   display: block;
-  flex: none;
   line-height: 0.98;
-  overflow: visible;
-  text-overflow: clip;
-  white-space: normal;
 }
 
 .title-line {
@@ -1273,7 +1931,6 @@ td:nth-child(6) {
   align-content: flex-start;
   align-items: center;
   gap: 10px 12px;
-  overflow: visible;
 }
 
 .transport-group {
@@ -1288,9 +1945,80 @@ td:nth-child(6) {
 }
 
 .playback-group-top,
+.session-group,
 .diesis-group {
   width: auto;
   justify-content: flex-end;
+}
+
+@media (max-width: 920px) {
+  .topbar {
+    grid-template-columns: max-content minmax(0, 1fr);
+    grid-template-areas: "brand transport";
+    align-items: start;
+    gap: 12px;
+  }
+
+  .brand {
+    width: max-content;
+    max-width: min(420px, 58vw);
+  }
+
+  .title-row {
+    grid-template-columns: max-content auto;
+    justify-content: start;
+    column-gap: 14px;
+  }
+
+  .title-actions {
+    width: auto;
+  }
+
+  .transport {
+    width: auto;
+    justify-self: end;
+    justify-content: flex-end;
+    justify-items: end;
+  }
+
+  .playback-group-top,
+  .session-group,
+  .diesis-group {
+    width: auto;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 560px) {
+  .topbar {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .brand {
+    max-width: min(340px, 66vw);
+  }
+
+  .title-row {
+    column-gap: 10px;
+  }
+
+  h1 {
+    font-size: 18px;
+  }
+
+  .brand p {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .transport {
+    gap: 7px;
+  }
+
+  .transport-group {
+    gap: 6px;
+  }
 }
 
 /* Diesis toolbar refinement: all toolbar boxes use the same internal rhythm. */
@@ -1326,6 +2054,10 @@ td:nth-child(6) {
   grid-template-rows: auto 30px 30px;
 }
 
+.filter-group > div {
+  display: contents;
+}
+
 .diesis-toolbar-group .compact-select,
 .diesis-toolbar-group .compact-check,
 .diesis-toolbar-group .collection-stats {
@@ -1340,79 +2072,8 @@ td:nth-child(6) {
   padding: 0 8px;
 }
 
-@media (max-width: 920px) {
-  .topbar {
-    grid-template-columns: max-content minmax(0, 1fr);
-    grid-template-areas: "brand transport";
-    align-items: start;
-    gap: 12px;
-  }
-
-  .brand {
-    width: max-content;
-    max-width: min(420px, 58vw);
-  }
-
-  .title-row {
-    grid-template-columns: max-content auto;
-    justify-content: start;
-    column-gap: 14px;
-  }
-
-  .title-actions {
-    width: auto;
-  }
-
-  .transport {
-    width: auto;
-    justify-self: end;
-    justify-content: flex-end;
-    justify-items: end;
-    overflow: visible;
-  }
-
-  .playback-group-top,
-  .diesis-group {
-    width: auto;
-    justify-content: flex-end;
-  }
-}
-
 @media (max-width: 740px) {
   .diesis-toolbar-group {
     min-height: auto;
-  }
-}
-
-@media (max-width: 560px) {
-  .topbar {
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .brand {
-    max-width: min(340px, 66vw);
-  }
-
-  .title-row {
-    column-gap: 10px;
-  }
-
-  h1 {
-    font-size: 18px;
-  }
-
-  .brand p {
-    max-width: 100%;
-    white-space: normal;
-  }
-
-  .transport {
-    gap: 7px;
-    padding-bottom: 0;
-  }
-
-  .transport-group {
-    gap: 6px;
   }
 }

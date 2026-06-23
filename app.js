@@ -38,10 +38,9 @@ const els = {
   windowSize: document.querySelector("#windowSize"),
   timerMinutes: document.querySelector("#timerMinutes"),
   timerOpen: document.querySelector("#timerOpen"),
+  timerBadge: document.querySelector("#timerBadge"),
   timerClose: document.querySelector("#timerClose"),
   timerDialog: document.querySelector("#timerDialog"),
-  timerLabel: document.querySelector("#timerLabel"),
-  timerCancel: document.querySelector("#timerCancel"),
   volume: document.querySelector("#volume"),
   allowDuplication: document.querySelector("#allowDuplication"),
   rootedDepth: document.querySelector("#rootedDepth"),
@@ -151,7 +150,6 @@ const i18nTargets = [
   ['label[for="nextMax"]', "labels.nextMax"],
   ['label[for="windowSize"]', "labels.window"],
   ['label[for="timerMinutes"]', "labels.timerMinutes"],
-  ["#timerCancel", "labels.cancelTimer"],
   ['label[for="volume"]', "labels.volume"],
   ["#allowDuplication", "labels.duplicate", "checkbox-label"],
   ["#rootedDepth", "labels.rootedDepth", "checkbox-label"],
@@ -183,6 +181,7 @@ const i18nTargets = [
   ["#detailsDialog .details-head p", "dialogs.settingsIntro"],
   ["#detailsClose", "dialogs.closeTitle", "title"],
   ["#helpDialog h2", "dialogs.helpTitle"],
+  ["#helpDialog .details-head p", "dialogs.helpIntro"],
   ["#helpClose", "dialogs.closeTitle", "title"],
   ["#helpTabAbout", "help.aboutTab"],
   ["#helpTabControls", "help.controlsTab"],
@@ -1795,6 +1794,19 @@ function drawCanvas() {
   });
 }
 
+function estimatePastFillerRows(upcomingRows, playingRows, pastRows) {
+  const tableWrap = els.noteRows?.closest(".event-table-wrap");
+  if (!tableWrap) return 0;
+  const headerHeight = 29;
+  const rowHeight = 33;
+  const groupHeaders = 3;
+  const usedHeight = groupHeaders * headerHeight + (upcomingRows + playingRows + pastRows) * rowHeight;
+  const rect = tableWrap.getBoundingClientRect();
+  const viewportFallback = Math.max(0, window.innerHeight - rect.top - 1);
+  const availableHeight = Math.max(tableWrap.clientHeight, rect.height, viewportFallback);
+  return Math.max(0, Math.ceil((availableHeight - usedHeight) / rowHeight));
+}
+
 function renderTable() {
   const now = timelineNow();
   const settings = getSettings();
@@ -1811,12 +1823,15 @@ function renderTable() {
     .filter((note) => note.start + note.duration < now)
     .sort((a, b) => (b.start + b.duration) - (a.start + a.duration));
   const commaNoteIds = new Set(findCloseActivePairs(active).flatMap((pair) => [pair.low.id, pair.high.id]));
+  const upcomingRows = Math.max(7, upcoming.length);
+  const playingRows = Math.max(15, active.length);
+  const pastMinRows = Math.max(0, estimatePastFillerRows(upcomingRows, playingRows, past.length));
 
   els.noteRows.textContent = "";
   const fragment = document.createDocumentFragment();
   appendEventGroup(fragment, t("table.upcoming"), upcoming, now, "upcoming", { minRows: 7, total: allUpcoming.length, commaNoteIds, alignBottom: true });
   appendEventGroup(fragment, t("table.playing"), active, now, "playing", { minRows: 15, commaNoteIds });
-  appendEventGroup(fragment, t("table.past"), past, now, "past", { commaNoteIds });
+  appendEventGroup(fragment, t("table.past"), past, now, "past", { minRows: pastMinRows, commaNoteIds });
   els.noteRows.appendChild(fragment);
 }
 
@@ -2011,9 +2026,11 @@ function updateLabels() {
   els.statusLabel.textContent = t(`status.${statusKey}`);
   els.noteCount.textContent = String(notes.length);
   els.lastDepth.textContent = String(selected?.generation ?? 0);
-  els.timerLabel.textContent = timerStatusText();
-  els.timerOpen.textContent = `${t("labels.timer")} ${timerStatusText()}`;
-  els.timerCancel.disabled = timerEndTime === null;
+  els.timerOpen.textContent = t("labels.timer");
+  els.timerBadge.textContent = timerBadgeText();
+  els.timerBadge.classList.remove("hidden");
+  els.seed.setAttribute("title", isRunning || isDraining ? "Add Child" : "Add Seed");
+  els.seed.setAttribute("aria-label", isRunning || isDraining ? "Add Child" : "Add Seed");
   els.activeRatioLabel.textContent = activeRatioText();
   els.autoMode.classList.toggle("active", mode === "auto");
   els.listMode.classList.toggle("active", mode === "list");
@@ -2037,13 +2054,24 @@ function updateLabels() {
   els.detailLabel.textContent = `${selected.frequency.toFixed(2)}Hz  ${nearestPitchLabel(selected.frequency)}  Depth ${selected.generation}  ${selected.ratio || base}`;
 }
 
-function timerStatusText() {
-  if (timerCompleted) return "Done";
-  if (timerEndTime === null) return "Off";
+function timerCountdownText() {
+  if (timerEndTime === null) return "";
   const remaining = Math.max(0, timerEndTime - timelineNow());
   const minutes = Math.floor(remaining / 60);
   const seconds = Math.floor(remaining % 60);
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function timerStatusText() {
+  if (timerCompleted) return "Done";
+  const countdown = timerCountdownText();
+  if (!countdown) return "No Timer Set";
+  return `${countdown} left`;
+}
+
+function timerBadgeText() {
+  if (timerCompleted) return "Done";
+  return timerCountdownText() || "OFF";
 }
 
 function render(forceTable = false) {
@@ -2360,12 +2388,6 @@ els.timerOpen.addEventListener("click", () => {
 });
 els.timerDialog.addEventListener("click", (event) => {
   if (event.target === els.timerDialog) els.timerDialog.close();
-});
-els.timerCancel.addEventListener("click", () => {
-  timerEndTime = null;
-  timerCompleted = false;
-  syncWakeLock();
-  render(true);
 });
 els.collectionReset.addEventListener("click", resetDiesisCollection);
 

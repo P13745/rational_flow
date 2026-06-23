@@ -20,23 +20,26 @@
           <p>Slowly Evolving Harmonic Currents</p>
         </div>
         <div class="transport" aria-label="Transport">
+          <div class="transport-group playback-group-top">
+            <button id="startStop" class="primary" type="button" title="Play / Stop">▶</button>
+            <button id="pauseResume" type="button" title="Pause / Resume">Ⅱ</button>
+            <select id="seedMode" class="transport-select" title="Seed / Drone">
+              <option value="seed">Seed</option>
+              <option value="drone">Drone</option>
+            </select>
+            <button id="seed" type="button" title="Add Seed">＋</button>
+            <button id="clear" type="button" title="Clear">Clear</button>
+          </div>
+          <div class="transport-group session-group">
+            <span id="timerBadge" class="timer-badge hidden" aria-live="polite"></span>
+            <button id="timerOpen" type="button" title="Timer">Timer…</button>
+          </div>
           <div class="transport-group diesis-group">
-            <button id="diesisOpen" class="diesis-nav-button" type="button">Diesis</button>
+            <button id="diesisOpen" class="diesis-nav-button" type="button">Diesis List…</button>
             <select id="globalRatioDisplay" class="transport-select" title="Ratio Display">
               <option value="ratio">Ratio</option>
               <option value="factors">Factors</option>
             </select>
-          </div>
-          <div class="transport-group playback-group-top">
-            <button id="startStop" class="primary" type="button" title="開始 / 停止">▶</button>
-            <button id="pauseResume" type="button" title="一時停止 / 再開">Ⅱ</button>
-            <button id="timerOpen" type="button" title="Timer">Timer Off</button>
-            <select id="seedMode" class="transport-select" title="起点タイプ">
-              <option value="seed">Seed</option>
-              <option value="drone">Drone</option>
-            </select>
-            <button id="seed" type="button" title="起点を追加">＋</button>
-            <button id="clear" type="button" title="クリア">Clear</button>
           </div>
         </div>
       </header>
@@ -326,16 +329,7 @@
               <label for="timerMinutes">Timer Min</label>
               <input id="timerMinutes" type="number" min="0" max="480" step="1" value="0" />
             </div>
-            <p>0 の場合は Timer Off です。再生中に変更すると、次回開始時の設定として使われます。</p>
-          </div>
-          <div class="setting-block">
-            <h3>Status</h3>
-            <div class="readout timer-readout">
-              <div><span id="timerLabel">Off</span><small>Timer</small></div>
-              <div class="control-group">
-                <button id="timerCancel" class="wide-button" type="button">Cancel Timer</button>
-              </div>
-            </div>
+            <p>0 の場合は Timer を使いません。再生を開始すると、設定された Timer は上部の badge で残り時間として表示されます。</p>
           </div>
         </section>
       </form>
@@ -346,6 +340,7 @@
         <header class="details-head">
           <div>
             <h2>Help</h2>
+            <p>Rational Flow の基本的な考え方、操作、設定項目を確認できます。</p>
           </div>
           <button id="helpClose" type="submit" title="閉じる">×</button>
         </header>
@@ -522,7 +517,7 @@
           <article class="preset-preview">
             <h3 id="presetName">---</h3>
             <p id="presetDescription">---</p>
-            <textarea id="presetRatios" rows="8" readonly></textarea>
+            <textarea id="presetRatios" class="readonly-ratio-panel" rows="8" readonly></textarea>
             <button id="presetLoad" class="wide-button primary" type="button">Load Preset</button>
           </article>
         </section>
@@ -545,19 +540,17 @@
             <div id="diesisBaseControls" class="compact-button-row" aria-label="Base Note"></div>
           </div>
           <div class="diesis-toolbar-group filter-group">
-            <div>
-              <label class="toolbar-label" for="diesisLimitFilter">Limit Filter</label>
-              <select id="diesisLimitFilter" class="compact-select">
-                <option value="all">All</option>
-                <option value="3">3-limit</option>
-                <option value="5">5-limit</option>
-                <option value="7">7-limit</option>
-                <option value="11">11-limit</option>
-                <option value="13">13-limit</option>
-                <option value="17">17-limit</option>
-                <option value="19">19-limit</option>
-              </select>
-            </div>
+            <label class="toolbar-label" for="diesisLimitFilter">Limit Filter</label>
+            <select id="diesisLimitFilter" class="compact-select">
+              <option value="all">All</option>
+              <option value="3">3-limit</option>
+              <option value="5">5-limit</option>
+              <option value="7">7-limit</option>
+              <option value="11">11-limit</option>
+              <option value="13">13-limit</option>
+              <option value="17">17-limit</option>
+              <option value="19">19-limit</option>
+            </select>
             <label class="check compact-check">
               <input id="diesisDerivedToggle" type="checkbox" checked />
               Derived
