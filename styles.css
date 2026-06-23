@@ -124,7 +124,20 @@ p {
 
 .transport {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.transport-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.transport-group + .transport-group {
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
 }
 
 .transport button {
@@ -1014,6 +1027,14 @@ td:nth-child(6) {
     -webkit-overflow-scrolling: touch;
   }
 
+  .transport-group {
+    flex: 0 0 auto;
+  }
+
+  .transport-group + .transport-group {
+    padding-left: 8px;
+  }
+
   .transport button {
     flex: 0 0 auto;
     min-width: 38px;
@@ -1185,5 +1206,213 @@ td:nth-child(6) {
   .compact-button-row button {
     height: 28px;
     font-size: 11px;
+  }
+}
+
+/* Header split refinement: keep brand/actions on the left and controls on the right. */
+.topbar {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-areas: "brand transport";
+  align-items: start;
+  gap: 18px;
+}
+
+.brand {
+  grid-area: brand;
+  width: max-content;
+  max-width: min(520px, 56vw);
+}
+
+.title-row {
+  display: grid;
+  grid-template-columns: max-content auto;
+  grid-template-areas: "title actions";
+  align-items: center;
+  justify-content: start;
+  column-gap: 18px;
+}
+
+.title-row h1 {
+  grid-area: title;
+  display: block;
+  flex: none;
+  line-height: 0.98;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.title-line {
+  display: block;
+  white-space: nowrap;
+}
+
+.title-actions {
+  grid-area: actions;
+  width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.brand p {
+  white-space: nowrap;
+}
+
+.transport {
+  grid-area: transport;
+  justify-self: end;
+  align-self: start;
+  width: auto;
+  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-content: flex-start;
+  align-items: center;
+  gap: 10px 12px;
+  overflow: visible;
+}
+
+.transport-group {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.playback-group-top,
+.diesis-group {
+  width: auto;
+  justify-content: flex-end;
+}
+
+/* Diesis toolbar refinement: all toolbar boxes use the same internal rhythm. */
+.diesis-toolbar {
+  align-items: stretch;
+}
+
+.diesis-toolbar-group {
+  display: grid;
+  grid-template-rows: auto 30px 30px;
+  align-content: start;
+  gap: 6px;
+  min-height: 94px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.diesis-toolbar-group .toolbar-label {
+  margin: 0;
+  min-height: 14px;
+}
+
+.playback-group .compact-button-row {
+  grid-row: 2 / 4;
+  align-content: start;
+}
+
+.filter-group,
+.display-group,
+.collection-group {
+  grid-template-rows: auto 30px 30px;
+}
+
+.diesis-toolbar-group .compact-select,
+.diesis-toolbar-group .compact-check,
+.diesis-toolbar-group .collection-stats {
+  min-height: 30px;
+  height: 30px;
+  margin: 0;
+}
+
+.collection-stats {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+@media (max-width: 920px) {
+  .topbar {
+    grid-template-columns: max-content minmax(0, 1fr);
+    grid-template-areas: "brand transport";
+    align-items: start;
+    gap: 12px;
+  }
+
+  .brand {
+    width: max-content;
+    max-width: min(420px, 58vw);
+  }
+
+  .title-row {
+    grid-template-columns: max-content auto;
+    justify-content: start;
+    column-gap: 14px;
+  }
+
+  .title-actions {
+    width: auto;
+  }
+
+  .transport {
+    width: auto;
+    justify-self: end;
+    justify-content: flex-end;
+    justify-items: end;
+    overflow: visible;
+  }
+
+  .playback-group-top,
+  .diesis-group {
+    width: auto;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 740px) {
+  .diesis-toolbar-group {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .topbar {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .brand {
+    max-width: min(340px, 66vw);
+  }
+
+  .title-row {
+    column-gap: 10px;
+  }
+
+  h1 {
+    font-size: 18px;
+  }
+
+  .brand p {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .transport {
+    gap: 7px;
+    padding-bottom: 0;
+  }
+
+  .transport-group {
+    gap: 6px;
   }
 }

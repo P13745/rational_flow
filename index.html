@@ -11,28 +11,37 @@
       <header class="topbar">
         <div class="brand">
           <div class="title-row">
-            <h1>Rational Flow <span class="version-label">v2.0.2</span></h1>
+            <h1><span class="title-line">Rational</span><span class="title-line">Flow <span class="version-label">v0.2.3</span></span></h1>
             <div class="title-actions">
               <button id="helpOpen" class="top-help-button" type="button">Help</button>
+              <button id="languageToggle" class="top-help-button" type="button" title="Language">EN</button>
             </div>
           </div>
-          <p>slowly evolving harmonic currents</p>
+          <p>Slowly Evolving Harmonic Currents</p>
         </div>
-        <div class="transport" aria-label="transport">
-          <button id="languageToggle" type="button" title="Language">EN</button>
-          <button id="diesisOpen" class="diesis-nav-button" type="button">Diesis</button>
-          <button id="startStop" class="primary" type="button" title="開始 / 停止">▶</button>
-          <button id="pauseResume" type="button" title="一時停止 / 再開">Ⅱ</button>
-          <select id="seedMode" class="transport-select" title="起点タイプ">
-            <option value="seed">Seed</option>
-            <option value="drone">Drone</option>
-          </select>
-          <button id="seed" type="button" title="起点を追加">＋</button>
-          <button id="clear" type="button" title="クリア">Clear</button>
+        <div class="transport" aria-label="Transport">
+          <div class="transport-group diesis-group">
+            <button id="diesisOpen" class="diesis-nav-button" type="button">Diesis</button>
+            <select id="globalRatioDisplay" class="transport-select" title="Ratio Display">
+              <option value="ratio">Ratio</option>
+              <option value="factors">Factors</option>
+            </select>
+          </div>
+          <div class="transport-group playback-group-top">
+            <button id="startStop" class="primary" type="button" title="開始 / 停止">▶</button>
+            <button id="pauseResume" type="button" title="一時停止 / 再開">Ⅱ</button>
+            <button id="timerOpen" type="button" title="Timer">Timer Off</button>
+            <select id="seedMode" class="transport-select" title="起点タイプ">
+              <option value="seed">Seed</option>
+              <option value="drone">Drone</option>
+            </select>
+            <button id="seed" type="button" title="起点を追加">＋</button>
+            <button id="clear" type="button" title="クリア">Clear</button>
+          </div>
         </div>
       </header>
 
-      <nav class="mobile-view-switch" aria-label="mobile view">
+      <nav class="mobile-view-switch" aria-label="Mobile View">
         <button id="mobileControlsView" type="button" data-mobile-view="controls">設定</button>
         <button id="mobileMainView" class="active" type="button" data-mobile-view="main">メイン</button>
         <button id="mobileListView" type="button" data-mobile-view="list">リスト</button>
@@ -40,13 +49,13 @@
 
       <section class="workbench">
         <aside class="controls" aria-label="controls">
-          <div class="mode-row" role="group" aria-label="fraction mode">
+          <div class="mode-row" role="group" aria-label="Fraction Mode">
             <button id="autoMode" class="seg active" type="button">Auto</button>
             <button id="listMode" class="seg" type="button">List</button>
           </div>
           <p class="hint">比率の作り方。Auto は範囲から生成、List は指定した比率だけを使います。</p>
 
-          <div class="mode-row three" role="group" aria-label="ratio bias">
+          <div class="mode-row three" role="group" aria-label="Ratio Bias">
             <button id="simpleRatioMode" class="seg active" type="button">Simple</button>
             <button id="equalRatioMode" class="seg" type="button">Equal</button>
             <button id="complexRatioMode" class="seg" type="button">Complex</button>
@@ -56,19 +65,19 @@
           <div id="autoControls" class="panel">
             <div class="split">
               <div class="control-group">
-                <label for="nMax">Numerator max</label>
-                <input id="nMax" type="number" min="2" max="128" step="1" value="8" />
+                <label for="nMax">Numerator Max</label>
+                <input id="nMax" type="number" min="2" max="512" step="1" value="8" />
               </div>
               <div class="control-group">
-                <label for="dMax">Denominator max</label>
-                <input id="dMax" type="number" min="2" max="128" step="1" value="8" />
+                <label for="dMax">Denominator Max</label>
+                <input id="dMax" type="number" min="2" max="512" step="1" value="8" />
               </div>
             </div>
           </div>
 
           <div id="listControls" class="panel hidden">
             <div class="control-group">
-              <label for="fractionList">fractions</label>
+              <label for="fractionList">Fractions</label>
               <textarea id="fractionList" rows="4">2/1, 1/2, 3/2, 5/4</textarea>
             </div>
             <button id="presetsOpen" class="wide-button" type="button">Presets</button>
@@ -76,67 +85,55 @@
 
           <div class="split">
             <div class="control-group">
-              <label for="minFreq">min Hz</label>
+              <label for="minFreq">Min Hz</label>
               <input id="minFreq" type="number" min="20" max="1200" step="1" value="130" />
             </div>
             <div class="control-group">
-              <label for="maxFreq">max Hz</label>
+              <label for="maxFreq">Max Hz</label>
               <input id="maxFreq" type="number" min="80" max="6000" step="1" value="2100" />
             </div>
           </div>
 
           <div class="split">
             <div class="control-group">
-              <label for="minDur">Duration min sec</label>
+              <label for="minDur">Duration Min Sec</label>
               <input id="minDur" type="number" min="0.5" max="60" step="0.1" value="5" />
             </div>
             <div class="control-group">
-              <label for="maxDur">Duration max sec</label>
+              <label for="maxDur">Duration Max Sec</label>
               <input id="maxDur" type="number" min="0.5" max="90" step="0.1" value="20" />
             </div>
           </div>
 
           <div class="split">
             <div class="control-group">
-              <label for="nextMin">Next event min sec</label>
+              <label for="nextMin">Next Event Min Sec</label>
               <input id="nextMin" type="number" min="0.05" max="20" step="0.05" value="1" />
             </div>
             <div class="control-group">
-              <label for="nextMax">Next event max sec</label>
+              <label for="nextMax">Next Event Max Sec</label>
               <input id="nextMax" type="number" min="0.05" max="30" step="0.05" value="3" />
             </div>
           </div>
 
           <div class="split">
             <div class="control-group">
-              <label for="windowSize">window</label>
+              <label for="windowSize">Window</label>
               <input id="windowSize" type="number" min="4" max="30" step="0.5" value="8" />
             </div>
             <div class="control-group">
-              <label for="timerMinutes">timer min</label>
-              <input id="timerMinutes" type="number" min="0" max="480" step="1" value="0" />
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label for="volume">volume</label>
-            <input id="volume" type="range" min="0" max="0.08" step="0.001" value="0.025" />
-          </div>
-
-          <div class="readout timer-readout">
-            <div><span id="timerLabel">off</span><small>timer</small></div>
-            <div class="control-group">
-              <button id="timerCancel" class="wide-button" type="button">Cancel timer</button>
+              <label for="volume">Volume</label>
+              <input id="volume" type="range" min="0" max="0.08" step="0.001" value="0.025" />
             </div>
           </div>
 
           <label class="check">
             <input id="allowDuplication" type="checkbox" />
-            duplicate frequencies
+            Duplicate Frequencies
           </label>
 
           <div class="control-group">
-            <label for="parentBiasBasis">parent bias</label>
+            <label for="parentBiasBasis">Parent Bias</label>
             <select id="parentBiasBasis">
               <option value="equal">Equal</option>
               <option value="depth">Depth</option>
@@ -147,7 +144,7 @@
               <option value="low">Shallow</option>
               <option value="high">Deep</option>
             </select>
-            <small>parent の選び方。Rooted depth は root が消えた後も depth 0 を 1 本の tree にだけ引き継ぎます。</small>
+            <small>Parent の選び方。Rooted Depth は root が消えた後も depth 0 を 1 本の tree にだけ引き継ぎます。</small>
           </div>
 
           <div class="button-row">
@@ -155,8 +152,8 @@
           </div>
 
           <div class="readout stats-readout">
-            <div><span id="noteCount">0</span><small>notes</small></div>
-            <div><span id="lastDepth">0</span><small>depth</small></div>
+            <div><span id="noteCount">0</span><small>Notes</small></div>
+            <div><span id="lastDepth">0</span><small>Depth</small></div>
           </div>
         </aside>
 
@@ -164,9 +161,9 @@
           <canvas id="visualizer" width="1200" height="620"></canvas>
           <div class="nowline" aria-hidden="true"></div>
           <div class="status">
-            <strong id="statusLabel">stopped</strong>
+            <strong id="statusLabel">Stopped</strong>
             <span id="detailLabel">---</span>
-            <span id="activeRatioLabel" class="ratio-strip">active ratio: ---</span>
+            <span id="activeRatioLabel" class="ratio-strip">Active Ratio: ---</span>
           </div>
         </section>
 
@@ -178,11 +175,11 @@
             <table>
               <thead>
                 <tr>
-                  <th>start</th>
+                  <th>Start</th>
                   <th>Hz</th>
-                  <th>duration</th>
-                  <th>depth</th>
-                  <th>ratio</th>
+                  <th>Duration</th>
+                  <th>Depth</th>
+                  <th>Ratio</th>
                 </tr>
               </thead>
               <tbody id="noteRows"></tbody>
@@ -204,14 +201,14 @@
 
         <section class="details-grid">
           <div class="setting-block">
-            <h3>Parent bias</h3>
+            <h3>Parent Bias</h3>
             <p>
               現在鳴っている音のどれを parent にするかを選びます。Equal は均等、Depth は枝の浅さ/深さ、
               Time は古い音/新しい音を基準に偏らせます。
             </p>
             <div class="split">
               <div class="control-group">
-                <label for="parentBiasCurve">parent curve</label>
+                <label for="parentBiasCurve">Parent Curve</label>
                 <select id="parentBiasCurve">
                   <option value="none">-</option>
                   <option value="linear">Linear</option>
@@ -219,18 +216,18 @@
                 </select>
               </div>
               <div class="control-group">
-                <label for="parentBiasStrength">parent strength</label>
+                <label for="parentBiasStrength">Parent Strength</label>
                 <input id="parentBiasStrength" type="range" min="0" max="1" step="0.01" value="0.55" />
               </div>
             </div>
             <label class="check">
               <input id="rootedDepth" type="checkbox" checked />
-              rooted depth
+              Rooted Depth
             </label>
           </div>
 
           <div class="setting-block">
-            <h3>Bias structure</h3>
+            <h3>Bias Structure</h3>
             <p>
               Ratio bias と Parent bias はどちらも、何を基準にするか、どちら向きに偏らせるか、
               Linear/Exponential のどちらで曲げるか、という同じ構造で考えられます。
@@ -238,26 +235,34 @@
           </div>
 
           <div class="setting-block">
-            <h3>Ratio source</h3>
+            <h3>Ratio Source</h3>
             <p>
-              Numerator max / Denominator max は Auto で使う分子と分母の上限です。List は comma 区切りの比率だけを使います。
+              Numerator Max / Denominator Max は Auto で使う分子と分母の上限です。List は comma 区切りの比率だけを使います。
               Simple は小さな整数比を優先し、Complex は大きな整数比を優先します。Curve で偏りの強さを変えます。
             </p>
             <div class="control-group">
-              <label for="ratioBiasCurve">ratio curve</label>
+              <label for="ratioBiasCurve">Ratio Curve</label>
               <select id="ratioBiasCurve">
                 <option value="none">-</option>
                 <option value="linear">Linear</option>
                 <option value="exponential">Exponential</option>
               </select>
             </div>
+            <p class="ratio-limit-hint">
+              約分後の numerator / denominator がこの値を超える比率は候補から外します。値を大きくすると長時間再生時の表示や処理が重くなる場合があります。
+              小さくすると派生音の候補が減り、生成に失敗しやすくなるため、音の密度が疎になります。
+            </p>
+            <div class="control-group">
+              <label for="ratioIntegerLimit">Ratio Integer Limit</label>
+              <input id="ratioIntegerLimit" type="number" min="1" max="4096" step="1" value="128" />
+            </div>
           </div>
 
           <div class="setting-block">
             <h3>Timing</h3>
             <p>
-              Next event min sec / max sec は次のイベントまでの待ち時間の範囲です。この範囲内で指数分布に近い抽選を行い、
-              右端までの予定を先に埋めます。Duration min sec / max sec は音の長さ、window は画面に見える時間幅です。
+              Next Event Min Sec / Max Sec は次のイベントまでの待ち時間の範囲です。この範囲内で指数分布に近い抽選を行い、
+              右端までの予定を先に埋めます。Duration Min Sec / Max Sec は音の長さ、Window は画面に見える時間幅です。
             </p>
           </div>
 
@@ -269,26 +274,26 @@
             </p>
             <label class="check">
               <input id="vibratoEnabled" type="checkbox" checked />
-              enable vibrato
+              Enable Vibrato
             </label>
-            <small class="vibrato-hint">enable vibrato をオンにすると下の値を編集できます。</small>
+            <small class="vibrato-hint">Enable Vibrato をオンにすると下の値を編集できます。</small>
             <div class="split">
               <div class="control-group">
-                <label for="vibratoRateMin">rate min Hz</label>
+                <label for="vibratoRateMin">Rate Min Hz</label>
                 <input id="vibratoRateMin" type="number" min="0" max="30" step="0.1" value="3" />
               </div>
               <div class="control-group">
-                <label for="vibratoRateMax">rate max Hz</label>
+                <label for="vibratoRateMax">Rate Max Hz</label>
                 <input id="vibratoRateMax" type="number" min="0" max="30" step="0.1" value="10" />
               </div>
             </div>
             <div class="split">
               <div class="control-group">
-                <label for="vibratoDepthMin">depth min cents</label>
+                <label for="vibratoDepthMin">Depth Min Cents</label>
                 <input id="vibratoDepthMin" type="number" min="0" max="100" step="0.1" value="0" />
               </div>
               <div class="control-group">
-                <label for="vibratoDepthMax">depth max cents</label>
+                <label for="vibratoDepthMax">Depth Max Cents</label>
                 <input id="vibratoDepthMax" type="number" min="0" max="100" step="0.1" value="7" />
               </div>
             </div>
@@ -299,7 +304,38 @@
             <p>
               Diesis List に保存された発見状況をリセットできます。星と出会った回数が消えます。
             </p>
-            <button id="collectionReset" class="wide-button danger-button" type="button">Reset collection</button>
+            <button id="collectionReset" class="wide-button danger-button" type="button">Reset Collection</button>
+          </div>
+        </section>
+      </form>
+    </dialog>
+
+    <dialog id="timerDialog" class="details-dialog">
+      <form method="dialog" class="details-panel timer-panel">
+        <header class="details-head">
+          <div>
+            <h2>Timer</h2>
+            <p>指定した時間に向けて生成密度をゆるやかに下げ、終了後に Wake Lock を解除します。</p>
+          </div>
+          <button id="timerClose" type="submit" title="閉じる">×</button>
+        </header>
+        <section class="details-grid timer-grid">
+          <div class="setting-block">
+            <h3>Duration</h3>
+            <div class="control-group">
+              <label for="timerMinutes">Timer Min</label>
+              <input id="timerMinutes" type="number" min="0" max="480" step="1" value="0" />
+            </div>
+            <p>0 の場合は Timer Off です。再生中に変更すると、次回開始時の設定として使われます。</p>
+          </div>
+          <div class="setting-block">
+            <h3>Status</h3>
+            <div class="readout timer-readout">
+              <div><span id="timerLabel">Off</span><small>Timer</small></div>
+              <div class="control-group">
+                <button id="timerCancel" class="wide-button" type="button">Cancel Timer</button>
+              </div>
+            </div>
           </div>
         </section>
       </form>
@@ -314,7 +350,7 @@
           <button id="helpClose" type="submit" title="閉じる">×</button>
         </header>
 
-        <div class="help-tabs" role="tablist" aria-label="help sections">
+        <div class="help-tabs" role="tablist" aria-label="Help Sections">
           <button id="helpTabAbout" class="active" type="button" data-help-page="about">About</button>
           <button id="helpTabControls" type="button" data-help-page="controls">Controls</button>
           <button id="helpTabSettings" type="button" data-help-page="settings">Settings</button>
@@ -331,17 +367,17 @@
           <div id="helpTerms" class="setting-block help-block" data-help-page="about">
             <h3>基本用語</h3>
             <ul class="setting-list">
-              <li><strong>seed</strong><span>最初に置かれる起点の音です。</span></li>
-              <li><strong>drone</strong><span>起点の音を短い音ではなく、ずっと鳴り続ける基準音にします。</span></li>
-              <li><strong>parent</strong><span>新しい音を作るときの、もとになる音です。</span></li>
-              <li><strong>child</strong><span>parent の周波数に ratio を掛けて作られた新しい音です。</span></li>
-              <li><strong>ratio</strong><span>parent から child を作るときに掛ける周波数比です。</span></li>
-              <li><strong>tree</strong><span>seed から child が枝分かれしていく派生関係です。</span></li>
-              <li><strong>depth</strong><span>seed から何世代離れているかを表す数です。</span></li>
+              <li><strong>Seed</strong><span>最初に置かれる起点の音です。</span></li>
+              <li><strong>Drone</strong><span>起点の音を短い音ではなく、ずっと鳴り続ける基準音にします。</span></li>
+              <li><strong>Parent</strong><span>新しい音を作るときの、もとになる音です。</span></li>
+              <li><strong>Child</strong><span>parent の周波数に ratio を掛けて作られた新しい音です。</span></li>
+              <li><strong>Ratio</strong><span>parent から child を作るときに掛ける周波数比です。</span></li>
+              <li><strong>Tree</strong><span>seed から child が枝分かれしていく派生関係です。</span></li>
+              <li><strong>Depth</strong><span>seed から何世代離れているかを表す数です。</span></li>
             </ul>
           </div>
           <div id="helpBasicFlow" class="setting-block help-block" data-help-page="about">
-            <h3>Basic flow</h3>
+            <h3>Basic Flow</h3>
             <p>
               再生を押すと、2 秒後に 1 音だけ seed が置かれます。seed が再生ヘッドに来ると鳴り始め、
               最初だけ seed/drone が 2 秒以上鳴ってから child の抽選が始まります。その後の child は鳴っている音を parent として通常どおり派生します。
@@ -376,18 +412,18 @@
             </p>
           </div>
           <div id="helpCanvasTapControl" class="setting-block help-block" data-help-page="controls">
-            <h3>Canvas tap</h3>
+            <h3>Canvas Tap</h3>
             <p>
               音のバーをクリックまたはタップすると、その音を 1 秒だけプレビューできます。空の場所を停止中にクリックすると、その高さに対応する周波数で seed または drone を置いて開始します。
             </p>
           </div>
           <div id="helpRatioSource" class="setting-block help-block" data-help-page="settings">
-            <h3>Ratio source</h3>
+            <h3>Ratio Source</h3>
             <ul class="setting-list">
               <li><strong>Auto</strong><span>Numerator max / Denominator max の範囲から n/d を作り、parent に掛けます。</span></li>
               <li><strong>List</strong><span>入力した比率だけを候補にします。例: 2/1, 3/2, 5/4, 81/80。</span></li>
-              <li><strong>Numerator max</strong><span>Auto で使う分子の最大値です。大きくすると候補が増え、遠い比率も出やすくなります。</span></li>
-              <li><strong>Denominator max</strong><span>Auto で使う分母の最大値です。大きくすると細かい下方向の比率も増えます。</span></li>
+              <li><strong>Numerator Max</strong><span>Auto で使う分子の最大値です。大きくすると候補が増え、遠い比率も出やすくなります。</span></li>
+              <li><strong>Denominator Max</strong><span>Auto で使う分母の最大値です。大きくすると細かい下方向の比率も増えます。</span></li>
               <li><strong>Simple</strong><span>分子と分母の合計が小さい、単純な比率を選びやすくします。</span></li>
               <li><strong>Complex</strong><span>分子と分母の合計が大きい、細かい比率や遠い比率を選びやすくします。</span></li>
               <li><strong>Linear</strong><span>偏りを穏やかにします。候補の多様性を残したいとき向きです。</span></li>
@@ -396,33 +432,33 @@
             </ul>
           </div>
           <div id="helpPitchRange" class="setting-block help-block" data-help-page="settings">
-            <h3>Pitch range</h3>
+            <h3>Pitch Range</h3>
             <ul class="setting-list">
-              <li><strong>min Hz</strong><span>生成してよい最低周波数です。child がこれより低い場合は候補から外れます。</span></li>
-              <li><strong>max Hz</strong><span>生成してよい最高周波数です。高すぎる child も候補から外れます。</span></li>
-              <li><strong>volume</strong><span>全体の音量です。同時に鳴る音が増えると、各音は少し抑えられます。</span></li>
+              <li><strong>Min Hz</strong><span>生成してよい最低周波数です。child がこれより低い場合は候補から外れます。</span></li>
+              <li><strong>Max Hz</strong><span>生成してよい最高周波数です。高すぎる child も候補から外れます。</span></li>
+              <li><strong>Volume</strong><span>全体の音量です。同時に鳴る音が増えると、各音は少し抑えられます。</span></li>
             </ul>
           </div>
           <div id="helpTiming" class="setting-block help-block" data-help-page="settings">
             <h3>Timing</h3>
             <ul class="setting-list">
-              <li><strong>Duration min sec</strong><span>新しい音の最短持続時間です。</span></li>
-              <li><strong>Duration max sec</strong><span>新しい音の最長持続時間です。Duration min sec より小さくは扱われません。</span></li>
-              <li><strong>Next event min sec</strong><span>次の child を追加するまでの最短待ち時間です。イベントが詰まりすぎるのを防ぎます。</span></li>
-              <li><strong>Next event max sec</strong><span>次の child を追加するまでの最長待ち時間です。待ち時間はこの範囲内で、ポアソン過程に近い偏り方で抽選されます。</span></li>
-              <li><strong>window</strong><span>画面に表示する時間幅です。右端から左端までの長さを決めます。</span></li>
+              <li><strong>Duration Min Sec</strong><span>新しい音の最短持続時間です。</span></li>
+              <li><strong>Duration Max Sec</strong><span>新しい音の最長持続時間です。Duration Min Sec より小さくは扱われません。</span></li>
+              <li><strong>Next Event Min Sec</strong><span>次の child を追加するまでの最短待ち時間です。イベントが詰まりすぎるのを防ぎます。</span></li>
+              <li><strong>Next Event Max Sec</strong><span>次の child を追加するまでの最長待ち時間です。待ち時間はこの範囲内で、ポアソン過程に近い偏り方で抽選されます。</span></li>
+              <li><strong>Window</strong><span>画面に表示する時間幅です。右端から左端までの長さを決めます。</span></li>
             </ul>
           </div>
           <div id="helpParentBias" class="setting-block help-block" data-help-page="settings">
-            <h3>Parent bias</h3>
+            <h3>Parent Bias</h3>
             <ul class="setting-list">
               <li><strong>Equal</strong><span>現在鳴っている音から parent を均等に選びます。</span></li>
               <li><strong>Depth</strong><span>depth を基準にします。Shallow は浅い枝、Deep は深い枝を優先します。</span></li>
-              <li><strong>Rooted depth</strong><span>Depth のときだけ使えます。root が消えた後、Shallow/Deep の向きで選ばれた 1 本の tree だけを depth 0 にします。</span></li>
+              <li><strong>Rooted Depth</strong><span>Depth のときだけ使えます。root が消えた後、Shallow/Deep の向きで選ばれた 1 本の tree だけを depth 0 にします。</span></li>
               <li><strong>Time</strong><span>音が作られた時刻を基準にします。Old は古い音、New は新しい音を優先します。</span></li>
               <li><strong>Linear</strong><span>偏りを穏やかにします。いろいろな parent が残りやすくなります。</span></li>
               <li><strong>Exponential</strong><span>偏りを強くします。選択傾向がはっきり出ます。</span></li>
-              <li><strong>strength</strong><span>Parent bias の効き具合です。0 に近いほど Equal に近づきます。</span></li>
+              <li><strong>Strength</strong><span>Parent bias の効き具合です。0 に近いほど Equal に近づきます。</span></li>
             </ul>
           </div>
           <div id="helpVibrato" class="setting-block help-block" data-help-page="settings">
@@ -441,14 +477,15 @@
             </p>
           </div>
           <div id="helpActiveRatio" class="setting-block help-block" data-help-page="about">
-            <h3>Active ratio</h3>
+            <h3>Active Ratio</h3>
             <p>
-              下部には現在鳴っている音を低い順に並べた比を表示します。各音の比率を通分してから gcd で割り、
-              できるだけ 1:5:6 のような既約な整数比として見えるようにしています。
+              下部には現在鳴っている音を低い順に並べた比を表示します。Ratio では各音の比率を通分してから gcd で割り、
+              できるだけ 80:81:120 のような既約な整数比として見えるようにしています。Factors では全体を通分するように指数を持ち上げ、
+              / を使わず 2^4·5 : 3^4 のように表示します。整数が大きくなりすぎる場合は、Ratio 表示中でも Factors 表示へ自動的に切り替わります。
             </p>
           </div>
           <div id="helpDiesisMarker" class="setting-block help-block" data-help-page="about">
-            <h3>Diesis marker</h3>
+            <h3>Diesis Marker</h3>
             <p>
               同時に鳴っている2つの音がとても近い高さになると、再生ヘッドの近くに赤い印が表示されます。これは、完全に同じ音ではないけれど、差が 100 cents 未満に収まっている2音を示す印です。
               このような近い音が重なると、単なる和音とは少し違う、ゆっくり揺れるようなうなりや、細かな濁りが生まれることがあります。
@@ -459,11 +496,11 @@
           <div id="helpTable" class="setting-block help-block" data-help-page="controls">
             <h3>Table</h3>
             <ul class="setting-list">
-              <li><strong>start</strong><span>現在から見た開始時刻です。+ は未来、- は過去です。</span></li>
+              <li><strong>Start</strong><span>現在から見た開始時刻です。+ は未来、- は過去です。</span></li>
               <li><strong>Hz</strong><span>その音の周波数です。</span></li>
-              <li><strong>duration</strong><span>その音が鳴る長さです。</span></li>
-              <li><strong>depth</strong><span>seed から何世代派生した音かを表します。</span></li>
-              <li><strong>ratio</strong><span>parent から child を作るときに掛けた比率です。</span></li>
+              <li><strong>Duration</strong><span>その音が鳴る長さです。</span></li>
+              <li><strong>Depth</strong><span>seed から何世代派生した音かを表します。</span></li>
+              <li><strong>Ratio</strong><span>parent から child を作るときに掛けた比率です。</span></li>
             </ul>
           </div>
         </section>
@@ -475,13 +512,13 @@
         <header class="details-head">
           <div>
             <h2>List Presets</h2>
-            <p>List モードで使う比率セットを選びます。読み込むと fractions 欄に展開されます。</p>
+            <p>List モードで使う比率セットを選びます。読み込むと Fractions 欄に展開されます。</p>
           </div>
           <button id="presetsClose" type="submit" title="閉じる">×</button>
         </header>
 
         <section class="preset-browser">
-          <aside class="preset-list" id="presetList" aria-label="preset list"></aside>
+          <aside class="preset-list" id="presetList" aria-label="Preset List"></aside>
           <article class="preset-preview">
             <h3 id="presetName">---</h3>
             <p id="presetDescription">---</p>
@@ -504,12 +541,12 @@
 
         <section class="diesis-toolbar">
           <div class="diesis-toolbar-group playback-group">
-            <span class="toolbar-label">Base note</span>
-            <div id="diesisBaseControls" class="compact-button-row" aria-label="base note"></div>
+            <span class="toolbar-label">Base Note</span>
+            <div id="diesisBaseControls" class="compact-button-row" aria-label="Base Note"></div>
           </div>
           <div class="diesis-toolbar-group filter-group">
             <div>
-              <label class="toolbar-label" for="diesisLimitFilter">Limit filter</label>
+              <label class="toolbar-label" for="diesisLimitFilter">Limit Filter</label>
               <select id="diesisLimitFilter" class="compact-select">
                 <option value="all">All</option>
                 <option value="3">3-limit</option>
@@ -527,14 +564,14 @@
             </label>
           </div>
           <div class="diesis-toolbar-group display-group">
-            <span class="toolbar-label">Ratio display</span>
-            <div class="compact-button-row">
-              <button id="diesisRatioMode" class="active" type="button">Ratio</button>
-              <button id="diesisFactorMode" type="button">Factors</button>
-            </div>
+            <span class="toolbar-label">Ratio Display</span>
+            <select id="diesisRatioDisplay" class="compact-select">
+              <option value="ratio">Ratio</option>
+              <option value="factors">Factors</option>
+            </select>
             <label class="check compact-check">
               <input id="diesisPowerToggle" type="checkbox" checked />
-              Power form
+              Power Form
             </label>
           </div>
           <div class="diesis-toolbar-group collection-group">
@@ -547,7 +584,7 @@
             <span id="diesisCollectionStats" class="collection-stats">0 / 0</span>
           </div>
         </section>
-        <section class="diesis-list" id="diesisList" aria-label="diesis list"></section>
+        <section class="diesis-list" id="diesisList" aria-label="Diesis List"></section>
       </form>
     </dialog>
 

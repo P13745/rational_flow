@@ -13,7 +13,9 @@ const els = {
   simpleRatioMode: document.querySelector("#simpleRatioMode"),
   equalRatioMode: document.querySelector("#equalRatioMode"),
   complexRatioMode: document.querySelector("#complexRatioMode"),
+  globalRatioDisplay: document.querySelector("#globalRatioDisplay"),
   ratioBiasCurve: document.querySelector("#ratioBiasCurve"),
+  ratioIntegerLimit: document.querySelector("#ratioIntegerLimit"),
   autoControls: document.querySelector("#autoControls"),
   listControls: document.querySelector("#listControls"),
   nMax: document.querySelector("#nMax"),
@@ -35,6 +37,9 @@ const els = {
   nextMax: document.querySelector("#nextMax"),
   windowSize: document.querySelector("#windowSize"),
   timerMinutes: document.querySelector("#timerMinutes"),
+  timerOpen: document.querySelector("#timerOpen"),
+  timerClose: document.querySelector("#timerClose"),
+  timerDialog: document.querySelector("#timerDialog"),
   timerLabel: document.querySelector("#timerLabel"),
   timerCancel: document.querySelector("#timerCancel"),
   volume: document.querySelector("#volume"),
@@ -66,8 +71,7 @@ const els = {
   diesisPowerToggle: document.querySelector("#diesisPowerToggle"),
   diesisCollectionFilter: document.querySelector("#diesisCollectionFilter"),
   diesisCollectionStats: document.querySelector("#diesisCollectionStats"),
-  diesisRatioMode: document.querySelector("#diesisRatioMode"),
-  diesisFactorMode: document.querySelector("#diesisFactorMode"),
+  diesisRatioDisplay: document.querySelector("#diesisRatioDisplay"),
   noteCount: document.querySelector("#noteCount"),
   lastDepth: document.querySelector("#lastDepth"),
   statusLabel: document.querySelector("#statusLabel"),
@@ -98,7 +102,7 @@ let nextEventTime = null;
 let selectedNoteId = null;
 let nextId = 1;
 let lastGenerationNormalizeAt = -Infinity;
-let namedCommaByRatio = new Map();
+let namedCommaByVectorKey = new Map();
 let namedCommaIntervals = [];
 let ratioPresets = [];
 let selectedPresetId = "";
@@ -119,6 +123,7 @@ const initialSeedDelay = 2;
 const tableRenderInterval = 180;
 const diesisCollectionCookie = "rf_diesis_seen";
 const germanPitchClasses = ["C", "Cis/Des", "D", "Dis/Es", "E", "F", "Fis/Ges", "G", "Gis/As", "A", "B", "H"];
+const maxSafeRatioInteger = Number.MAX_SAFE_INTEGER;
 const i18nTargets = [
   ["header > div > p", "subtitle"],
   ["header .transport", "transport.label", "aria-label"],
@@ -128,6 +133,7 @@ const i18nTargets = [
   ["#mobileListView", "mobile.list"],
   ["#startStop", "transport.startStopTitle", "title"],
   ["#pauseResume", "transport.pauseTitle", "title"],
+  ["#timerOpen", "labels.timer", "title"],
   ["#seedMode", "transport.seedModeTitle", "title"],
   ["#seed", "transport.seedTitle", "title"],
   ["#clear", "transport.clear"],
@@ -157,7 +163,14 @@ const i18nTargets = [
   ["#detailsOpen", "labels.settings"],
   ["#helpOpen", "labels.help"],
   ["#diesisOpen", "labels.diesis"],
+  ['#globalRatioDisplay option[value="ratio"]', "dialogs.ratioMode"],
+  ['#globalRatioDisplay option[value="factors"]', "dialogs.factorMode"],
   [".list-toolbar-title", "labels.timeline"],
+  ["#timerDialog h2", "dialogs.timerTitle"],
+  ["#timerDialog .details-head p", "dialogs.timerIntro"],
+  ["#timerDialog .setting-block:nth-child(1) h3", "dialogs.timerDurationTitle"],
+  ["#timerDialog .setting-block:nth-child(1) p", "dialogs.timerDurationText"],
+  ["#timerDialog .setting-block:nth-child(2) h3", "dialogs.timerStatusTitle"],
   [".timer-readout div:nth-child(1) small", "labels.timer"],
   [".stats-readout div:nth-child(1) small", "labels.notes"],
   [".stats-readout div:nth-child(2) small", "labels.depth"],
@@ -187,8 +200,8 @@ const i18nTargets = [
   ["#diesisPowerToggle", "dialogs.powerForm", "checkbox-label"],
   ['label[for="diesisCollectionFilter"]', "dialogs.collection"],
   [".display-group .toolbar-label", "dialogs.ratioDisplay"],
-  ["#diesisRatioMode", "dialogs.ratioMode"],
-  ["#diesisFactorMode", "dialogs.factorMode"],
+  ['#diesisRatioDisplay option[value="ratio"]', "dialogs.ratioMode"],
+  ['#diesisRatioDisplay option[value="factors"]', "dialogs.factorMode"],
 ];
 
 function timelineNow() {
@@ -212,6 +225,8 @@ const i18nHelpTargets = [
   ['label[for="vibratoRateMax"]', "labels.vibratoRateMax"],
   ['label[for="vibratoDepthMin"]', "labels.vibratoDepthMin"],
   ['label[for="vibratoDepthMax"]', "labels.vibratoDepthMax"],
+  ['label[for="ratioIntegerLimit"]', "labels.ratioIntegerLimit"],
+  [".ratio-limit-hint", "hints.ratioIntegerLimit"],
   ["#helpAppOverview h3", "help.appTitle"],
   ["#helpAppOverview p", "help.appText"],
   ["#helpTerms h3", "help.termsTitle"],
@@ -430,11 +445,15 @@ function setHelpPage(page) {
 }
 
 function gcd(a, b) {
-  return b === 0 ? Math.abs(a) : gcd(b, a % b);
-}
-
-function lcm(a, b) {
-  return Math.abs(a * b) / Math.max(1, gcd(a, b));
+  let x = Math.abs(Math.trunc(a));
+  let y = Math.abs(Math.trunc(b));
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return 1;
+  while (y !== 0) {
+    const next = x % y;
+    x = y;
+    y = next;
+  }
+  return x || 1;
 }
 
 function largestPrimeFactor(value) {
@@ -458,6 +477,137 @@ function ratioLimitValue(ratio) {
   const frac = parseFraction(ratio);
   if (!frac) return 0;
   return Math.max(largestPrimeFactor(frac.numerator), largestPrimeFactor(frac.denominator));
+}
+
+function vectorFromFraction(frac) {
+  const vector = new Map();
+  addIntegerFactorsToVector(vector, Math.abs(frac.numerator), 1);
+  addIntegerFactorsToVector(vector, Math.abs(frac.denominator), -1);
+  return vector;
+}
+
+function addIntegerFactorsToVector(vector, value, direction) {
+  let n = Math.abs(Math.trunc(value));
+  if (n <= 1) return;
+  for (let factor = 2; factor * factor <= n; factor += factor === 2 ? 1 : 2) {
+    while (n % factor === 0) {
+      vector.set(factor, (vector.get(factor) || 0) + direction);
+      if (vector.get(factor) === 0) vector.delete(factor);
+      n /= factor;
+    }
+  }
+  if (n > 1) vector.set(n, (vector.get(n) || 0) + direction);
+}
+
+function cloneVector(vector) {
+  return new Map(vector || []);
+}
+
+function addVectors(a, b) {
+  const result = cloneVector(a);
+  b.forEach((exponent, prime) => {
+    const next = (result.get(prime) || 0) + exponent;
+    if (next) result.set(prime, next);
+    else result.delete(prime);
+  });
+  return result;
+}
+
+function subtractVectors(a, b) {
+  const result = cloneVector(a);
+  b.forEach((exponent, prime) => {
+    const next = (result.get(prime) || 0) - exponent;
+    if (next) result.set(prime, next);
+    else result.delete(prime);
+  });
+  return result;
+}
+
+function vectorKey(vector) {
+  return [...vector.entries()]
+    .filter(([, exponent]) => exponent !== 0)
+    .sort(([a], [b]) => a - b)
+    .map(([prime, exponent]) => `${prime}:${exponent}`)
+    .join("|");
+}
+
+function safeMultiply(value, factor) {
+  if (factor === 1) return value;
+  if (!Number.isFinite(value) || !Number.isFinite(factor)) return null;
+  if (value > Math.floor(maxSafeRatioInteger / factor)) return null;
+  return value * factor;
+}
+
+function vectorToSafeFraction(vector) {
+  let numerator = 1;
+  let denominator = 1;
+  const entries = [...vector.entries()].sort(([a], [b]) => a - b);
+  for (const [prime, exponent] of entries) {
+    const count = Math.abs(exponent);
+    for (let i = 0; i < count; i += 1) {
+      if (exponent > 0) {
+        numerator = safeMultiply(numerator, prime);
+        if (numerator === null) return null;
+      } else {
+        denominator = safeMultiply(denominator, prime);
+        if (denominator === null) return null;
+      }
+    }
+  }
+  return { numerator, denominator };
+}
+
+function vectorFactorLabel(vector) {
+  const positive = [];
+  const negative = [];
+  [...vector.entries()].sort(([a], [b]) => a - b).forEach(([prime, exponent]) => {
+    if (!exponent) return;
+    const label = Math.abs(exponent) === 1 ? String(prime) : `${prime}^${Math.abs(exponent)}`;
+    if (exponent > 0) positive.push(label);
+    else negative.push(label);
+  });
+  if (!positive.length && !negative.length) return "1";
+  const numerator = positive.length ? positive.join("·") : "1";
+  return negative.length ? `${numerator}/${negative.join("·")}` : numerator;
+}
+
+function positiveVectorFactorLabel(vector) {
+  const parts = [];
+  [...vector.entries()].sort(([a], [b]) => a - b).forEach(([prime, exponent]) => {
+    if (exponent <= 0) return;
+    parts.push(exponent === 1 ? String(prime) : `${prime}^${exponent}`);
+  });
+  return parts.length ? parts.join("·") : "1";
+}
+
+function normalizeVectorsToPositive(vectors) {
+  const primes = new Set();
+  vectors.forEach((vector) => {
+    vector.forEach((exponent, prime) => {
+      if (exponent !== 0) primes.add(prime);
+    });
+  });
+  const offsets = new Map();
+  primes.forEach((prime) => {
+    const minExponent = Math.min(...vectors.map((vector) => vector.get(prime) || 0));
+    offsets.set(prime, minExponent < 0 ? -minExponent : 0);
+  });
+  return vectors.map((vector) => {
+    const normalized = new Map();
+    primes.forEach((prime) => {
+      const exponent = (vector.get(prime) || 0) + (offsets.get(prime) || 0);
+      if (exponent !== 0) normalized.set(prime, exponent);
+    });
+    return normalized;
+  });
+}
+
+function ratioDisplayFromVector(vector, preferredMode = diesisRatioDisplay) {
+  if (preferredMode !== "factors") {
+    const frac = vectorToSafeFraction(vector);
+    if (frac) return fractionLabel(frac);
+  }
+  return vectorFactorLabel(vector);
 }
 
 function factorIntegerLabel(value) {
@@ -517,7 +667,13 @@ function fractionLabel(frac) {
 function installNamedCommas(data) {
   if (!data?.intervals) return false;
   namedCommaIntervals = data.intervals;
-  namedCommaByRatio = new Map(data.intervals.map((entry) => [entry.ratio, entry]));
+  namedCommaByVectorKey = new Map();
+  data.intervals.forEach((entry) => {
+    const frac = parseFraction(entry.ratio);
+    if (!frac) return;
+    const key = vectorKey(vectorFromFraction(frac));
+    namedCommaByVectorKey.set(key, entry);
+  });
   loadDiesisCollection();
   if (els.diesisDialog.open) {
     renderDiesisControls();
@@ -592,6 +748,37 @@ function reduceIntegerRatio(values) {
   return integers.map((value) => value / Math.max(1, divisor));
 }
 
+function safeLcm(a, b) {
+  const divisor = gcd(a, b);
+  const reduced = a / Math.max(1, divisor);
+  return safeMultiply(reduced, b);
+}
+
+function relativeVectorForActiveNote(note, base) {
+  if (note.absoluteVector && base.absoluteVector && note.rootId === base.rootId) {
+    return subtractVectors(note.absoluteVector, base.absoluteVector);
+  }
+  return vectorFromFraction(approximateFraction(note.frequency / base.frequency));
+}
+
+function tryIntegerRatioFromVectors(vectors) {
+  const fractions = vectors.map(vectorToSafeFraction);
+  if (fractions.some((frac) => !frac)) return null;
+  let commonDenominator = 1;
+  for (const frac of fractions) {
+    commonDenominator = safeLcm(commonDenominator, frac.denominator);
+    if (commonDenominator === null) return null;
+  }
+  const integers = [];
+  for (const frac of fractions) {
+    const multiplier = commonDenominator / frac.denominator;
+    const value = safeMultiply(frac.numerator, multiplier);
+    if (value === null) return null;
+    integers.push(value);
+  }
+  return reduceIntegerRatio(integers);
+}
+
 function nearestPitchLabel(frequency) {
   const midi = Math.round(69 + 12 * Math.log2(frequency / 440));
   const nearestFrequency = 440 * 2 ** ((midi - 69) / 12);
@@ -609,6 +796,7 @@ function getSettings() {
   const nextMin = Math.max(0.05, Number(els.nextMin.value) || 1);
   const nextMax = Math.max(nextMin, Number(els.nextMax.value) || 3);
   const timerMinutes = Math.max(0, Number(els.timerMinutes.value) || 0);
+  const ratioIntegerLimit = clamp(Math.floor(Number(els.ratioIntegerLimit.value) || 128), 1, 4096);
   const vibratoRateMin = Math.max(0, Number(els.vibratoRateMin.value) || 0);
   const vibratoRateMax = Math.max(vibratoRateMin, Number(els.vibratoRateMax.value) || 0);
   const vibratoDepthMin = Math.max(0, Number(els.vibratoDepthMin.value) || 0);
@@ -623,8 +811,9 @@ function getSettings() {
     windowSize: Math.max(4, Number(els.windowSize.value) || 8),
     timerMinutes,
     volume: Math.max(0, Number(els.volume.value) || 0),
-    nMax: clamp(Math.floor(Number(els.nMax.value) || 8), 2, 128),
-    dMax: clamp(Math.floor(Number(els.dMax.value) || 8), 2, 128),
+    ratioIntegerLimit,
+    nMax: clamp(Math.floor(Number(els.nMax.value) || 8), 2, 512),
+    dMax: clamp(Math.floor(Number(els.dMax.value) || 8), 2, 512),
     allowDuplication: els.allowDuplication.checked,
     rootedDepth: els.rootedDepth.checked && els.parentBiasBasis.value === "depth",
     ratioBias,
@@ -639,6 +828,10 @@ function getSettings() {
     vibratoDepthMin,
     vibratoDepthMax,
   };
+}
+
+function fractionWithinIntegerLimit(frac, limit) {
+  return Math.abs(frac.numerator) <= limit && Math.abs(frac.denominator) <= limit;
 }
 
 function buildCandidates(baseFreq = null) {
@@ -658,6 +851,7 @@ function buildCandidates(baseFreq = null) {
     parts.forEach((part) => {
       const frac = parseFraction(part);
       if (!frac || frac.numerator === frac.denominator) return;
+      if (!fractionWithinIntegerLimit(frac, settings.ratioIntegerLimit)) return;
       const ratio = frac.numerator / frac.denominator;
       const frequency = baseFreq === null ? null : baseFreq * ratio;
       if (frequency !== null && (frequency < settings.minFreq || frequency > settings.maxFreq)) return;
@@ -672,6 +866,7 @@ function buildCandidates(baseFreq = null) {
       if (numerator === denominator) continue;
       const divisor = gcd(numerator, denominator);
       const frac = { numerator: numerator / divisor, denominator: denominator / divisor };
+      if (!fractionWithinIntegerLimit(frac, settings.ratioIntegerLimit)) continue;
       const ratio = frac.numerator / frac.denominator;
       const frequency = baseFreq === null ? null : baseFreq * ratio;
       if (frequency !== null && (frequency < settings.minFreq || frequency > settings.maxFreq)) continue;
@@ -974,15 +1169,7 @@ function previewFrequency(frequency) {
   };
 }
 
-function multiplyFractions(a, b) {
-  return parseFraction(`${a.numerator * b.numerator}/${a.denominator * b.denominator}`);
-}
-
-function divideFractions(a, b) {
-  return parseFraction(`${a.numerator * b.denominator}/${a.denominator * b.numerator}`);
-}
-
-function addNote(frequency, duration, start, ratio = "", baseFrequency = null, generation = 0, parentId = null, absoluteRatio = null, rootId = null) {
+function addNote(frequency, duration, start, ratio = "", baseFrequency = null, generation = 0, parentId = null, absoluteVector = null, rootId = null) {
   const settings = getSettings();
   const id = nextId;
   const note = {
@@ -995,7 +1182,7 @@ function addNote(frequency, duration, start, ratio = "", baseFrequency = null, g
     generation,
     parentId,
     rootId: rootId || id,
-    absoluteRatio: absoluteRatio || { numerator: 1, denominator: 1 },
+    absoluteVector: absoluteVector || new Map(),
     volume: Math.min(settings.volume, settings.volume / Math.sqrt(Math.max(1, activeAt(start).length + 1)) + 0.002),
     nodes: null,
   };
@@ -1014,7 +1201,7 @@ function seedNote(offset = 2, durationOverride = null, frequencyOverride = null)
   const settings = getSettings();
   const frequency = frequencyOverride ?? randomBetween(settings.minFreq, settings.maxFreq);
   const duration = durationOverride ?? (seedMode === "drone" ? Infinity : randomBetween(settings.minDur, settings.maxDur));
-  return addNote(frequency, duration, performance.now() / 1000 + offset, "", null, 0, null, { numerator: 1, denominator: 1 }, null);
+  return addNote(frequency, duration, performance.now() / 1000 + offset, "", null, 0, null, new Map(), null);
 }
 
 function frequencyFromCanvasY(clientY) {
@@ -1091,7 +1278,7 @@ function addGeneratedChild(playTime) {
       base.frequency,
       base.generation + 1,
       base.id,
-      multiplyFractions(base.absoluteRatio, chosen.frac),
+      addVectors(base.absoluteVector, vectorFromFraction(chosen.frac)),
       base.rootId,
     );
     return true;
@@ -1316,8 +1503,8 @@ function descendantIds(rootId) {
 }
 
 function exactRatioBetween(low, high) {
-  if (!low.absoluteRatio || !high.absoluteRatio || low.rootId !== high.rootId) return null;
-  return divideFractions(high.absoluteRatio, low.absoluteRatio);
+  if (!low.absoluteVector || !high.absoluteVector || low.rootId !== high.rootId) return null;
+  return subtractVectors(high.absoluteVector, low.absoluteVector);
 }
 
 function findCloseActivePairs(activeNotes) {
@@ -1332,14 +1519,17 @@ function findCloseActivePairs(activeNotes) {
       const high = low === scanNotes[i] ? scanNotes[j] : scanNotes[i];
       const cents = 1200 * Math.log2(high.frequency / low.frequency);
       if (cents <= 0.01 || cents >= 100) continue;
-      const exactRatio = exactRatioBetween(low, high);
-      const ratio = exactRatio ? fractionLabel(exactRatio) : fractionLabel(approximateFraction(high.frequency / low.frequency));
+      const exactVector = exactRatioBetween(low, high);
+      const approximate = approximateFraction(high.frequency / low.frequency);
+      const ratio = exactVector ? ratioDisplayFromVector(exactVector) : fractionLabel(approximate);
+      const namedInterval = exactVector ? namedCommaByVectorKey.get(vectorKey(exactVector)) || null : null;
       pairs.push({
         low,
         high,
         cents,
         ratio,
-        namedInterval: exactRatio ? namedCommaByRatio.get(ratio) || null : null,
+        vector: exactVector,
+        namedInterval,
       });
     }
   }
@@ -1403,15 +1593,15 @@ function activeRatioText(now = timelineNow()) {
   const active = activeAt(now).sort((a, b) => a.frequency - b.frequency);
   if (!active.length) return `${t("status.activeRatio")}: ---`;
   const base = active[0];
-  const fractions = active.map((note) => {
-    if (note.absoluteRatio && base.absoluteRatio && note.rootId === base.rootId) {
-      return divideFractions(note.absoluteRatio, base.absoluteRatio);
-    }
-    return approximateFraction(note.frequency / base.frequency);
-  });
-  const commonDenominator = fractions.reduce((current, frac) => lcm(current, frac.denominator), 1);
-  const integers = reduceIntegerRatio(fractions.map((frac) => frac.numerator * (commonDenominator / frac.denominator)));
-  return `${t("status.activeRatio")}: ${integers.join(" : ")}`;
+  const vectors = active.map((note) => relativeVectorForActiveNote(note, base));
+  if (diesisRatioDisplay !== "factors") {
+    const integers = tryIntegerRatioFromVectors(vectors);
+    if (integers) return `${t("status.activeRatio")}: ${integers.join(" : ")}`;
+  }
+  const sameRoot = active.every((note) => note.absoluteVector && note.rootId === base.rootId);
+  const factorVectors = sameRoot ? active.map((note) => note.absoluteVector) : vectors;
+  const labels = normalizeVectorsToPositive(factorVectors).map(positiveVectorFactorLabel);
+  return `${t("status.activeRatio")}: ${labels.join(" : ")}`;
 }
 
 function drawRoundedRect(ctx, x, y, width, height, radius) {
@@ -1429,6 +1619,20 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
   ctx.quadraticCurveTo(x, y + height, x, y + height - r);
   ctx.lineTo(x, y + r);
   ctx.quadraticCurveTo(x, y, x + r, y);
+}
+
+function fitCanvasText(ctx, text, maxWidth) {
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  const suffix = "...";
+  let low = 0;
+  let high = text.length;
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2);
+    const candidate = `${text.slice(0, mid)}${suffix}`;
+    if (ctx.measureText(candidate).width <= maxWidth) low = mid;
+    else high = mid - 1;
+  }
+  return `${text.slice(0, low)}${suffix}`;
 }
 
 function drawCanvas() {
@@ -1573,7 +1777,7 @@ function drawCanvas() {
     ctx.lineTo(x, yHigh);
     ctx.stroke();
     ctx.font = "12px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-    const text = closePairLabel(pair);
+    const text = fitCanvasText(ctx, closePairLabel(pair), Math.min(260, w - 24));
     const labelW = ctx.measureText(text).width + 14;
     const labelH = 24;
     const labelRect = placeMarkerLabel(x, yMid, labelW, labelH, w, h, occupiedMarkerLabels, index);
@@ -1646,7 +1850,7 @@ function appendEventGroup(fragment, label, items, now, state, options = {}) {
     tr.innerHTML = `
       <td>${start >= 0 ? "+" : ""}${start.toFixed(1)}</td>
       <td>${note.frequency.toFixed(1)}</td>
-      <td>${Number.isFinite(note.duration) ? note.duration.toFixed(1) : "drone"}</td>
+      <td>${Number.isFinite(note.duration) ? note.duration.toFixed(1) : "Drone"}</td>
       <td>${note.generation}</td>
       <td>${note.ratio || "---"}</td>
     `;
@@ -1719,8 +1923,8 @@ function renderDiesisControls() {
     });
     els.diesisBaseControls.appendChild(button);
   }
-  els.diesisRatioMode.classList.toggle("active", diesisRatioDisplay === "ratio");
-  els.diesisFactorMode.classList.toggle("active", diesisRatioDisplay === "factors");
+  els.globalRatioDisplay.value = diesisRatioDisplay;
+  els.diesisRatioDisplay.value = diesisRatioDisplay;
   els.diesisDerivedToggle.checked = diesisShowDerived;
   els.diesisPowerToggle.checked = diesisShowPower;
   els.diesisCollectionFilter.value = diesisCollectionFilter;
@@ -1808,6 +2012,7 @@ function updateLabels() {
   els.noteCount.textContent = String(notes.length);
   els.lastDepth.textContent = String(selected?.generation ?? 0);
   els.timerLabel.textContent = timerStatusText();
+  els.timerOpen.textContent = `${t("labels.timer")} ${timerStatusText()}`;
   els.timerCancel.disabled = timerEndTime === null;
   els.activeRatioLabel.textContent = activeRatioText();
   els.autoMode.classList.toggle("active", mode === "auto");
@@ -1815,6 +2020,8 @@ function updateLabels() {
   els.simpleRatioMode.classList.toggle("active", ratioBias === "simple");
   els.equalRatioMode.classList.toggle("active", ratioBias === "equal");
   els.complexRatioMode.classList.toggle("active", ratioBias === "complex");
+  els.globalRatioDisplay.value = diesisRatioDisplay;
+  if (els.diesisRatioDisplay) els.diesisRatioDisplay.value = diesisRatioDisplay;
   els.autoControls.classList.toggle("hidden", mode !== "auto");
   els.listControls.classList.toggle("hidden", mode !== "list");
   updateRatioCurveState();
@@ -1826,13 +2033,13 @@ function updateLabels() {
     return;
   }
 
-  const base = selected.baseFrequency === null ? "seed" : `${selected.baseFrequency.toFixed(2)}Hz`;
-  els.detailLabel.textContent = `${selected.frequency.toFixed(2)}Hz  ${nearestPitchLabel(selected.frequency)}  depth ${selected.generation}  ${selected.ratio || base}`;
+  const base = selected.baseFrequency === null ? "Seed" : `${selected.baseFrequency.toFixed(2)}Hz`;
+  els.detailLabel.textContent = `${selected.frequency.toFixed(2)}Hz  ${nearestPitchLabel(selected.frequency)}  Depth ${selected.generation}  ${selected.ratio || base}`;
 }
 
 function timerStatusText() {
-  if (timerCompleted) return "done";
-  if (timerEndTime === null) return "off";
+  if (timerCompleted) return "Done";
+  if (timerEndTime === null) return "Off";
   const remaining = Math.max(0, timerEndTime - timelineNow());
   const minutes = Math.floor(remaining / 60);
   const seconds = Math.floor(remaining % 60);
@@ -2119,16 +2326,14 @@ els.diesisOpen.addEventListener("click", () => {
 els.diesisDialog.addEventListener("click", (event) => {
   if (event.target === els.diesisDialog) els.diesisDialog.close();
 });
-els.diesisRatioMode.addEventListener("click", () => {
-  diesisRatioDisplay = "ratio";
+function setRatioDisplayMode(nextMode) {
+  diesisRatioDisplay = nextMode;
   renderDiesisControls();
   renderDiesisList();
-});
-els.diesisFactorMode.addEventListener("click", () => {
-  diesisRatioDisplay = "factors";
-  renderDiesisControls();
-  renderDiesisList();
-});
+  render(true);
+}
+els.globalRatioDisplay.addEventListener("change", () => setRatioDisplayMode(els.globalRatioDisplay.value));
+els.diesisRatioDisplay.addEventListener("change", () => setRatioDisplayMode(els.diesisRatioDisplay.value));
 els.diesisDerivedToggle.addEventListener("input", () => {
   diesisShowDerived = els.diesisDerivedToggle.checked;
   renderDiesisList();
@@ -2145,6 +2350,16 @@ els.diesisLimitFilter.addEventListener("change", () => {
   const value = els.diesisLimitFilter.value;
   diesisLimitFilter = value === "all" ? Infinity : Number(value);
   renderDiesisList();
+});
+els.timerOpen.addEventListener("click", () => {
+  if (typeof els.timerDialog.showModal === "function") {
+    els.timerDialog.showModal();
+  } else {
+    els.timerDialog.setAttribute("open", "");
+  }
+});
+els.timerDialog.addEventListener("click", (event) => {
+  if (event.target === els.timerDialog) els.timerDialog.close();
 });
 els.timerCancel.addEventListener("click", () => {
   timerEndTime = null;
@@ -2174,6 +2389,7 @@ els.collectionReset.addEventListener("click", resetDiesisCollection);
   els.parentBiasDirection,
   els.parentBiasCurve,
   els.parentBiasStrength,
+  els.ratioIntegerLimit,
   els.vibratoEnabled,
   els.vibratoRateMin,
   els.vibratoRateMax,
