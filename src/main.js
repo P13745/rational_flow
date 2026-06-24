@@ -6,7 +6,6 @@ import { clamp, randomBetween } from "./core/utils.js";
 import {
   addVectors,
   approximateFraction,
-  factorRatioLabel,
   fractionLabel,
   normalizeVectorsToPositive,
   parseFraction,
@@ -26,6 +25,11 @@ import {
   markDiesisDiscovered as recordDiesisDiscovered,
   resetDiesisCollection as clearDiesisCollection,
 } from "./diesis/diesis-collection.js";
+import {
+  diesisFrequencies as getDiesisFrequencies,
+  diesisRatioLabel as formatDiesisRatioLabel,
+  isDifferenceAudible as isDiesisDifferenceAudible,
+} from "./diesis/diesis-model.js";
 import { localizedField, t } from "./i18n/i18n.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
 import { setMobileView as applyMobileView } from "./ui/mobile-view.js";
@@ -280,15 +284,6 @@ function ratioDisplayFromVector(vector, preferredMode = state.diesisRatioDisplay
     if (frac) return fractionLabel(frac);
   }
   return vectorFactorLabel(vector);
-}
-
-function diesisRatioLabel(entry) {
-  if (state.diesisRatioDisplay === "factors") {
-    if (state.diesisShowPower && entry.display?.powerFactors) return entry.display.powerFactors;
-    return entry.display?.factors || factorRatioLabel(entry.ratio);
-  }
-  if (state.diesisShowPower && entry.display?.powerRatio) return entry.display.powerRatio;
-  return entry.display?.ratio || entry.ratio;
 }
 
 function installNamedCommas(data) {
@@ -582,25 +577,12 @@ function stopNode(note, fadeSeconds = 0.45) {
 }
 
 function diesisFrequencies(ratio, mode = "normal") {
-  const frac = parseFraction(ratio);
-  if (!frac) return [];
   const baseFrequency = cFrequency(state.diesisBaseOctave);
-  const upperFrequency = baseFrequency * (frac.numerator / frac.denominator);
-  const frequencies = [
-    { frequency: baseFrequency, gain: 1 },
-    { frequency: upperFrequency, gain: 1 },
-  ];
-  if (mode === "difference") {
-    const diff = Math.abs(upperFrequency - baseFrequency);
-    if (diff > 0) frequencies.push({ frequency: diff, gain: 0.8 });
-  }
-  return frequencies;
+  return getDiesisFrequencies(ratio, baseFrequency, mode);
 }
 
 function isDifferenceAudible(ratio) {
-  const frequencies = diesisFrequencies(ratio, "difference");
-  const difference = frequencies.at(-1)?.frequency || 0;
-  return frequencies.length < 3 || difference >= 20;
+  return isDiesisDifferenceAudible(ratio, cFrequency(state.diesisBaseOctave));
 }
 
 function previewDiesisInterval(ratio, mode = "normal") {
@@ -1483,7 +1465,10 @@ function renderDiesisList() {
       cents.textContent = `${Number(entry.cents).toFixed(2)}¢`;
       const ratio = document.createElement("span");
       ratio.className = "diesis-ratio";
-      ratio.textContent = diesisRatioLabel(entry);
+      ratio.textContent = formatDiesisRatioLabel(entry, {
+        displayMode: state.diesisRatioDisplay,
+        showPower: state.diesisShowPower,
+      });
       const limit = document.createElement("span");
       limit.className = "diesis-limit";
       limit.textContent = ratioLimitLabel(entry.ratio);
