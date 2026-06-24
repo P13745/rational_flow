@@ -1,5 +1,6 @@
 import { els } from "./dom.js";
 import { state } from "./state.js";
+import { playDiesisPreview, playFrequencyPreview } from "./audio/preview.js";
 import { buildCandidates as buildCandidateList, chooseBase as chooseCandidateBase, chooseWeighted } from "./core/candidates.js";
 import { cFrequency, nearestPitchLabel } from "./core/pitch.js";
 import { clamp, randomBetween } from "./core/utils.js";
@@ -590,58 +591,18 @@ function previewDiesisInterval(ratio, mode = "normal") {
   if (!frequencies.length) return;
   const ctx = ensureAudio();
   ctx.resume();
-  const startAt = ctx.currentTime + 0.02;
-  const duration = 2;
-  const attack = 0.14;
-  const release = 0.34;
   const settings = getSettings();
   const level = Math.min(0.035, Math.max(0.008, settings.volume || 0.025));
-
-  frequencies.forEach((item) => {
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.value = item.frequency;
-    gain.gain.setValueAtTime(0, startAt);
-    gain.gain.linearRampToValueAtTime(level * item.gain, startAt + attack);
-    gain.gain.setValueAtTime(level * item.gain, startAt + duration - release);
-    gain.gain.linearRampToValueAtTime(0, startAt + duration);
-    oscillator.connect(gain).connect(ctx.destination);
-    oscillator.start(startAt);
-    oscillator.stop(startAt + duration + 0.03);
-    oscillator.onended = () => {
-      oscillator.disconnect();
-      gain.disconnect();
-    };
-  });
+  playDiesisPreview(ctx, frequencies, level);
 }
 
 function previewFrequency(frequency) {
   if (!Number.isFinite(frequency) || frequency < 20) return;
   const ctx = ensureAudio();
   ctx.resume();
-  const startAt = ctx.currentTime + 0.02;
-  const duration = 1;
-  const attack = 0.06;
-  const release = 0.22;
   const settings = getSettings();
   const level = Math.min(0.04, Math.max(0.01, settings.volume * 1.25 || 0.025));
-  const oscillator = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  oscillator.type = "sine";
-  oscillator.frequency.value = frequency;
-  gain.gain.setValueAtTime(0, startAt);
-  gain.gain.linearRampToValueAtTime(level, startAt + attack);
-  gain.gain.setValueAtTime(level, startAt + duration - release);
-  gain.gain.linearRampToValueAtTime(0, startAt + duration);
-  oscillator.connect(gain).connect(ctx.destination);
-  oscillator.start(startAt);
-  oscillator.stop(startAt + duration + 0.03);
-  oscillator.onended = () => {
-    oscillator.disconnect();
-    gain.disconnect();
-  };
+  playFrequencyPreview(ctx, frequency, level);
 }
 
 function addNote(frequency, duration, start, ratio = "", baseFrequency = null, generation = 0, parentId = null, absoluteVector = null, rootId = null) {
