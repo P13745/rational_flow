@@ -1,43 +1,6 @@
 import { els } from "./dom.js";
+import { state } from "./state.js";
 import { diesisCollectionCookie, germanPitchClasses, initialSeedDelay, maxSafeRatioInteger, tableRenderInterval } from "./config.js";
-
-let audioContext = null;
-let isRunning = false;
-let isPaused = false;
-let isDraining = false;
-let pausedWasDraining = false;
-let pausedAt = null;
-let seedMode = "seed";
-let mode = "auto";
-let ratioBias = "simple";
-let notes = [];
-let rafId = null;
-let schedulerTimer = null;
-let wakeLockSentinel = null;
-let wakeLockRequestPending = false;
-let startTime = performance.now() / 1000;
-let timerEndTime = null;
-let timerCompleted = false;
-let nextEventTime = null;
-let selectedNoteId = null;
-let nextId = 1;
-let lastGenerationNormalizeAt = -Infinity;
-let namedCommaByVectorKey = new Map();
-let namedCommaIntervals = [];
-let ratioPresets = [];
-let selectedPresetId = "";
-let lastTableRenderAt = -Infinity;
-let currentLanguage = ["ja", "en"].includes(localStorage.getItem("rationalFlowLanguage"))
-  ? localStorage.getItem("rationalFlowLanguage")
-  : "ja";
-let diesisBaseOctave = 5;
-let diesisRatioDisplay = "ratio";
-let diesisLimitFilter = Infinity;
-let diesisShowDerived = true;
-let diesisShowPower = true;
-let diesisCollectionFilter = "all";
-let discoveredDiesisCounts = new Map();
-let activeDiesisEncounterKeys = new Set();
 
 const i18nTargets = [
   ["header > div > p", "subtitle"],
@@ -120,7 +83,7 @@ const i18nTargets = [
 ];
 
 function timelineNow() {
-  return isPaused && pausedAt !== null ? pausedAt : performance.now() / 1000;
+  return state.isPaused && state.pausedAt !== null ? state.pausedAt : performance.now() / 1000;
 }
 
 const i18nHelpTargets = [
@@ -219,13 +182,13 @@ function randomBetween(min, max) {
 }
 
 function t(key) {
-  const source = window.RF_I18N?.[currentLanguage] || window.RF_I18N?.ja || {};
+  const source = window.RF_I18N?.[state.currentLanguage] || window.RF_I18N?.ja || {};
   return key.split(".").reduce((value, part) => value?.[part], source) ?? key;
 }
 
 function localizedField(value) {
   if (value && typeof value === "object") {
-    return value[currentLanguage] ?? value.ja ?? value.en ?? "";
+    return value[state.currentLanguage] ?? value.ja ?? value.en ?? "";
   }
   return value ?? "";
 }
@@ -255,7 +218,7 @@ function applyTranslationTarget(selector, key, attribute = "text") {
 }
 
 function applyLanguage() {
-  document.documentElement.lang = currentLanguage;
+  document.documentElement.lang = state.currentLanguage;
   document.title = t("title");
   els.languageToggle.textContent = t("langToggle");
   [...i18nTargets, ...i18nHelpTargets].forEach(([selector, key, attribute]) => {
@@ -271,8 +234,8 @@ function applyLanguage() {
 }
 
 function toggleLanguage() {
-  currentLanguage = currentLanguage === "ja" ? "en" : "ja";
-  localStorage.setItem("rationalFlowLanguage", currentLanguage);
+  state.currentLanguage = state.currentLanguage === "ja" ? "en" : "ja";
+  localStorage.setItem("rationalFlowLanguage", state.currentLanguage);
   applyLanguage();
 }
 
@@ -306,7 +269,7 @@ function writeCookie(name, value, maxAgeDays = 3650) {
 
 function loadDiesisCollection() {
   const raw = readCookie(diesisCollectionCookie);
-  discoveredDiesisCounts = new Map();
+  state.discoveredDiesisCounts = new Map();
   raw
     .split(".")
     .map((part) => part.trim())
@@ -316,13 +279,13 @@ function loadDiesisCollection() {
       const index = parseInt(indexPart, 36);
       const count = countPart ? parseInt(countPart, 36) : 1;
       if (Number.isInteger(index) && index >= 0) {
-        discoveredDiesisCounts.set(index, Math.max(1, Number.isInteger(count) ? count : 1));
+        state.discoveredDiesisCounts.set(index, Math.max(1, Number.isInteger(count) ? count : 1));
       }
     });
 }
 
 function saveDiesisCollection() {
-  const value = [...discoveredDiesisCounts.entries()]
+  const value = [...state.discoveredDiesisCounts.entries()]
     .sort(([a], [b]) => a - b)
     .map(([index, count]) => `${index.toString(36)}:${count.toString(36)}`)
     .join(".");
@@ -330,19 +293,19 @@ function saveDiesisCollection() {
 }
 
 function resetDiesisCollection() {
-  discoveredDiesisCounts = new Map();
+  state.discoveredDiesisCounts = new Map();
   saveDiesisCollection();
   if (els.diesisDialog.open) renderDiesisList();
 }
 
 function diesisIndex(entry) {
-  return namedCommaIntervals.indexOf(entry);
+  return state.namedCommaIntervals.indexOf(entry);
 }
 
 function markDiesisDiscovered(entry) {
   const index = diesisIndex(entry);
   if (index < 0) return;
-  discoveredDiesisCounts.set(index, (discoveredDiesisCounts.get(index) || 0) + 1);
+  state.discoveredDiesisCounts.set(index, (state.discoveredDiesisCounts.get(index) || 0) + 1);
   saveDiesisCollection();
   if (els.diesisDialog.open) renderDiesisList();
 }
@@ -517,7 +480,7 @@ function normalizeVectorsToPositive(vectors) {
   });
 }
 
-function ratioDisplayFromVector(vector, preferredMode = diesisRatioDisplay) {
+function ratioDisplayFromVector(vector, preferredMode = state.diesisRatioDisplay) {
   if (preferredMode !== "factors") {
     const frac = vectorToSafeFraction(vector);
     if (frac) return fractionLabel(frac);
@@ -548,11 +511,11 @@ function factorRatioLabel(ratio) {
 }
 
 function diesisRatioLabel(entry) {
-  if (diesisRatioDisplay === "factors") {
-    if (diesisShowPower && entry.display?.powerFactors) return entry.display.powerFactors;
+  if (state.diesisRatioDisplay === "factors") {
+    if (state.diesisShowPower && entry.display?.powerFactors) return entry.display.powerFactors;
     return entry.display?.factors || factorRatioLabel(entry.ratio);
   }
-  if (diesisShowPower && entry.display?.powerRatio) return entry.display.powerRatio;
+  if (state.diesisShowPower && entry.display?.powerRatio) return entry.display.powerRatio;
   return entry.display?.ratio || entry.ratio;
 }
 
@@ -581,13 +544,13 @@ function fractionLabel(frac) {
 
 function installNamedCommas(data) {
   if (!data?.intervals) return false;
-  namedCommaIntervals = data.intervals;
-  namedCommaByVectorKey = new Map();
+  state.namedCommaIntervals = data.intervals;
+  state.namedCommaByVectorKey = new Map();
   data.intervals.forEach((entry) => {
     const frac = parseFraction(entry.ratio);
     if (!frac) return;
     const key = vectorKey(vectorFromFraction(frac));
-    namedCommaByVectorKey.set(key, entry);
+    state.namedCommaByVectorKey.set(key, entry);
   });
   loadDiesisCollection();
   if (els.diesisDialog.open) {
@@ -613,8 +576,8 @@ async function loadNamedCommas() {
 
 function installRatioPresets(data) {
   if (!data?.presets?.length) return false;
-  ratioPresets = data.presets;
-  selectedPresetId = ratioPresets[0]?.id || "";
+  state.ratioPresets = data.presets;
+  state.selectedPresetId = state.ratioPresets[0]?.id || "";
   renderPresetBrowser();
   return true;
 }
@@ -731,7 +694,7 @@ function getSettings() {
     dMax: clamp(Math.floor(Number(els.dMax.value) || 8), 2, 512),
     allowDuplication: els.allowDuplication.checked,
     rootedDepth: els.rootedDepth.checked && els.parentBiasBasis.value === "depth",
-    ratioBias,
+    ratioBias: state.ratioBias,
     ratioBiasCurve: els.ratioBiasCurve.value === "none" ? "linear" : els.ratioBiasCurve.value,
     parentBiasBasis: els.parentBiasBasis.value,
     parentBiasDirection: els.parentBiasDirection.value === "none" ? "low" : els.parentBiasDirection.value,
@@ -761,7 +724,7 @@ function buildCandidates(baseFreq = null) {
     return settings.ratioBiasCurve === "exponential" ? 1 / (complexity * complexity) : 1 / complexity;
   };
 
-  if (mode === "list") {
+  if (state.mode === "list") {
     const parts = els.fractionList.value.split(",");
     parts.forEach((part) => {
       const frac = parseFraction(part);
@@ -828,8 +791,8 @@ function chooseBase(bases) {
 }
 
 function ensureAudio() {
-  if (!audioContext) audioContext = new AudioContext();
-  return audioContext;
+  if (!state.audioContext) state.audioContext = new AudioContext();
+  return state.audioContext;
 }
 
 function scheduleAudio(note) {
@@ -890,22 +853,22 @@ function scheduleAudio(note) {
 }
 
 function scheduleVisibleAudio(now = performance.now() / 1000) {
-  notes.forEach((note) => {
+  state.notes.forEach((note) => {
     const endsAfterNow = !Number.isFinite(note.duration) || note.start + note.duration > now;
     if (endsAfterNow && !note.nodes) scheduleAudio(note);
   });
 }
 
 function cancelFutureAudio(now = performance.now() / 1000) {
-  notes.forEach((note) => {
+  state.notes.forEach((note) => {
     if (note.start > now && note.nodes) stopNode(note, 0.03);
   });
 }
 
 function holdActiveAudio(now = performance.now() / 1000) {
-  if (!audioContext) return;
-  const audioNow = audioContext.currentTime;
-  notes.forEach((note) => {
+  if (!state.audioContext) return;
+  const audioNow = state.audioContext.currentTime;
+  state.notes.forEach((note) => {
     const isActive = note.start <= now && (!Number.isFinite(note.duration) || note.start + note.duration > now);
     if (!isActive || !note.nodes) return;
     const heldGain = Math.max(0, estimatedGainAt(note, now));
@@ -917,9 +880,9 @@ function holdActiveAudio(now = performance.now() / 1000) {
 }
 
 function resumeHeldAudio(now = performance.now() / 1000) {
-  if (!audioContext) return;
-  const audioNow = audioContext.currentTime;
-  notes.forEach((note) => {
+  if (!state.audioContext) return;
+  const audioNow = state.audioContext.currentTime;
+  state.notes.forEach((note) => {
     if (!note.nodes?.pausedHold) return;
     note.nodes.pausedHold = false;
     const gainParam = note.nodes.gain.gain;
@@ -948,16 +911,16 @@ function resumeHeldAudio(now = performance.now() / 1000) {
 }
 
 function applyPausedTimeShift() {
-  if (pausedAt === null) return 0;
+  if (state.pausedAt === null) return 0;
   const now = performance.now() / 1000;
-  const delta = Math.max(0, now - pausedAt);
+  const delta = Math.max(0, now - state.pausedAt);
   if (delta <= 0) return 0;
-  notes.forEach((note) => {
+  state.notes.forEach((note) => {
     note.start += delta;
   });
-  if (nextEventTime !== null) nextEventTime += delta;
-  startTime += delta;
-  pausedAt = now;
+  if (state.nextEventTime !== null) state.nextEventTime += delta;
+  state.startTime += delta;
+  state.pausedAt = now;
   return delta;
 }
 
@@ -973,9 +936,9 @@ function estimatedGainAt(note, time) {
 }
 
 function stopNode(note, fadeSeconds = 0.45) {
-  if (!note.nodes || !audioContext) return;
+  if (!note.nodes || !state.audioContext) return;
   const nodes = note.nodes;
-  const audioNow = audioContext.currentTime;
+  const audioNow = state.audioContext.currentTime;
   const wallNow = performance.now() / 1000;
   const gainParam = nodes.gain.gain;
   try {
@@ -1006,7 +969,7 @@ function stopNode(note, fadeSeconds = 0.45) {
 function diesisFrequencies(ratio, mode = "normal") {
   const frac = parseFraction(ratio);
   if (!frac) return [];
-  const baseFrequency = cFrequency(diesisBaseOctave);
+  const baseFrequency = cFrequency(state.diesisBaseOctave);
   const upperFrequency = baseFrequency * (frac.numerator / frac.denominator);
   const frequencies = [
     { frequency: baseFrequency, gain: 1 },
@@ -1086,7 +1049,7 @@ function previewFrequency(frequency) {
 
 function addNote(frequency, duration, start, ratio = "", baseFrequency = null, generation = 0, parentId = null, absoluteVector = null, rootId = null) {
   const settings = getSettings();
-  const id = nextId;
+  const id = state.nextId;
   const note = {
     id,
     start,
@@ -1101,21 +1064,21 @@ function addNote(frequency, duration, start, ratio = "", baseFrequency = null, g
     volume: Math.min(settings.volume, settings.volume / Math.sqrt(Math.max(1, activeAt(start).length + 1)) + 0.002),
     nodes: null,
   };
-  nextId += 1;
-  notes.push(note);
-  selectedNoteId = note.id;
-  if (isRunning) scheduleAudio(note);
+  state.nextId += 1;
+  state.notes.push(note);
+  state.selectedNoteId = note.id;
+  if (state.isRunning) scheduleAudio(note);
   return note;
 }
 
 function activeAt(time) {
-  return notes.filter((note) => note.start <= time && note.start + note.duration >= time);
+  return state.notes.filter((note) => note.start <= time && note.start + note.duration >= time);
 }
 
 function seedNote(offset = 2, durationOverride = null, frequencyOverride = null) {
   const settings = getSettings();
   const frequency = frequencyOverride ?? randomBetween(settings.minFreq, settings.maxFreq);
-  const duration = durationOverride ?? (seedMode === "drone" ? Infinity : randomBetween(settings.minDur, settings.maxDur));
+  const duration = durationOverride ?? (state.seedMode === "drone" ? Infinity : randomBetween(settings.minDur, settings.maxDur));
   return addNote(frequency, duration, performance.now() / 1000 + offset, "", null, 0, null, new Map(), null);
 }
 
@@ -1149,7 +1112,7 @@ function noteAtCanvasPoint(clientX, clientY) {
   const x = clientX - rect.left;
   const y = clientY - rect.top;
   const hitRadius = 8;
-  const candidates = notes
+  const candidates = state.notes
     .map((note) => {
       const x0 = xOf(note.start);
       const x1 = Number.isFinite(note.duration) ? xOf(note.start + note.duration) : rect.width + 16;
@@ -1175,7 +1138,7 @@ function hasDuplicateFrequency(frequency, atTime) {
 
 function addGeneratedChild(playTime) {
   const settings = getSettings();
-  const bases = notes.filter((note) => note.start <= playTime && note.start + note.duration >= playTime);
+  const bases = state.notes.filter((note) => note.start <= playTime && note.start + note.duration >= playTime);
   if (!bases.length) return false;
 
   for (let i = 0; i < 16; i += 1) {
@@ -1202,16 +1165,16 @@ function addGeneratedChild(playTime) {
 }
 
 function addManualNote() {
-  if (isPaused) return;
-  if (isDraining) return;
-  if (!isRunning) {
+  if (state.isPaused) return;
+  if (state.isDraining) return;
+  if (!state.isRunning) {
     seedNote(2);
     render(true);
     return;
   }
 
   const added = addGeneratedChild(performance.now() / 1000 + rightEdgeOffset());
-  if (!added && !notes.some((note) => note.start + note.duration > performance.now() / 1000)) {
+  if (!added && !state.notes.some((note) => note.start + note.duration > performance.now() / 1000)) {
     seedNote(rightEdgeOffset());
   }
   render(true);
@@ -1222,46 +1185,46 @@ function startCanvasSeed(event) {
   const source = event.touches?.[0] || event.changedTouches?.[0] || event;
   const hitNote = noteAtCanvasPoint(source.clientX, source.clientY);
   if (hitNote) {
-    selectedNoteId = hitNote.id;
+    state.selectedNoteId = hitNote.id;
     previewFrequency(hitNote.frequency);
     render(true);
     return;
   }
-  if (isRunning || isPaused || isDraining) return;
-  notes.forEach((note) => stopNode(note, 0.24));
-  notes = [];
-  activeDiesisEncounterKeys = new Set();
+  if (state.isRunning || state.isPaused || state.isDraining) return;
+  state.notes.forEach((note) => stopNode(note, 0.24));
+  state.notes = [];
+  state.activeDiesisEncounterKeys = new Set();
   const note = seedNote(2, null, frequencyFromCanvasY(source.clientY));
   ensureAudio().resume();
-  isRunning = true;
-  isPaused = false;
-  isDraining = false;
-  pausedWasDraining = false;
-  pausedAt = null;
-  startTime = performance.now() / 1000;
+  state.isRunning = true;
+  state.isPaused = false;
+  state.isDraining = false;
+  state.pausedWasDraining = false;
+  state.pausedAt = null;
+  state.startTime = performance.now() / 1000;
   const settings = getSettings();
-  timerEndTime = settings.timerMinutes > 0 ? startTime + settings.timerMinutes * 60 : null;
-  timerCompleted = false;
-  nextEventTime = null;
-  selectedNoteId = note.id;
+  state.timerEndTime = settings.timerMinutes > 0 ? state.startTime + settings.timerMinutes * 60 : null;
+  state.timerCompleted = false;
+  state.nextEventTime = null;
+  state.selectedNoteId = note.id;
   scheduleAudio(note);
   fillEventQueue();
   queueScheduler(0.5);
   syncWakeLock();
-  if (!rafId) tick();
+  if (!state.rafId) tick();
   render(true);
 }
 
 function scheduleNext() {
-  if (!isRunning) return;
+  if (!state.isRunning) return;
   const settings = getSettings();
   fillEventQueue();
   queueScheduler(Math.min(0.5, settings.nextMin));
 }
 
 function queueScheduler(seconds) {
-  window.clearTimeout(schedulerTimer);
-  schedulerTimer = window.setTimeout(scheduleNext, Math.max(120, seconds * 1000));
+  window.clearTimeout(state.schedulerTimer);
+  state.schedulerTimer = window.setTimeout(scheduleNext, Math.max(120, seconds * 1000));
 }
 
 function sampleEventWait(settings) {
@@ -1271,8 +1234,8 @@ function sampleEventWait(settings) {
 }
 
 function firstSeedReadyTime(now) {
-  if (notes.some((note) => note.generation > 0)) return now;
-  const living = notes.filter((note) => note.start + note.duration >= now);
+  if (state.notes.some((note) => note.generation > 0)) return now;
+  const living = state.notes.filter((note) => note.start + note.duration >= now);
   if (!living.length) return Infinity;
   return Math.min(...living.map((note) => Math.max(now, note.start + initialSeedDelay)));
 }
@@ -1280,44 +1243,44 @@ function firstSeedReadyTime(now) {
 function fillEventQueue() {
   const settings = getSettings();
   const now = performance.now() / 1000;
-  if (timerEndTime !== null && now >= timerEndTime) {
+  if (state.timerEndTime !== null && now >= state.timerEndTime) {
     finishTimedRun();
     return;
   }
   const horizon = now + rightEdgeOffset();
   const readyAt = firstSeedReadyTime(now);
   if (!Number.isFinite(readyAt)) return;
-  if (nextEventTime === null || nextEventTime < now) {
-    nextEventTime = Math.max(now, readyAt) + sampleEventWait(settings);
+  if (state.nextEventTime === null || state.nextEventTime < now) {
+    state.nextEventTime = Math.max(now, readyAt) + sampleEventWait(settings);
   }
 
   let guard = 0;
-  while (nextEventTime <= horizon && guard < 64) {
-    if (timerEndTime !== null && nextEventTime >= timerEndTime) break;
-    if (Math.random() <= generationProbabilityAt(nextEventTime)) {
-      addGeneratedChild(nextEventTime);
+  while (state.nextEventTime <= horizon && guard < 64) {
+    if (state.timerEndTime !== null && state.nextEventTime >= state.timerEndTime) break;
+    if (Math.random() <= generationProbabilityAt(state.nextEventTime)) {
+      addGeneratedChild(state.nextEventTime);
     }
-    nextEventTime += sampleEventWait(settings);
+    state.nextEventTime += sampleEventWait(settings);
     guard += 1;
   }
 }
 
 function generationProbabilityAt(time) {
-  if (timerEndTime === null) return 1;
-  const total = Math.max(1, timerEndTime - startTime);
-  const remaining = clamp((timerEndTime - time) / total, 0, 1);
+  if (state.timerEndTime === null) return 1;
+  const total = Math.max(1, state.timerEndTime - state.startTime);
+  const remaining = clamp((state.timerEndTime - time) / total, 0, 1);
   return remaining;
 }
 
 function finishTimedRun() {
-  if (!isRunning) return;
-  isRunning = false;
-  isDraining = true;
-  timerEndTime = null;
-  timerCompleted = true;
-  nextEventTime = null;
-  window.clearTimeout(schedulerTimer);
-  schedulerTimer = null;
+  if (!state.isRunning) return;
+  state.isRunning = false;
+  state.isDraining = true;
+  state.timerEndTime = null;
+  state.timerCompleted = true;
+  state.nextEventTime = null;
+  window.clearTimeout(state.schedulerTimer);
+  state.schedulerTimer = null;
   syncWakeLock();
 }
 
@@ -1326,7 +1289,7 @@ function trimNotes() {
   const settings = getSettings();
   const keepAfter = now - settings.windowSize * 1.35;
   let removed = false;
-  notes = notes.filter((note) => {
+  state.notes = state.notes.filter((note) => {
     const keep = note.start + note.duration >= keepAfter;
     if (!keep) {
       removed = true;
@@ -1334,15 +1297,15 @@ function trimNotes() {
     }
     return keep;
   });
-  if (removed || now - lastGenerationNormalizeAt > 0.5) {
+  if (removed || now - state.lastGenerationNormalizeAt > 0.5) {
     normalizeGenerations(now);
-    lastGenerationNormalizeAt = now;
+    state.lastGenerationNormalizeAt = now;
   }
 }
 
 function normalizeGenerations(now = performance.now() / 1000) {
   const settings = getSettings();
-  const living = notes.filter((note) => note.start + note.duration >= now);
+  const living = state.notes.filter((note) => note.start + note.duration >= now);
   if (!living.length) return;
   const minGeneration = Math.min(...living.map((note) => note.generation));
   if (minGeneration <= 0) return;
@@ -1350,7 +1313,7 @@ function normalizeGenerations(now = performance.now() / 1000) {
     normalizeRootedGenerations(living, settings);
     return;
   }
-  notes.forEach((note) => {
+  state.notes.forEach((note) => {
     note.generation = Math.max(0, note.generation - minGeneration);
   });
 }
@@ -1375,7 +1338,7 @@ function normalizeRootedGenerations(living, settings) {
   const selected = chooseRootedDepthGroup(candidates, settings);
   const decrement = Math.max(1, selected.root.generation);
   const selectedIds = descendantIds(selected.root.id);
-  notes.forEach((note) => {
+  state.notes.forEach((note) => {
     if (selectedIds.has(note.id)) {
       note.generation = Math.max(0, note.generation - decrement);
     }
@@ -1407,7 +1370,7 @@ function descendantIds(rootId) {
   let changed = true;
   while (changed) {
     changed = false;
-    notes.forEach((note) => {
+    state.notes.forEach((note) => {
       if (!ids.has(note.id) && ids.has(note.parentId)) {
         ids.add(note.id);
         changed = true;
@@ -1437,7 +1400,7 @@ function findCloseActivePairs(activeNotes) {
       const exactVector = exactRatioBetween(low, high);
       const approximate = approximateFraction(high.frequency / low.frequency);
       const ratio = exactVector ? ratioDisplayFromVector(exactVector) : fractionLabel(approximate);
-      const namedInterval = exactVector ? namedCommaByVectorKey.get(vectorKey(exactVector)) || null : null;
+      const namedInterval = exactVector ? state.namedCommaByVectorKey.get(vectorKey(exactVector)) || null : null;
       pairs.push({
         low,
         high,
@@ -1504,12 +1467,12 @@ function placeMarkerLabel(x, y, width, height, canvasWidth, canvasHeight, occupi
 }
 
 function activeRatioText(now = timelineNow()) {
-  if (!isRunning && !isPaused && !isDraining) return `${t("status.activeRatio")}: ---`;
+  if (!state.isRunning && !state.isPaused && !state.isDraining) return `${t("status.activeRatio")}: ---`;
   const active = activeAt(now).sort((a, b) => a.frequency - b.frequency);
   if (!active.length) return `${t("status.activeRatio")}: ---`;
   const base = active[0];
   const vectors = active.map((note) => relativeVectorForActiveNote(note, base));
-  if (diesisRatioDisplay !== "factors") {
+  if (state.diesisRatioDisplay !== "factors") {
     const integers = tryIntegerRatioFromVectors(vectors);
     if (integers) return `${t("status.activeRatio")}: ${integers.join(" : ")}`;
   }
@@ -1562,7 +1525,7 @@ function drawCanvas() {
   const { settings, now, xOf, yOf } = canvasMetrics();
   const w = rect.width;
   const h = rect.height;
-  const activeNow = isRunning || isPaused || isDraining ? activeAt(now) : [];
+  const activeNow = state.isRunning || state.isPaused || state.isDraining ? activeAt(now) : [];
   const closePairs = findCloseActivePairs(activeNow);
   const nextEncounterKeys = new Set();
   closePairs.forEach((pair) => {
@@ -1570,9 +1533,9 @@ function drawCanvas() {
     const index = diesisIndex(pair.namedInterval);
     const key = `${index}:${Math.min(pair.low.id, pair.high.id)}:${Math.max(pair.low.id, pair.high.id)}`;
     nextEncounterKeys.add(key);
-    if (!activeDiesisEncounterKeys.has(key)) markDiesisDiscovered(pair.namedInterval);
+    if (!state.activeDiesisEncounterKeys.has(key)) markDiesisDiscovered(pair.namedInterval);
   });
-  activeDiesisEncounterKeys = nextEncounterKeys;
+  state.activeDiesisEncounterKeys = nextEncounterKeys;
   const closeNoteIds = new Set(closePairs.flatMap((pair) => [pair.low.id, pair.high.id]));
 
   ctx.clearRect(0, 0, w, h);
@@ -1602,7 +1565,7 @@ function drawCanvas() {
     }
   }
 
-  const visible = notes.filter((note) => {
+  const visible = state.notes.filter((note) => {
     const endX = Number.isFinite(note.duration) ? xOf(note.start + note.duration) : w + 40;
     return endX >= -40 && xOf(note.start) <= w + 40;
   });
@@ -1632,7 +1595,7 @@ function drawCanvas() {
     const x0 = xOf(note.start);
     const x1 = Number.isFinite(note.duration) ? xOf(note.start + note.duration) : w + 16;
     const y = yOf(note.frequency);
-    const isSelected = note.id === selectedNoteId;
+    const isSelected = note.id === state.selectedNoteId;
     const isBase = !note.ratio;
     const isClose = closeNoteIds.has(note.id);
     ctx.strokeStyle = isClose ? "#f0574c" : isSelected ? "#efc84a" : isBase ? "#68cfb7" : "rgba(243,241,232,0.84)";
@@ -1727,7 +1690,7 @@ function renderTable() {
   const now = timelineNow();
   const settings = getSettings();
   const leftEdgeTime = now - settings.windowSize / 2;
-  const visible = notes.filter((note) => note.start + note.duration >= leftEdgeTime);
+  const visible = state.notes.filter((note) => note.start + note.duration >= leftEdgeTime);
   const allUpcoming = visible
     .filter((note) => note.start > now)
     .sort((a, b) => a.start - b.start);
@@ -1751,9 +1714,9 @@ function renderTable() {
   els.noteRows.appendChild(fragment);
 }
 
-function appendEventGroup(fragment, label, items, now, state, options = {}) {
+function appendEventGroup(fragment, label, items, now, rowState, options = {}) {
   const header = document.createElement("tr");
-  header.className = `group-row ${state}`;
+  header.className = `group-row ${rowState}`;
   const total = options.total ?? items.length;
   const countLabel = total === items.length ? String(items.length) : `${items.length}/${total}`;
   header.innerHTML = `<td colspan="5">${label}<span>${countLabel}</span></td>`;
@@ -1761,7 +1724,7 @@ function appendEventGroup(fragment, label, items, now, state, options = {}) {
 
   const appendEmptyRow = () => {
     const tr = document.createElement("tr");
-    tr.className = `event-row ${state} empty`;
+    tr.className = `event-row ${rowState} empty`;
     tr.innerHTML = "<td>&nbsp;</td><td></td><td></td><td></td><td></td>";
     fragment.appendChild(tr);
   };
@@ -1775,7 +1738,7 @@ function appendEventGroup(fragment, label, items, now, state, options = {}) {
     const tr = document.createElement("tr");
     const isCommaHit = options.commaNoteIds?.has(note.id);
     const isSeed = !note.ratio;
-    tr.className = `event-row ${state}${isSeed ? " seed" : ""}${note.id === selectedNoteId ? " active" : ""}${isCommaHit ? " comma-hit" : ""}`;
+    tr.className = `event-row ${rowState}${isSeed ? " seed" : ""}${note.id === state.selectedNoteId ? " active" : ""}${isCommaHit ? " comma-hit" : ""}`;
     tr.title = "Preview this note";
     const start = note.start - now;
     tr.innerHTML = `
@@ -1786,7 +1749,7 @@ function appendEventGroup(fragment, label, items, now, state, options = {}) {
       <td>${note.ratio || "---"}</td>
     `;
     tr.addEventListener("click", () => {
-      selectedNoteId = note.id;
+      state.selectedNoteId = note.id;
       previewFrequency(note.frequency);
       render(true);
     });
@@ -1802,20 +1765,20 @@ function renderPresetBrowser() {
   if (!els.presetList) return;
   els.presetList.textContent = "";
   const fragment = document.createDocumentFragment();
-  ratioPresets.forEach((preset) => {
+  state.ratioPresets.forEach((preset) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = preset.id === selectedPresetId ? "preset-item active" : "preset-item";
+    button.className = preset.id === state.selectedPresetId ? "preset-item active" : "preset-item";
     button.textContent = localizedField(preset.name);
     button.addEventListener("click", () => {
-      selectedPresetId = preset.id;
+      state.selectedPresetId = preset.id;
       renderPresetBrowser();
     });
     fragment.appendChild(button);
   });
   els.presetList.appendChild(fragment);
 
-  const selected = ratioPresets.find((preset) => preset.id === selectedPresetId) || ratioPresets[0];
+  const selected = state.ratioPresets.find((preset) => preset.id === state.selectedPresetId) || state.ratioPresets[0];
   if (!selected) {
     els.presetName.textContent = "---";
     els.presetDescription.textContent = "---";
@@ -1831,7 +1794,7 @@ function renderPresetBrowser() {
 }
 
 function loadSelectedPreset() {
-  const selected = ratioPresets.find((preset) => preset.id === selectedPresetId);
+  const selected = state.ratioPresets.find((preset) => preset.id === state.selectedPresetId);
   if (!selected) return;
   els.fractionList.value = selected.ratios.join(", ");
   setMode("list");
@@ -1846,42 +1809,42 @@ function renderDiesisControls() {
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = `C${octave}`;
-    button.className = octave === diesisBaseOctave ? "active" : "";
+    button.className = octave === state.diesisBaseOctave ? "active" : "";
     button.addEventListener("click", () => {
-      diesisBaseOctave = octave;
+      state.diesisBaseOctave = octave;
       renderDiesisControls();
       renderDiesisList();
     });
     els.diesisBaseControls.appendChild(button);
   }
-  els.globalRatioDisplay.value = diesisRatioDisplay;
-  els.diesisRatioDisplay.value = diesisRatioDisplay;
-  els.diesisDerivedToggle.checked = diesisShowDerived;
-  els.diesisPowerToggle.checked = diesisShowPower;
-  els.diesisCollectionFilter.value = diesisCollectionFilter;
-  els.diesisLimitFilter.value = Number.isFinite(diesisLimitFilter) ? String(diesisLimitFilter) : "all";
+  els.globalRatioDisplay.value = state.diesisRatioDisplay;
+  els.diesisRatioDisplay.value = state.diesisRatioDisplay;
+  els.diesisDerivedToggle.checked = state.diesisShowDerived;
+  els.diesisPowerToggle.checked = state.diesisShowPower;
+  els.diesisCollectionFilter.value = state.diesisCollectionFilter;
+  els.diesisLimitFilter.value = Number.isFinite(state.diesisLimitFilter) ? String(state.diesisLimitFilter) : "all";
 }
 
 function renderDiesisList() {
   if (!els.diesisList) return;
   els.diesisList.textContent = "";
   const fragment = document.createDocumentFragment();
-  const visibleBase = namedCommaIntervals
+  const visibleBase = state.namedCommaIntervals
     .map((entry, index) => ({ entry, index }))
-    .filter(({ entry }) => ratioLimitValue(entry.ratio) <= diesisLimitFilter)
-    .filter(({ entry }) => diesisShowDerived || entry.source !== "derived");
-  const discoveredVisible = visibleBase.filter(({ index }) => discoveredDiesisCounts.has(index)).length;
+    .filter(({ entry }) => ratioLimitValue(entry.ratio) <= state.diesisLimitFilter)
+    .filter(({ entry }) => state.diesisShowDerived || entry.source !== "derived");
+  const discoveredVisible = visibleBase.filter(({ index }) => state.discoveredDiesisCounts.has(index)).length;
   els.diesisCollectionStats.textContent = `${discoveredVisible} / ${visibleBase.length}`;
   visibleBase
     .filter(({ index }) => {
-      if (diesisCollectionFilter === "seen") return discoveredDiesisCounts.has(index);
-      if (diesisCollectionFilter === "unseen") return !discoveredDiesisCounts.has(index);
+      if (state.diesisCollectionFilter === "seen") return state.discoveredDiesisCounts.has(index);
+      if (state.diesisCollectionFilter === "unseen") return !state.discoveredDiesisCounts.has(index);
       return true;
     })
     .map(({ entry }) => entry)
     .sort((a, b) => b.cents - a.cents)
     .forEach((entry) => {
-      const discoveryCount = discoveredDiesisCounts.get(diesisIndex(entry)) || 0;
+      const discoveryCount = state.discoveredDiesisCounts.get(diesisIndex(entry)) || 0;
       const discovered = discoveryCount > 0;
       const row = document.createElement("div");
       row.className = `diesis-item${discovered ? " discovered" : ""}`;
@@ -1929,34 +1892,34 @@ function renderDiesisList() {
 }
 
 function updateLabels() {
-  const selected = notes.find((note) => note.id === selectedNoteId) || notes[notes.length - 1];
-  els.startStop.textContent = isRunning || isPaused || isDraining ? "■" : "▶";
-  els.pauseResume.textContent = isPaused ? "▶Ⅱ" : "Ⅱ";
-  els.pauseResume.disabled = !isRunning && !isPaused && !isDraining;
-  els.pauseResume.classList.toggle("active", isPaused);
-  const seedControlsDisabled = isRunning || isPaused || isDraining;
-  els.seed.disabled = isPaused;
+  const selected = state.notes.find((note) => note.id === state.selectedNoteId) || state.notes[state.notes.length - 1];
+  els.startStop.textContent = state.isRunning || state.isPaused || state.isDraining ? "■" : "▶";
+  els.pauseResume.textContent = state.isPaused ? "▶Ⅱ" : "Ⅱ";
+  els.pauseResume.disabled = !state.isRunning && !state.isPaused && !state.isDraining;
+  els.pauseResume.classList.toggle("active", state.isPaused);
+  const seedControlsDisabled = state.isRunning || state.isPaused || state.isDraining;
+  els.seed.disabled = state.isPaused;
   els.seedMode.disabled = seedControlsDisabled;
-  els.seedMode.value = seedMode;
-  const statusKey = isPaused ? "paused" : isRunning ? "running" : isDraining ? "draining" : "stopped";
+  els.seedMode.value = state.seedMode;
+  const statusKey = state.isPaused ? "paused" : state.isRunning ? "running" : state.isDraining ? "draining" : "stopped";
   els.statusLabel.textContent = t(`status.${statusKey}`);
-  els.noteCount.textContent = String(notes.length);
+  els.noteCount.textContent = String(state.notes.length);
   els.lastDepth.textContent = String(selected?.generation ?? 0);
   els.timerOpen.textContent = t("labels.timer");
   els.timerBadge.textContent = timerBadgeText();
   els.timerBadge.classList.remove("hidden");
-  els.seed.setAttribute("title", isRunning || isDraining ? "Add Child" : "Add Seed");
-  els.seed.setAttribute("aria-label", isRunning || isDraining ? "Add Child" : "Add Seed");
+  els.seed.setAttribute("title", state.isRunning || state.isDraining ? "Add Child" : "Add Seed");
+  els.seed.setAttribute("aria-label", state.isRunning || state.isDraining ? "Add Child" : "Add Seed");
   els.activeRatioLabel.textContent = activeRatioText();
-  els.autoMode.classList.toggle("active", mode === "auto");
-  els.listMode.classList.toggle("active", mode === "list");
-  els.simpleRatioMode.classList.toggle("active", ratioBias === "simple");
-  els.equalRatioMode.classList.toggle("active", ratioBias === "equal");
-  els.complexRatioMode.classList.toggle("active", ratioBias === "complex");
-  els.globalRatioDisplay.value = diesisRatioDisplay;
-  if (els.diesisRatioDisplay) els.diesisRatioDisplay.value = diesisRatioDisplay;
-  els.autoControls.classList.toggle("hidden", mode !== "auto");
-  els.listControls.classList.toggle("hidden", mode !== "list");
+  els.autoMode.classList.toggle("active", state.mode === "auto");
+  els.listMode.classList.toggle("active", state.mode === "list");
+  els.simpleRatioMode.classList.toggle("active", state.ratioBias === "simple");
+  els.equalRatioMode.classList.toggle("active", state.ratioBias === "equal");
+  els.complexRatioMode.classList.toggle("active", state.ratioBias === "complex");
+  els.globalRatioDisplay.value = state.diesisRatioDisplay;
+  if (els.diesisRatioDisplay) els.diesisRatioDisplay.value = state.diesisRatioDisplay;
+  els.autoControls.classList.toggle("hidden", state.mode !== "auto");
+  els.listControls.classList.toggle("hidden", state.mode !== "list");
   updateRatioCurveState();
   updateParentDirectionLabels();
   updateVibratoState();
@@ -1971,22 +1934,22 @@ function updateLabels() {
 }
 
 function timerCountdownText() {
-  if (timerEndTime === null) return "";
-  const remaining = Math.max(0, timerEndTime - timelineNow());
+  if (state.timerEndTime === null) return "";
+  const remaining = Math.max(0, state.timerEndTime - timelineNow());
   const minutes = Math.floor(remaining / 60);
   const seconds = Math.floor(remaining % 60);
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
 function timerStatusText() {
-  if (timerCompleted) return "Done";
+  if (state.timerCompleted) return "Done";
   const countdown = timerCountdownText();
   if (!countdown) return "No Timer Set";
   return `${countdown} left`;
 }
 
 function timerBadgeText() {
-  if (timerCompleted) return "Done";
+  if (state.timerCompleted) return "Done";
   return timerCountdownText() || "OFF";
 }
 
@@ -2003,38 +1966,38 @@ function render(forceTable = false) {
   updateLabels();
   drawCanvas();
   const now = performance.now();
-  if (forceTable || now - lastTableRenderAt >= tableRenderInterval) {
+  if (forceTable || now - state.lastTableRenderAt >= tableRenderInterval) {
     renderTable();
-    lastTableRenderAt = now;
+    state.lastTableRenderAt = now;
   }
 }
 
 function shouldHoldWakeLock() {
-  return (isRunning || isPaused || isDraining) && !timerCompleted;
+  return (state.isRunning || state.isPaused || state.isDraining) && !state.timerCompleted;
 }
 
 async function requestWakeLock() {
-  if (wakeLockSentinel || wakeLockRequestPending) return;
+  if (state.wakeLockSentinel || state.wakeLockRequestPending) return;
   if (!("wakeLock" in navigator) || document.visibilityState !== "visible") return;
-  wakeLockRequestPending = true;
+  state.wakeLockRequestPending = true;
   try {
-    wakeLockSentinel = await navigator.wakeLock.request("screen");
-    wakeLockSentinel.addEventListener("release", () => {
-      wakeLockSentinel = null;
+    state.wakeLockSentinel = await navigator.wakeLock.request("screen");
+    state.wakeLockSentinel.addEventListener("release", () => {
+      state.wakeLockSentinel = null;
       if (shouldHoldWakeLock() && document.visibilityState === "visible") {
         window.setTimeout(requestWakeLock, 0);
       }
     });
   } catch (_) {
-    wakeLockSentinel = null;
+    state.wakeLockSentinel = null;
   } finally {
-    wakeLockRequestPending = false;
+    state.wakeLockRequestPending = false;
   }
 }
 
 function releaseWakeLock() {
-  const sentinel = wakeLockSentinel;
-  wakeLockSentinel = null;
+  const sentinel = state.wakeLockSentinel;
+  state.wakeLockSentinel = null;
   if (sentinel) sentinel.release().catch(() => {});
 }
 
@@ -2044,46 +2007,46 @@ function syncWakeLock() {
 }
 
 function tick() {
-  if (isRunning && timerEndTime !== null && performance.now() / 1000 >= timerEndTime) {
+  if (state.isRunning && state.timerEndTime !== null && performance.now() / 1000 >= state.timerEndTime) {
     finishTimedRun();
   }
   trimNotes();
-  if (isDraining && !notes.length) {
-    isDraining = false;
-    selectedNoteId = null;
-    timerEndTime = null;
-    timerCompleted = false;
+  if (state.isDraining && !state.notes.length) {
+    state.isDraining = false;
+    state.selectedNoteId = null;
+    state.timerEndTime = null;
+    state.timerCompleted = false;
     syncWakeLock();
   }
   render();
-  rafId = isRunning || isDraining ? window.requestAnimationFrame(tick) : null;
+  state.rafId = state.isRunning || state.isDraining ? window.requestAnimationFrame(tick) : null;
 }
 
 function start() {
   ensureAudio().resume();
   const settings = getSettings();
-  window.clearTimeout(schedulerTimer);
-  if (rafId) window.cancelAnimationFrame(rafId);
-  rafId = null;
-  notes.forEach(stopNode);
-  notes = [];
-  activeDiesisEncounterKeys = new Set();
+  window.clearTimeout(state.schedulerTimer);
+  if (state.rafId) window.cancelAnimationFrame(state.rafId);
+  state.rafId = null;
+  state.notes.forEach(stopNode);
+  state.notes = [];
+  state.activeDiesisEncounterKeys = new Set();
   seedNote(2);
-  isRunning = true;
-  isPaused = false;
-  isDraining = false;
-  pausedWasDraining = false;
-  pausedAt = null;
-  startTime = performance.now() / 1000;
-  timerEndTime = settings.timerMinutes > 0 ? startTime + settings.timerMinutes * 60 : null;
-  timerCompleted = false;
-  nextEventTime = null;
+  state.isRunning = true;
+  state.isPaused = false;
+  state.isDraining = false;
+  state.pausedWasDraining = false;
+  state.pausedAt = null;
+  state.startTime = performance.now() / 1000;
+  state.timerEndTime = settings.timerMinutes > 0 ? state.startTime + settings.timerMinutes * 60 : null;
+  state.timerCompleted = false;
+  state.nextEventTime = null;
   scheduleVisibleAudio();
   fillEventQueue();
   queueScheduler(0.5);
   syncWakeLock();
   render(true);
-  if (!rafId) tick();
+  if (!state.rafId) tick();
 }
 
 function stop() {
@@ -2091,83 +2054,83 @@ function stop() {
 }
 
 function clearAll() {
-  isRunning = false;
-  isPaused = false;
-  isDraining = false;
-  pausedWasDraining = false;
-  pausedAt = null;
-  timerEndTime = null;
-  timerCompleted = false;
-  window.clearTimeout(schedulerTimer);
-  schedulerTimer = null;
-  nextEventTime = null;
-  if (rafId) window.cancelAnimationFrame(rafId);
-  rafId = null;
-  notes.forEach(stopNode);
-  notes = [];
-  activeDiesisEncounterKeys = new Set();
-  selectedNoteId = null;
+  state.isRunning = false;
+  state.isPaused = false;
+  state.isDraining = false;
+  state.pausedWasDraining = false;
+  state.pausedAt = null;
+  state.timerEndTime = null;
+  state.timerCompleted = false;
+  window.clearTimeout(state.schedulerTimer);
+  state.schedulerTimer = null;
+  state.nextEventTime = null;
+  if (state.rafId) window.cancelAnimationFrame(state.rafId);
+  state.rafId = null;
+  state.notes.forEach(stopNode);
+  state.notes = [];
+  state.activeDiesisEncounterKeys = new Set();
+  state.selectedNoteId = null;
   syncWakeLock();
   render(true);
 }
 
 function pause() {
-  if ((!isRunning && !isDraining) || isPaused) return;
-  pausedWasDraining = isDraining;
-  isRunning = false;
-  isDraining = false;
-  isPaused = true;
-  pausedAt = performance.now() / 1000;
-  window.clearTimeout(schedulerTimer);
-  schedulerTimer = null;
-  holdActiveAudio(pausedAt);
-  cancelFutureAudio(pausedAt);
-  if (rafId) window.cancelAnimationFrame(rafId);
-  rafId = null;
+  if ((!state.isRunning && !state.isDraining) || state.isPaused) return;
+  state.pausedWasDraining = state.isDraining;
+  state.isRunning = false;
+  state.isDraining = false;
+  state.isPaused = true;
+  state.pausedAt = performance.now() / 1000;
+  window.clearTimeout(state.schedulerTimer);
+  state.schedulerTimer = null;
+  holdActiveAudio(state.pausedAt);
+  cancelFutureAudio(state.pausedAt);
+  if (state.rafId) window.cancelAnimationFrame(state.rafId);
+  state.rafId = null;
   syncWakeLock();
   render(true);
 }
 
 function resume() {
-  if (!isPaused) return;
-  const resumeToDraining = pausedWasDraining;
-  const pausedDuration = performance.now() / 1000 - pausedAt;
+  if (!state.isPaused) return;
+  const resumeToDraining = state.pausedWasDraining;
+  const pausedDuration = performance.now() / 1000 - state.pausedAt;
   applyPausedTimeShift();
-  if (timerEndTime !== null) timerEndTime += pausedDuration;
+  if (state.timerEndTime !== null) state.timerEndTime += pausedDuration;
   const now = performance.now() / 1000;
-  pausedAt = null;
-  pausedWasDraining = false;
-  isPaused = false;
-  isRunning = !resumeToDraining;
-  isDraining = resumeToDraining;
+  state.pausedAt = null;
+  state.pausedWasDraining = false;
+  state.isPaused = false;
+  state.isRunning = !resumeToDraining;
+  state.isDraining = resumeToDraining;
   ensureAudio().resume();
   resumeHeldAudio(now);
   scheduleVisibleAudio(now);
-  if (isRunning) {
+  if (state.isRunning) {
     fillEventQueue();
     queueScheduler(0.5);
   }
   syncWakeLock();
-  if (!rafId) tick();
+  if (!state.rafId) tick();
 }
 
 function togglePause() {
-  if (isPaused) resume();
+  if (state.isPaused) resume();
   else pause();
 }
 
 function setSeedMode(nextSeedMode) {
-  seedMode = nextSeedMode === "drone" ? "drone" : "seed";
+  state.seedMode = nextSeedMode === "drone" ? "drone" : "seed";
   render();
 }
 
 function setMode(nextMode) {
-  mode = nextMode;
+  state.mode = nextMode === "list" ? "list" : "auto";
   render();
 }
 
 function setRatioBias(nextBias) {
-  ratioBias = nextBias;
+  state.ratioBias = nextBias;
   render();
 }
 
@@ -2190,7 +2153,7 @@ function updateParentDirectionLabels() {
 }
 
 function updateRatioCurveState() {
-  const isEqual = ratioBias === "equal";
+  const isEqual = state.ratioBias === "equal";
   els.ratioBiasCurve.disabled = isEqual;
   if (isEqual) els.ratioBiasCurve.value = "none";
   if (!isEqual && els.ratioBiasCurve.value === "none") els.ratioBiasCurve.value = "linear";
@@ -2209,7 +2172,7 @@ function updateVibratoState() {
 }
 
 els.startStop.addEventListener("click", () => {
-  if (isRunning || isPaused || isDraining) stop();
+  if (state.isRunning || state.isPaused || state.isDraining) stop();
   else start();
 });
 els.languageToggle.addEventListener("click", toggleLanguage);
@@ -2280,7 +2243,7 @@ els.diesisDialog.addEventListener("click", (event) => {
   if (event.target === els.diesisDialog) els.diesisDialog.close();
 });
 function setRatioDisplayMode(nextMode) {
-  diesisRatioDisplay = nextMode;
+  state.diesisRatioDisplay = nextMode;
   renderDiesisControls();
   renderDiesisList();
   render(true);
@@ -2288,20 +2251,20 @@ function setRatioDisplayMode(nextMode) {
 els.globalRatioDisplay.addEventListener("change", () => setRatioDisplayMode(els.globalRatioDisplay.value));
 els.diesisRatioDisplay.addEventListener("change", () => setRatioDisplayMode(els.diesisRatioDisplay.value));
 els.diesisDerivedToggle.addEventListener("input", () => {
-  diesisShowDerived = els.diesisDerivedToggle.checked;
+  state.diesisShowDerived = els.diesisDerivedToggle.checked;
   renderDiesisList();
 });
 els.diesisPowerToggle.addEventListener("input", () => {
-  diesisShowPower = els.diesisPowerToggle.checked;
+  state.diesisShowPower = els.diesisPowerToggle.checked;
   renderDiesisList();
 });
 els.diesisCollectionFilter.addEventListener("change", () => {
-  diesisCollectionFilter = els.diesisCollectionFilter.value;
+  state.diesisCollectionFilter = els.diesisCollectionFilter.value;
   renderDiesisList();
 });
 els.diesisLimitFilter.addEventListener("change", () => {
   const value = els.diesisLimitFilter.value;
-  diesisLimitFilter = value === "all" ? Infinity : Number(value);
+  state.diesisLimitFilter = value === "all" ? Infinity : Number(value);
   renderDiesisList();
 });
 if (els.mobileToolsToggle) {
@@ -2360,7 +2323,7 @@ document.addEventListener("keydown", (event) => {
   if (["INPUT", "TEXTAREA", "SELECT"].includes(tagName)) return;
   if (event.code === "Space") {
     event.preventDefault();
-    if (isRunning || isPaused || isDraining) togglePause();
+    if (state.isRunning || state.isPaused || state.isDraining) togglePause();
     else start();
   }
   if (event.key.toLowerCase() === "n") {
