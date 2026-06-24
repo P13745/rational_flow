@@ -7,13 +7,14 @@ Rational Flow のレファクタリング前の構造メモです。今後の分
 2026-06-25 時点の主なファイル規模です。
 
 ```text
-index.html             592 lines
+index.html             601 lines
 styles/               3354 lines total
-src/main.js           2200 lines
+src/main.js           2188 lines
 src/dom.js              82 lines
 src/config.js            5 lines
 src/state.js            39 lines
 src/ui/event-bindings.js 171 lines
+src/core/pitch.js       14 lines
 translations.js        370 lines
 named_commas_data.js  1878 lines
 ratio_presets_data.js  304 lines
@@ -58,11 +59,11 @@ styles/responsive.css
 
 挙動維持を優先したため、後半の `Final`, `Last`, `proposal`, `refinement` などの作業履歴コメント付き override は、まだ主に `responsive.css` に残っています。次の整理段階では、これらを正式な component CSS へ吸収し、不要な重複を削除します。
 
-## src/main.js / src/dom.js / src/config.js / src/state.js / src/ui/event-bindings.js
+## src/main.js / src/dom.js / src/config.js / src/state.js / src/ui/event-bindings.js / src/core/pitch.js
 
 Phase 2 の入口整理で、旧 `app.js` は `src/main.js` に移動しました。`index.html` は `type="module"` で `src/main.js` を読み込みます。
 
-DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は `src/config.js` に分離されています。主要な mutable state は `src/state.js` の `state` object に集約されています。event listener 登録は `src/ui/event-bindings.js` に分離されています。
+DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は `src/config.js` に分離されています。主要な mutable state は `src/state.js` の `state` object に集約されています。event listener 登録は `src/ui/event-bindings.js` に分離されています。音名表示と C 周波数 helper は `src/core/pitch.js` に分離されています。
 
 `src/main.js` はまだアプリの大半の責務を持つ entry script です。
 
@@ -89,7 +90,7 @@ DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は 
 - wake lock
 - `src/ui/event-bindings.js` に渡す handler 群
 
-`src/main.js` はまだ state を直接読み書きし、主要ロジックも多く残っています。次の分割では、core 計算、Diesis、audio/scheduler、UI rendering を段階的に feature module へ移します。
+`src/main.js` はまだ state を直接読み書きし、主要ロジックも多く残っています。Phase 3 では、まず挙動に影響しにくい pitch helper だけを `src/core/pitch.js` に移しました。次の分割では、fraction / ratio / prime-vector 計算、Diesis、audio/scheduler、UI rendering を段階的に feature module へ移します。
 
 ## translations.js
 

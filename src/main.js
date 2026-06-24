@@ -1,7 +1,8 @@
 import { els } from "./dom.js";
 import { state } from "./state.js";
+import { cFrequency, nearestPitchLabel } from "./core/pitch.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
-import { diesisCollectionCookie, germanPitchClasses, initialSeedDelay, maxSafeRatioInteger, tableRenderInterval } from "./config.js";
+import { diesisCollectionCookie, initialSeedDelay, maxSafeRatioInteger, tableRenderInterval } from "./config.js";
 
 const i18nTargets = [
   ["header > div > p", "subtitle"],
@@ -520,10 +521,6 @@ function diesisRatioLabel(entry) {
   return entry.display?.ratio || entry.ratio;
 }
 
-function cFrequency(octave) {
-  return 261.6255653005986 * 2 ** (octave - 4);
-}
-
 function parseFraction(raw) {
   const trimmed = raw.trim();
   const match = trimmed.match(/^(-?\d+)(?:\s*\/\s*(-?\d+))?$/);
@@ -656,15 +653,6 @@ function tryIntegerRatioFromVectors(vectors) {
     integers.push(value);
   }
   return reduceIntegerRatio(integers);
-}
-
-function nearestPitchLabel(frequency) {
-  const midi = Math.round(69 + 12 * Math.log2(frequency / 440));
-  const nearestFrequency = 440 * 2 ** ((midi - 69) / 12);
-  const cents = 1200 * Math.log2(frequency / nearestFrequency);
-  const name = germanPitchClasses[((midi % 12) + 12) % 12];
-  const sign = cents >= 0 ? "+" : "";
-  return `${name}${sign}${cents.toFixed(1)}¢`;
 }
 
 function getSettings() {
