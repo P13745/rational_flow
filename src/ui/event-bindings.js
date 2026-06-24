@@ -1,19 +1,6 @@
 import { els } from "../dom.js";
 import { state } from "../state.js";
-
-function openDialog(dialog) {
-  if (typeof dialog.showModal === "function") {
-    dialog.showModal();
-  } else {
-    dialog.setAttribute("open", "");
-  }
-}
-
-function closeOnBackdrop(dialog) {
-  dialog.addEventListener("click", (event) => {
-    if (event.target === dialog) dialog.close();
-  });
-}
+import { closeOnBackdrop, openDialog, setHelpPage } from "./dialogs.js";
 
 export function registerEventBindings({
   addManualNote,
@@ -25,7 +12,6 @@ export function registerEventBindings({
   renderDiesisList,
   renderPresetBrowser,
   resetDiesisCollection,
-  setHelpPage,
   setMobileToolsOpen,
   setMobileView,
   setMode,

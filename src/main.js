@@ -272,18 +272,6 @@ function markDiesisDiscovered(entry) {
   if (els.diesisDialog.open) renderDiesisList();
 }
 
-function setHelpPage(page) {
-  document.querySelectorAll("[data-help-page]").forEach((element) => {
-    const isTarget = element.dataset.helpPage === page;
-    if (element.classList.contains("help-block")) {
-      element.classList.toggle("hidden", !isTarget);
-    } else if (element.tagName === "BUTTON") {
-      element.classList.toggle("active", isTarget);
-      element.setAttribute("aria-selected", String(isTarget));
-    }
-  });
-}
-
 function ratioDisplayFromVector(vector, preferredMode = state.diesisRatioDisplay) {
   if (preferredMode !== "factors") {
     const frac = vectorToSafeFraction(vector);
@@ -1667,7 +1655,6 @@ registerEventBindings({
   renderDiesisList,
   renderPresetBrowser,
   resetDiesisCollection,
-  setHelpPage,
   setMobileToolsOpen,
   setMobileView,
   setMode,
