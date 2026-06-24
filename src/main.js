@@ -42,6 +42,12 @@ import {
 } from "./generation/note-model.js";
 import { t } from "./i18n/i18n.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
+import {
+  canvasMetrics as getCanvasMetrics,
+  frequencyFromCanvasY as getFrequencyFromCanvasY,
+  noteAtCanvasPoint as getNoteAtCanvasPoint,
+  rightEdgeOffset as getRightEdgeOffset,
+} from "./ui/canvas-metrics.js";
 import { setMobileToolsOpen, setMobileView as applyMobileView } from "./ui/mobile-view.js";
 import {
   loadSelectedPreset as applySelectedPreset,
@@ -644,53 +650,19 @@ function seedNote(offset = 2, durationOverride = null, frequencyOverride = null)
 }
 
 function frequencyFromCanvasY(clientY) {
-  const rect = els.visualizer.getBoundingClientRect();
-  const settings = getSettings();
-  const minLog = Math.log2(settings.minFreq * 0.94);
-  const maxLog = Math.log2(settings.maxFreq * 1.04);
-  const y = clamp(clientY - rect.top, 44, rect.height - 44);
-  const normalized = (rect.height - 44 - y) / Math.max(1, rect.height - 88);
-  return clamp(2 ** (minLog + normalized * (maxLog - minLog)), settings.minFreq, settings.maxFreq);
+  return getFrequencyFromCanvasY(clientY, getSettings());
 }
 
 function canvasMetrics() {
-  const rect = els.visualizer.getBoundingClientRect();
-  const settings = getSettings();
-  const now = timelineNow();
-  const minLog = Math.log2(settings.minFreq * 0.94);
-  const maxLog = Math.log2(settings.maxFreq * 1.04);
-  return {
-    rect,
-    settings,
-    now,
-    xOf: (time) => rect.width / 2 + ((time - now) / settings.windowSize) * rect.width,
-    yOf: (frequency) => rect.height - 44 - ((Math.log2(frequency) - minLog) / (maxLog - minLog)) * (rect.height - 88),
-  };
+  return getCanvasMetrics({ settings: getSettings(), now: timelineNow() });
 }
 
 function noteAtCanvasPoint(clientX, clientY) {
-  const { rect, xOf, yOf } = canvasMetrics();
-  const x = clientX - rect.left;
-  const y = clientY - rect.top;
-  const hitRadius = 8;
-  const candidates = state.notes
-    .map((note) => {
-      const x0 = xOf(note.start);
-      const x1 = Number.isFinite(note.duration) ? xOf(note.start + note.duration) : rect.width + 16;
-      const minX = Math.min(x0, x1) - hitRadius;
-      const maxX = Math.max(x0, x1) + hitRadius;
-      const noteY = yOf(note.frequency);
-      const dy = Math.abs(y - noteY);
-      const isHit = x >= minX && x <= maxX && dy <= hitRadius;
-      return { note, dy, isHit };
-    })
-    .filter((item) => item.isHit)
-    .sort((a, b) => a.dy - b.dy);
-  return candidates[0]?.note || null;
+  return getNoteAtCanvasPoint(clientX, clientY, canvasMetrics());
 }
 
 function rightEdgeOffset() {
-  return getSettings().windowSize / 2;
+  return getRightEdgeOffset(getSettings());
 }
 
 function addGeneratedChild(playTime) {
