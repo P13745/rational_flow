@@ -20,11 +20,16 @@ import {
   vectorKey,
   vectorToSafeFraction,
 } from "./core/ratio-math.js";
-import { readCookie, writeCookie } from "./storage/cookies.js";
+import {
+  diesisIndex,
+  loadDiesisCollection,
+  markDiesisDiscovered as recordDiesisDiscovered,
+  resetDiesisCollection as clearDiesisCollection,
+} from "./diesis/diesis-collection.js";
 import { localizedField, t } from "./i18n/i18n.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
 import { setMobileView as applyMobileView } from "./ui/mobile-view.js";
-import { diesisCollectionCookie, initialSeedDelay, tableRenderInterval } from "./config.js";
+import { initialSeedDelay, tableRenderInterval } from "./config.js";
 
 const i18nTargets = [
   ["header > div > p", "subtitle"],
@@ -247,46 +252,13 @@ function setMobileView(view) {
   applyMobileView(view, { renderTable, drawCanvas });
 }
 
-function loadDiesisCollection() {
-  const raw = readCookie(diesisCollectionCookie);
-  state.discoveredDiesisCounts = new Map();
-  raw
-    .split(".")
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .forEach((part) => {
-      const [indexPart, countPart] = part.split(":");
-      const index = parseInt(indexPart, 36);
-      const count = countPart ? parseInt(countPart, 36) : 1;
-      if (Number.isInteger(index) && index >= 0) {
-        state.discoveredDiesisCounts.set(index, Math.max(1, Number.isInteger(count) ? count : 1));
-      }
-    });
-}
-
-function saveDiesisCollection() {
-  const value = [...state.discoveredDiesisCounts.entries()]
-    .sort(([a], [b]) => a - b)
-    .map(([index, count]) => `${index.toString(36)}:${count.toString(36)}`)
-    .join(".");
-  writeCookie(diesisCollectionCookie, value);
-}
-
 function resetDiesisCollection() {
-  state.discoveredDiesisCounts = new Map();
-  saveDiesisCollection();
+  clearDiesisCollection();
   if (els.diesisDialog.open) renderDiesisList();
 }
 
-function diesisIndex(entry) {
-  return state.namedCommaIntervals.indexOf(entry);
-}
-
 function markDiesisDiscovered(entry) {
-  const index = diesisIndex(entry);
-  if (index < 0) return;
-  state.discoveredDiesisCounts.set(index, (state.discoveredDiesisCounts.get(index) || 0) + 1);
-  saveDiesisCollection();
+  if (!recordDiesisDiscovered(entry)) return;
   if (els.diesisDialog.open) renderDiesisList();
 }
 

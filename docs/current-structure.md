@@ -9,10 +9,11 @@ Rational Flow のレファクタリング前の構造メモです。今後の分
 ```text
 index.html             601 lines
 styles/               3354 lines total
-src/main.js           1842 lines
+src/main.js           1814 lines
 src/dom.js              82 lines
 src/config.js            5 lines
 src/state.js            39 lines
+src/diesis/diesis-collection.js 45 lines
 src/ui/event-bindings.js 171 lines
 src/ui/mobile-view.js   15 lines
 src/core/candidates.js  81 lines
@@ -69,7 +70,7 @@ styles/responsive.css
 
 Phase 2 の入口整理で、旧 `app.js` は `src/main.js` に移動しました。`index.html` は `type="module"` で `src/main.js` を読み込みます。
 
-DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は `src/config.js` に分離されています。主要な mutable state は `src/state.js` の `state` object に集約されています。event listener 登録は `src/ui/event-bindings.js` に分離されています。mobile view 切替は `src/ui/mobile-view.js` に分離されています。候補生成と weighted choice は `src/core/candidates.js` に分離されています。音名表示と C 周波数 helper は `src/core/pitch.js` に、fraction / prime-vector / ratio limit 系の純粋関数は `src/core/ratio-math.js` に分離されています。小さな numeric utility は `src/core/utils.js`、cookie helper は `src/storage/cookies.js` に分離されています。翻訳 lookup helper は `src/i18n/i18n.js` に分離されています。
+DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は `src/config.js` に分離されています。主要な mutable state は `src/state.js` の `state` object に集約されています。Diesis collection の cookie 読み書きと発見数更新は `src/diesis/diesis-collection.js` に分離されています。event listener 登録は `src/ui/event-bindings.js` に分離されています。mobile view 切替は `src/ui/mobile-view.js` に分離されています。候補生成と weighted choice は `src/core/candidates.js` に分離されています。音名表示と C 周波数 helper は `src/core/pitch.js` に、fraction / prime-vector / ratio limit 系の純粋関数は `src/core/ratio-math.js` に分離されています。小さな numeric utility は `src/core/utils.js`、cookie helper は `src/storage/cookies.js` に分離されています。翻訳 lookup helper は `src/i18n/i18n.js` に分離されています。
 
 `src/main.js` はまだアプリの大半の責務を持つ entry script です。
 
