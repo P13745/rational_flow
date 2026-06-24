@@ -1,0 +1,26 @@
+.app {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+.workbench {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 260px minmax(380px, 1fr) 460px;
+}
+
+.controls,
+.list-wrap {
+  min-height: 0;
+  overflow: auto;
+  background: var(--panel);
+}
+
+.controls {
+  border-right: 1px solid var(--line);
+  padding: 12px;
+}

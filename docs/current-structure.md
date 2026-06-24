@@ -8,7 +8,7 @@ Rational Flow のレファクタリング前の構造メモです。今後の分
 
 ```text
 index.html             592 lines
-styles.css            3366 lines
+styles/               3354 lines total
 app.js                2458 lines
 translations.js        370 lines
 named_commas_data.js  1878 lines
@@ -22,25 +22,37 @@ README.md               51 lines
 
 現時点では静的文言と翻訳対象が混在しています。将来的には `data-i18n` 系属性を使い、HTML 構造と翻訳処理の結合を下げる予定です。
 
-## styles.css
+## styles/
 
-`styles.css` は全 UI のスタイルを 1 ファイルで持っています。
+Phase 1 で、旧 `styles.css` は `styles/` 配下の機能別 CSS に分割されました。`index.html` は明示的に次の順序で読み込みます。
+
+```text
+styles/tokens.css
+styles/base.css
+styles/layout.css
+styles/header.css
+styles/controls.css
+styles/dialogs.css
+styles/timeline.css
+styles/visualizer.css
+styles/diesis.css
+styles/responsive.css
+```
 
 主な責務は次の通りです。
 
-- token / reset / base controls
-- app layout
-- sidebar controls
-- canvas stage
-- timeline table
-- dialogs
-- Diesis List
-- mobile layout
-- header / transport の responsive 調整
+- `tokens.css`: color token と CSS variables
+- `base.css`: reset、typography、form、button などの基礎
+- `layout.css`: `.app`、`.workbench`、主要 pane
+- `header.css`: brand、transport、header controls
+- `controls.css`: sidebar controls、readout
+- `dialogs.css`: details/help/timer/preset dialog
+- `timeline.css`: timeline table と event row
+- `visualizer.css`: canvas stage、status、nowline
+- `diesis.css`: Diesis List toolbar と rows
+- `responsive.css`: 既存の breakpoint と後半の refinement 指定
 
-後半には `Final`, `Last`, `proposal`, `refinement` などの作業履歴コメント付き override が多く残っています。特に header、transport、Diesis toolbar、mobile layout は後ろの指定ほど強く、どの指定が最終的に効いているか追いづらくなっています。
-
-Phase 1 では CSS を `styles/` 配下に機能別分割し、最終的に効く指定を正式な場所へ移します。
+挙動維持を優先したため、後半の `Final`, `Last`, `proposal`, `refinement` などの作業履歴コメント付き override は、まだ主に `responsive.css` に残っています。次の整理段階では、これらを正式な component CSS へ吸収し、不要な重複を削除します。
 
 ## app.js
 
