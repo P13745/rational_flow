@@ -1,6 +1,7 @@
 import { els } from "./dom.js";
 import { state } from "./state.js";
 import { cFrequency, nearestPitchLabel } from "./core/pitch.js";
+import { clamp, randomBetween } from "./core/utils.js";
 import {
   addVectors,
   approximateFraction,
@@ -19,6 +20,7 @@ import {
   vectorKey,
   vectorToSafeFraction,
 } from "./core/ratio-math.js";
+import { readCookie, writeCookie } from "./storage/cookies.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
 import { diesisCollectionCookie, initialSeedDelay, tableRenderInterval } from "./config.js";
 
@@ -193,14 +195,6 @@ const i18nHelpTargets = [
   ["#helpTable li:nth-child(4) span", "help.tableDepth"],
   ["#helpTable li:nth-child(5) span", "help.tableRatio"],
 ];
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function randomBetween(min, max) {
-  return min + (max - min) * Math.random();
-}
-
 function t(key) {
   const source = window.RF_I18N?.[state.currentLanguage] || window.RF_I18N?.ja || {};
   return key.split(".").reduce((value, part) => value?.[part], source) ?? key;
@@ -271,20 +265,6 @@ function setMobileView(view) {
   });
   if (nextView === "list") renderTable();
   window.requestAnimationFrame(drawCanvas);
-}
-
-function readCookie(name) {
-  const encoded = `${encodeURIComponent(name)}=`;
-  return document.cookie
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(encoded))
-    ?.slice(encoded.length) || "";
-}
-
-function writeCookie(name, value, maxAgeDays = 3650) {
-  const maxAge = Math.max(1, Math.floor(maxAgeDays * 86400));
-  document.cookie = `${encodeURIComponent(name)}=${value}; max-age=${maxAge}; path=/; SameSite=Lax`;
 }
 
 function loadDiesisCollection() {
