@@ -22,6 +22,7 @@ import {
 } from "./core/ratio-math.js";
 import { readCookie, writeCookie } from "./storage/cookies.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
+import { setMobileView as applyMobileView } from "./ui/mobile-view.js";
 import { diesisCollectionCookie, initialSeedDelay, tableRenderInterval } from "./config.js";
 
 const i18nTargets = [
@@ -254,17 +255,7 @@ function toggleLanguage() {
 }
 
 function setMobileView(view) {
-  const nextView = ["controls", "main", "list"].includes(view) ? view : "main";
-  document.body.dataset.mobileView = nextView;
-  [
-    [els.mobileControlsView, "controls"],
-    [els.mobileMainView, "main"],
-    [els.mobileListView, "list"],
-  ].forEach(([button, buttonView]) => {
-    button.classList.toggle("active", buttonView === nextView);
-  });
-  if (nextView === "list") renderTable();
-  window.requestAnimationFrame(drawCanvas);
+  applyMobileView(view, { renderTable, drawCanvas });
 }
 
 function loadDiesisCollection() {
