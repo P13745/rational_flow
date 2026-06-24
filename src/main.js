@@ -21,6 +21,7 @@ import {
   vectorToSafeFraction,
 } from "./core/ratio-math.js";
 import { readCookie, writeCookie } from "./storage/cookies.js";
+import { localizedField, t } from "./i18n/i18n.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
 import { setMobileView as applyMobileView } from "./ui/mobile-view.js";
 import { diesisCollectionCookie, initialSeedDelay, tableRenderInterval } from "./config.js";
@@ -196,18 +197,6 @@ const i18nHelpTargets = [
   ["#helpTable li:nth-child(4) span", "help.tableDepth"],
   ["#helpTable li:nth-child(5) span", "help.tableRatio"],
 ];
-function t(key) {
-  const source = window.RF_I18N?.[state.currentLanguage] || window.RF_I18N?.ja || {};
-  return key.split(".").reduce((value, part) => value?.[part], source) ?? key;
-}
-
-function localizedField(value) {
-  if (value && typeof value === "object") {
-    return value[state.currentLanguage] ?? value.ja ?? value.en ?? "";
-  }
-  return value ?? "";
-}
-
 function setCheckboxLabel(input, text) {
   if (!input?.parentNode) return;
   [...input.parentNode.childNodes].forEach((node) => {
