@@ -39,6 +39,11 @@ import {
   loadSelectedPreset as applySelectedPreset,
   renderPresetBrowser,
 } from "./ui/preset-browser.js";
+import {
+  timerBadgeText as formatTimerBadgeText,
+  timerCountdownText as formatTimerCountdownText,
+  timerStatusText as formatTimerStatusText,
+} from "./ui/timer-labels.js";
 import { initialSeedDelay, tableRenderInterval } from "./config.js";
 
 const i18nTargets = [
@@ -1451,23 +1456,23 @@ function updateLabels() {
 }
 
 function timerCountdownText() {
-  if (state.timerEndTime === null) return "";
-  const remaining = Math.max(0, state.timerEndTime - timelineNow());
-  const minutes = Math.floor(remaining / 60);
-  const seconds = Math.floor(remaining % 60);
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+  return formatTimerCountdownText(state.timerEndTime, timelineNow());
 }
 
 function timerStatusText() {
-  if (state.timerCompleted) return "Done";
-  const countdown = timerCountdownText();
-  if (!countdown) return "No Timer Set";
-  return `${countdown} left`;
+  return formatTimerStatusText({
+    timerCompleted: state.timerCompleted,
+    timerEndTime: state.timerEndTime,
+    now: timelineNow(),
+  });
 }
 
 function timerBadgeText() {
-  if (state.timerCompleted) return "Done";
-  return timerCountdownText() || "OFF";
+  return formatTimerBadgeText({
+    timerCompleted: state.timerCompleted,
+    timerEndTime: state.timerEndTime,
+    now: timelineNow(),
+  });
 }
 
 function render(forceTable = false) {
