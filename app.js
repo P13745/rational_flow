@@ -41,6 +41,7 @@ const els = {
   timerBadge: document.querySelector("#timerBadge"),
   timerClose: document.querySelector("#timerClose"),
   timerDialog: document.querySelector("#timerDialog"),
+  mobileToolsToggle: document.querySelector("#mobileToolsToggle"),
   volume: document.querySelector("#volume"),
   allowDuplication: document.querySelector("#allowDuplication"),
   rootedDepth: document.querySelector("#rootedDepth"),
@@ -2074,6 +2075,15 @@ function timerBadgeText() {
   return timerCountdownText() || "OFF";
 }
 
+function setMobileToolsOpen(open) {
+  const isOpen = Boolean(open);
+  const transport = document.querySelector(".transport");
+  if (!transport || !els.mobileToolsToggle) return;
+  transport.dataset.toolsOpen = String(isOpen);
+  els.mobileToolsToggle.setAttribute("aria-expanded", String(isOpen));
+  els.mobileToolsToggle.textContent = isOpen ? "Less ▴" : "More ▾";
+}
+
 function render(forceTable = false) {
   updateLabels();
   drawCanvas();
@@ -2379,6 +2389,13 @@ els.diesisLimitFilter.addEventListener("change", () => {
   diesisLimitFilter = value === "all" ? Infinity : Number(value);
   renderDiesisList();
 });
+if (els.mobileToolsToggle) {
+  els.mobileToolsToggle.addEventListener("click", () => {
+    const transport = document.querySelector(".transport");
+    setMobileToolsOpen(transport?.dataset.toolsOpen !== "true");
+  });
+}
+
 els.timerOpen.addEventListener("click", () => {
   if (typeof els.timerDialog.showModal === "function") {
     els.timerDialog.showModal();

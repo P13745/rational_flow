@@ -12,14 +12,14 @@
         <div class="brand">
           <div class="title-row">
             <h1><span class="title-line">Rational</span><span class="title-line">Flow <span class="version-label">v0.2.3</span></span></h1>
-            <div class="title-actions">
-              <button id="helpOpen" class="top-help-button" type="button">Help</button>
-              <button id="languageToggle" class="top-help-button" type="button" title="Language">EN</button>
-            </div>
           </div>
           <p>Slowly Evolving Harmonic Currents</p>
         </div>
-        <div class="transport" aria-label="Transport">
+        <div class="title-actions">
+          <button id="helpOpen" class="top-help-button" type="button">Help</button>
+          <button id="languageToggle" class="top-help-button" type="button" title="Language">EN</button>
+        </div>
+        <div class="transport" aria-label="Transport" data-tools-open="false">
           <div class="transport-group playback-group-top">
             <button id="startStop" class="primary" type="button" title="Play / Stop">▶</button>
             <button id="pauseResume" type="button" title="Pause / Resume">Ⅱ</button>
@@ -30,7 +30,8 @@
             <button id="seed" type="button" title="Add Seed">＋</button>
             <button id="clear" type="button" title="Clear">Clear</button>
           </div>
-          <div class="transport-lower">
+          <button id="mobileToolsToggle" class="mobile-tools-toggle" type="button" aria-expanded="false">More ▾</button>
+          <div class="transport-lower" id="transportTools">
             <div class="transport-group diesis-group">
               <button id="diesisOpen" class="diesis-nav-button" type="button">Diesis List…</button>
               <select id="globalRatioDisplay" class="transport-select" title="Ratio Display">
