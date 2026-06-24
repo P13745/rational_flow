@@ -8,6 +8,18 @@ Rational Flow は、周波数比から少しずつ音を派生させる生成音
 
 GitHub Pages で公開する場合は、このリポジトリの `index.html` をそのまま使えます。
 
+## 開発時の起動
+
+このアプリは静的ファイルだけで動きます。ローカルで確認するときは、リポジトリ直下で簡易サーバーを起動します。
+
+```bash
+python3 -m http.server 8000
+```
+
+その後、ブラウザで `http://localhost:8000/` を開きます。ファイルを直接開くこともできますが、今後 ES modules へ移行するため、開発時はローカルサーバー経由で確認する方針です。
+
+レファクタリング時の回帰確認項目は [docs/refactoring-checklist.md](docs/refactoring-checklist.md) にまとめています。構成の現状メモは [docs/current-structure.md](docs/current-structure.md) を参照してください。
+
 ## 現在の対応環境
 
 デスクトップブラウザに加えて、スマートフォン幅では、設定・メイン画面・リストを切り替える簡易レイアウトを用意しています。モバイルでも主要な再生操作、Diesis List、Help、タイムライン確認ができる構成です。
