@@ -1,5 +1,6 @@
 import { els } from "./dom.js";
 import { state } from "./state.js";
+import { registerEventBindings } from "./ui/event-bindings.js";
 import { diesisCollectionCookie, germanPitchClasses, initialSeedDelay, maxSafeRatioInteger, tableRenderInterval } from "./config.js";
 
 const i18nTargets = [
@@ -2171,166 +2172,29 @@ function updateVibratoState() {
   });
 }
 
-els.startStop.addEventListener("click", () => {
-  if (state.isRunning || state.isPaused || state.isDraining) stop();
-  else start();
+registerEventBindings({
+  addManualNote,
+  clearAll,
+  drawCanvas,
+  loadSelectedPreset,
+  render,
+  renderDiesisControls,
+  renderDiesisList,
+  renderPresetBrowser,
+  resetDiesisCollection,
+  setHelpPage,
+  setMobileToolsOpen,
+  setMobileView,
+  setMode,
+  setRatioBias,
+  setSeedMode,
+  start,
+  startCanvasSeed,
+  stop,
+  syncWakeLock,
+  toggleLanguage,
+  togglePause,
 });
-els.languageToggle.addEventListener("click", toggleLanguage);
-[
-  els.mobileControlsView,
-  els.mobileMainView,
-  els.mobileListView,
-].forEach((button) => {
-  button.addEventListener("click", () => setMobileView(button.dataset.mobileView));
-});
-els.pauseResume.addEventListener("click", togglePause);
-els.seedMode.addEventListener("change", () => setSeedMode(els.seedMode.value));
-els.seed.addEventListener("click", addManualNote);
-els.clear.addEventListener("click", clearAll);
-els.visualizer.addEventListener("click", startCanvasSeed);
-els.visualizer.addEventListener("touchstart", startCanvasSeed, { passive: false });
-els.autoMode.addEventListener("click", () => setMode("auto"));
-els.listMode.addEventListener("click", () => setMode("list"));
-els.simpleRatioMode.addEventListener("click", () => setRatioBias("simple"));
-els.equalRatioMode.addEventListener("click", () => setRatioBias("equal"));
-els.complexRatioMode.addEventListener("click", () => setRatioBias("complex"));
-els.detailsOpen.addEventListener("click", () => {
-  if (typeof els.detailsDialog.showModal === "function") {
-    els.detailsDialog.showModal();
-  } else {
-    els.detailsDialog.setAttribute("open", "");
-  }
-});
-els.detailsDialog.addEventListener("click", (event) => {
-  if (event.target === els.detailsDialog) els.detailsDialog.close();
-});
-els.helpOpen.addEventListener("click", () => {
-  setHelpPage("about");
-  if (typeof els.helpDialog.showModal === "function") {
-    els.helpDialog.showModal();
-  } else {
-    els.helpDialog.setAttribute("open", "");
-  }
-});
-els.helpDialog.addEventListener("click", (event) => {
-  if (event.target === els.helpDialog) els.helpDialog.close();
-});
-document.querySelectorAll(".help-tabs button").forEach((button) => {
-  button.addEventListener("click", () => setHelpPage(button.dataset.helpPage));
-});
-els.presetsOpen.addEventListener("click", () => {
-  renderPresetBrowser();
-  if (typeof els.presetsDialog.showModal === "function") {
-    els.presetsDialog.showModal();
-  } else {
-    els.presetsDialog.setAttribute("open", "");
-  }
-});
-els.presetsDialog.addEventListener("click", (event) => {
-  if (event.target === els.presetsDialog) els.presetsDialog.close();
-});
-els.presetLoad.addEventListener("click", loadSelectedPreset);
-els.diesisOpen.addEventListener("click", () => {
-  renderDiesisControls();
-  renderDiesisList();
-  if (typeof els.diesisDialog.showModal === "function") {
-    els.diesisDialog.showModal();
-  } else {
-    els.diesisDialog.setAttribute("open", "");
-  }
-});
-els.diesisDialog.addEventListener("click", (event) => {
-  if (event.target === els.diesisDialog) els.diesisDialog.close();
-});
-function setRatioDisplayMode(nextMode) {
-  state.diesisRatioDisplay = nextMode;
-  renderDiesisControls();
-  renderDiesisList();
-  render(true);
-}
-els.globalRatioDisplay.addEventListener("change", () => setRatioDisplayMode(els.globalRatioDisplay.value));
-els.diesisRatioDisplay.addEventListener("change", () => setRatioDisplayMode(els.diesisRatioDisplay.value));
-els.diesisDerivedToggle.addEventListener("input", () => {
-  state.diesisShowDerived = els.diesisDerivedToggle.checked;
-  renderDiesisList();
-});
-els.diesisPowerToggle.addEventListener("input", () => {
-  state.diesisShowPower = els.diesisPowerToggle.checked;
-  renderDiesisList();
-});
-els.diesisCollectionFilter.addEventListener("change", () => {
-  state.diesisCollectionFilter = els.diesisCollectionFilter.value;
-  renderDiesisList();
-});
-els.diesisLimitFilter.addEventListener("change", () => {
-  const value = els.diesisLimitFilter.value;
-  state.diesisLimitFilter = value === "all" ? Infinity : Number(value);
-  renderDiesisList();
-});
-if (els.mobileToolsToggle) {
-  els.mobileToolsToggle.addEventListener("click", () => {
-    const transport = document.querySelector(".transport");
-    setMobileToolsOpen(transport?.dataset.toolsOpen !== "true");
-  });
-}
-
-els.timerOpen.addEventListener("click", () => {
-  if (typeof els.timerDialog.showModal === "function") {
-    els.timerDialog.showModal();
-  } else {
-    els.timerDialog.setAttribute("open", "");
-  }
-});
-els.timerDialog.addEventListener("click", (event) => {
-  if (event.target === els.timerDialog) els.timerDialog.close();
-});
-els.collectionReset.addEventListener("click", resetDiesisCollection);
-
-[
-  els.nMax,
-  els.dMax,
-  els.ratioBiasCurve,
-  els.fractionList,
-  els.minFreq,
-  els.maxFreq,
-  els.minDur,
-  els.maxDur,
-  els.nextMin,
-  els.nextMax,
-  els.windowSize,
-  els.timerMinutes,
-  els.volume,
-  els.allowDuplication,
-  els.rootedDepth,
-  els.parentBiasBasis,
-  els.parentBiasDirection,
-  els.parentBiasCurve,
-  els.parentBiasStrength,
-  els.ratioIntegerLimit,
-  els.vibratoEnabled,
-  els.vibratoRateMin,
-  els.vibratoRateMax,
-  els.vibratoDepthMin,
-  els.vibratoDepthMax,
-].forEach((el) => el.addEventListener("input", render));
-
-window.addEventListener("resize", drawCanvas);
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") syncWakeLock();
-});
-document.addEventListener("keydown", (event) => {
-  const tagName = document.activeElement?.tagName;
-  if (["INPUT", "TEXTAREA", "SELECT"].includes(tagName)) return;
-  if (event.code === "Space") {
-    event.preventDefault();
-    if (state.isRunning || state.isPaused || state.isDraining) togglePause();
-    else start();
-  }
-  if (event.key.toLowerCase() === "n") {
-    addManualNote();
-  }
-});
-
 loadNamedCommas();
 loadRatioPresets();
 applyLanguage();
