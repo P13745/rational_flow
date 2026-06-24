@@ -32,9 +32,13 @@ import {
   diesisRatioLabel as formatDiesisRatioLabel,
   isDifferenceAudible as isDiesisDifferenceAudible,
 } from "./diesis/diesis-model.js";
-import { localizedField, t } from "./i18n/i18n.js";
+import { t } from "./i18n/i18n.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
 import { setMobileToolsOpen, setMobileView as applyMobileView } from "./ui/mobile-view.js";
+import {
+  loadSelectedPreset as applySelectedPreset,
+  renderPresetBrowser,
+} from "./ui/preset-browser.js";
 import { initialSeedDelay, tableRenderInterval } from "./config.js";
 
 const i18nTargets = [
@@ -1320,45 +1324,8 @@ function appendEventGroup(fragment, label, items, now, rowState, options = {}) {
   }
 }
 
-function renderPresetBrowser() {
-  if (!els.presetList) return;
-  els.presetList.textContent = "";
-  const fragment = document.createDocumentFragment();
-  state.ratioPresets.forEach((preset) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = preset.id === state.selectedPresetId ? "preset-item active" : "preset-item";
-    button.textContent = localizedField(preset.name);
-    button.addEventListener("click", () => {
-      state.selectedPresetId = preset.id;
-      renderPresetBrowser();
-    });
-    fragment.appendChild(button);
-  });
-  els.presetList.appendChild(fragment);
-
-  const selected = state.ratioPresets.find((preset) => preset.id === state.selectedPresetId) || state.ratioPresets[0];
-  if (!selected) {
-    els.presetName.textContent = "---";
-    els.presetDescription.textContent = "---";
-    els.presetRatios.value = "";
-    els.presetLoad.disabled = true;
-    return;
-  }
-
-  els.presetLoad.disabled = false;
-  els.presetName.textContent = localizedField(selected.name);
-  els.presetDescription.textContent = localizedField(selected.description);
-  els.presetRatios.value = selected.ratios.join(", ");
-}
-
 function loadSelectedPreset() {
-  const selected = state.ratioPresets.find((preset) => preset.id === state.selectedPresetId);
-  if (!selected) return;
-  els.fractionList.value = selected.ratios.join(", ");
-  setMode("list");
-  els.presetsDialog.close();
-  render(true);
+  applySelectedPreset({ setMode, render });
 }
 
 function renderDiesisControls() {
