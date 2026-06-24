@@ -32,6 +32,12 @@ import {
   diesisRatioLabel as formatDiesisRatioLabel,
   isDifferenceAudible as isDiesisDifferenceAudible,
 } from "./diesis/diesis-model.js";
+import {
+  activeAt,
+  descendantIds,
+  exactRatioBetween,
+  hasDuplicateFrequency,
+} from "./generation/note-model.js";
 import { t } from "./i18n/i18n.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
 import { setMobileToolsOpen, setMobileView as applyMobileView } from "./ui/mobile-view.js";
@@ -628,10 +634,6 @@ function addNote(frequency, duration, start, ratio = "", baseFrequency = null, g
   return note;
 }
 
-function activeAt(time) {
-  return state.notes.filter((note) => note.start <= time && note.start + note.duration >= time);
-}
-
 function seedNote(offset = 2, durationOverride = null, frequencyOverride = null) {
   const settings = getSettings();
   const frequency = frequencyOverride ?? randomBetween(settings.minFreq, settings.maxFreq);
@@ -687,10 +689,6 @@ function noteAtCanvasPoint(clientX, clientY) {
 
 function rightEdgeOffset() {
   return getSettings().windowSize / 2;
-}
-
-function hasDuplicateFrequency(frequency, atTime) {
-  return activeAt(atTime).some((note) => Math.abs(note.frequency - frequency) < 0.001);
 }
 
 function addGeneratedChild(playTime) {
@@ -920,26 +918,6 @@ function chooseRootedDepthGroup(groups, settings) {
       : 1 + target * curvePower;
     return { note: item.group, weight };
   })).note;
-}
-
-function descendantIds(rootId) {
-  const ids = new Set([rootId]);
-  let changed = true;
-  while (changed) {
-    changed = false;
-    state.notes.forEach((note) => {
-      if (!ids.has(note.id) && ids.has(note.parentId)) {
-        ids.add(note.id);
-        changed = true;
-      }
-    });
-  }
-  return ids;
-}
-
-function exactRatioBetween(low, high) {
-  if (!low.absoluteVector || !high.absoluteVector || low.rootId !== high.rootId) return null;
-  return subtractVectors(high.absoluteVector, low.absoluteVector);
 }
 
 function findCloseActivePairs(activeNotes) {
