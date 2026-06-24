@@ -9,12 +9,13 @@ Rational Flow のレファクタリング前の構造メモです。今後の分
 ```text
 index.html             601 lines
 styles/               3354 lines total
-src/main.js           2188 lines
+src/main.js           1950 lines
 src/dom.js              82 lines
 src/config.js            5 lines
 src/state.js            39 lines
 src/ui/event-bindings.js 171 lines
 src/core/pitch.js       14 lines
+src/core/ratio-math.js 257 lines
 translations.js        370 lines
 named_commas_data.js  1878 lines
 ratio_presets_data.js  304 lines
@@ -63,7 +64,7 @@ styles/responsive.css
 
 Phase 2 の入口整理で、旧 `app.js` は `src/main.js` に移動しました。`index.html` は `type="module"` で `src/main.js` を読み込みます。
 
-DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は `src/config.js` に分離されています。主要な mutable state は `src/state.js` の `state` object に集約されています。event listener 登録は `src/ui/event-bindings.js` に分離されています。音名表示と C 周波数 helper は `src/core/pitch.js` に分離されています。
+DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は `src/config.js` に分離されています。主要な mutable state は `src/state.js` の `state` object に集約されています。event listener 登録は `src/ui/event-bindings.js` に分離されています。音名表示と C 周波数 helper は `src/core/pitch.js` に、fraction / prime-vector / ratio limit 系の純粋関数は `src/core/ratio-math.js` に分離されています。
 
 `src/main.js` はまだアプリの大半の責務を持つ entry script です。
 
@@ -75,7 +76,7 @@ DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は 
 - mobile view 切替
 - cookie-based Diesis collection
 - Help page 切替
-- fraction / ratio / prime-vector 計算
+- mode / settings 読み取り
 - named commas / presets の install
 - settings 読み取り
 - candidate generation と parent choice
@@ -90,7 +91,7 @@ DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は 
 - wake lock
 - `src/ui/event-bindings.js` に渡す handler 群
 
-`src/main.js` はまだ state を直接読み書きし、主要ロジックも多く残っています。Phase 3 では、まず挙動に影響しにくい pitch helper だけを `src/core/pitch.js` に移しました。次の分割では、fraction / ratio / prime-vector 計算、Diesis、audio/scheduler、UI rendering を段階的に feature module へ移します。
+`src/main.js` はまだ state を直接読み書きし、主要ロジックも多く残っています。Phase 3 では、まず挙動に影響しにくい pitch helper を `src/core/pitch.js` に移し、続いて fraction / prime-vector / ratio limit 系の純粋関数を `src/core/ratio-math.js` に移しました。次の分割では、Diesis、audio/scheduler、UI rendering を段階的に feature module へ移します。
 
 ## translations.js
 
