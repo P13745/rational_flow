@@ -34,7 +34,7 @@ import {
 } from "./diesis/diesis-model.js";
 import { localizedField, t } from "./i18n/i18n.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
-import { setMobileView as applyMobileView } from "./ui/mobile-view.js";
+import { setMobileToolsOpen, setMobileView as applyMobileView } from "./ui/mobile-view.js";
 import { initialSeedDelay, tableRenderInterval } from "./config.js";
 
 const i18nTargets = [
@@ -1513,15 +1513,6 @@ function timerStatusText() {
 function timerBadgeText() {
   if (state.timerCompleted) return "Done";
   return timerCountdownText() || "OFF";
-}
-
-function setMobileToolsOpen(open) {
-  const isOpen = Boolean(open);
-  const transport = document.querySelector(".transport");
-  if (!transport || !els.mobileToolsToggle) return;
-  transport.dataset.toolsOpen = String(isOpen);
-  els.mobileToolsToggle.setAttribute("aria-expanded", String(isOpen));
-  els.mobileToolsToggle.textContent = isOpen ? "Less ▴" : "More ▾";
 }
 
 function render(forceTable = false) {
