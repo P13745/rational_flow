@@ -9,18 +9,24 @@ Rational Flow のレファクタリング前の構造メモです。今後の分
 ```text
 index.html             603 lines
 styles/               3350 lines total
-src/main.js           1259 lines
+src/main.js            914 lines
 src/dom.js              82 lines
 src/config.js            5 lines
 src/state.js            39 lines
 src/audio/audio-engine.js 163 lines
 src/audio/preview.js    38 lines
 src/audio/wake-lock.js  35 lines
+src/data/loaders.js     70 lines
 src/diesis/diesis-collection.js 45 lines
 src/diesis/diesis-model.js 31 lines
 src/diesis/diesis-view.js 101 lines
+src/generation/depth-normalization.js 63 lines
+src/generation/scheduler.js 56 lines
+src/i18n/targets.js    167 lines
+src/ui/active-ratio.js  32 lines
 src/ui/canvas-metrics.js 50 lines
 src/ui/canvas-primitives.js 30 lines
+src/ui/control-state.js 36 lines
 src/ui/dialogs.js       25 lines
 src/ui/event-bindings.js 157 lines
 src/ui/marker-layout.js 53 lines
@@ -87,7 +93,7 @@ styles/header-responsive.css
 
 Phase 2 の入口整理で、旧 `app.js` は `src/main.js` に移動しました。`index.html` は `type="module"` で `src/main.js` を読み込みます。
 
-DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は `src/config.js` に分離されています。主要な mutable state は `src/state.js` の `state` object に集約されています。通常 note audio の scheduling / pause / stop helper は `src/audio/audio-engine.js`、Preview audio の oscillator / gain 生成は `src/audio/preview.js`、Wake Lock の取得と解放は `src/audio/wake-lock.js` に分離されています。Diesis collection の cookie 読み書きと発見数更新は `src/diesis/diesis-collection.js` に分離されています。Diesis の ratio label と preview frequency 計算は `src/diesis/diesis-model.js`、Diesis List の DOM 生成は `src/diesis/diesis-view.js` に分離されています。event listener 登録は `src/ui/event-bindings.js` に分離されています。canvas metrics / hit test は `src/ui/canvas-metrics.js`、canvas primitive は `src/ui/canvas-primitives.js`、marker label layout は `src/ui/marker-layout.js` に分離されています。dialog helper は `src/ui/dialogs.js`、mobile view 切替は `src/ui/mobile-view.js`、preset browser は `src/ui/preset-browser.js`、timer label formatting は `src/ui/timer-labels.js`、timeline table rendering は `src/ui/timeline-table.js` に分離されています。note model helper は `src/generation/note-model.js` に分離されています。候補生成と weighted choice は `src/core/candidates.js` に分離されています。音名表示と C 周波数 helper は `src/core/pitch.js` に、fraction / prime-vector / ratio limit 系の純粋関数は `src/core/ratio-math.js` に分離されています。小さな numeric utility は `src/core/utils.js`、cookie helper は `src/storage/cookies.js` に分離されています。翻訳 lookup helper は `src/i18n/i18n.js` に分離されています。
+DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は `src/config.js` に分離されています。主要な mutable state は `src/state.js` の `state` object に集約されています。通常 note audio の scheduling / pause / stop helper は `src/audio/audio-engine.js`、Preview audio の oscillator / gain 生成は `src/audio/preview.js`、Wake Lock の取得と解放は `src/audio/wake-lock.js` に分離されています。Data file の JSON / JS fallback 読み込みは `src/data/loaders.js` に分離されています。Diesis collection の cookie 読み書きと発見数更新は `src/diesis/diesis-collection.js` に分離されています。Diesis の ratio label と preview frequency 計算は `src/diesis/diesis-model.js`、Diesis List の DOM 生成は `src/diesis/diesis-view.js` に分離されています。event listener 登録は `src/ui/event-bindings.js` に分離されています。canvas metrics / hit test は `src/ui/canvas-metrics.js`、canvas primitive は `src/ui/canvas-primitives.js`、marker label layout は `src/ui/marker-layout.js` に分離されています。dialog helper は `src/ui/dialogs.js`、mobile view 切替は `src/ui/mobile-view.js`、preset browser は `src/ui/preset-browser.js`、timer label formatting は `src/ui/timer-labels.js`、timeline table rendering は `src/ui/timeline-table.js` に分離されています。Active Ratio の表示文字列は `src/ui/active-ratio.js`、設定 UI の従属状態は `src/ui/control-state.js` に分離されています。note model helper は `src/generation/note-model.js`、depth normalization は `src/generation/depth-normalization.js`、generation event queue は `src/generation/scheduler.js` に分離されています。候補生成と weighted choice は `src/core/candidates.js` に分離されています。音名表示と C 周波数 helper は `src/core/pitch.js` に、fraction / prime-vector / ratio limit 系の純粋関数は `src/core/ratio-math.js` に分離されています。小さな numeric utility は `src/core/utils.js`、cookie helper は `src/storage/cookies.js` に分離されています。翻訳 lookup helper は `src/i18n/i18n.js`、selector based i18n target list は `src/i18n/targets.js` に分離されています。
 
 `src/main.js` はまだアプリの大半の責務を持つ entry script です。
 
@@ -100,11 +106,11 @@ DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は 
 - cookie-based Diesis collection
 - Help page 切替
 - mode / settings 読み取り
-- named commas / presets の install
+- named commas / presets の読み込み結果の反映
 - settings 読み取り
 - candidate generation と parent choice
 - Web Audio の作成、schedule、preview、pause / resume / stop
-- note model と generation scheduler
+- note model と generation scheduler の wiring
 - canvas hit testing と drawing
 - diesis marker 検出と label 配置
 - timeline table rendering
@@ -114,19 +120,19 @@ DOM 参照は `src/dom.js` の `els` に分離され、固定定数の一部は 
 - wake lock
 - `src/ui/event-bindings.js` に渡す handler 群
 
-`src/main.js` はまだ state を直接読み書きし、主要ロジックも多く残っています。Phase 3 では、まず挙動に影響しにくい pitch helper を `src/core/pitch.js` に移し、続いて fraction / prime-vector / ratio limit 系の純粋関数を `src/core/ratio-math.js` に移しました。候補生成と parent choice の計算は `src/core/candidates.js` に移しました。次の分割では、Diesis、audio/scheduler、UI rendering を段階的に feature module へ移します。
+`src/main.js` はまだ state を直接読み書きし、主要ロジックも残っています。Phase 3 では、まず挙動に影響しにくい pitch helper を `src/core/pitch.js` に移し、続いて fraction / prime-vector / ratio limit 系の純粋関数を `src/core/ratio-math.js` に移しました。候補生成と parent choice の計算は `src/core/candidates.js` に移しました。さらに Diesis、audio helper、generation scheduler、depth normalization、Active Ratio 表示、設定 UI 状態、data loading、i18n targets を段階的に module 化しました。次の分割では、canvas rendering と app controller の責務をさらに下げます。
 
 ## translations.js
 
 `translations.js` は `window.RF_I18N` として UI 文言を提供しています。`src/main.js` 側の selector 対応表で DOM に適用されます。
 
-現状の弱点は、HTML 構造変更や selector 変更で翻訳適用が壊れやすいことです。Phase 7 では `src/i18n/messages.js` と `data-i18n` 属性ベースへ移行する予定です。
+現状の弱点は、HTML 構造変更や selector 変更で翻訳適用が壊れやすいことです。selector list は `src/i18n/targets.js` に移しましたが、Phase 7 では `src/i18n/messages.js` と `data-i18n` 属性ベースへ移行する予定です。
 
 ## Data Files
 
 `named_commas_data.js` と `ratio_presets_data.js` は、それぞれ `window.NAMED_COMMAS_DATA`、`window.RATIO_PRESETS_DATA` を提供しています。
 
-対応する `.json` ファイルも残っていますが、現行アプリ実行時に直接読み込まれているのは `.js` 側です。Phase 2 以降もしばらくは window global 方式を維持し、後の段階で `data/` 配下へ移動する方針です。
+対応する `.json` ファイルも残っています。現行アプリは `src/data/loaders.js` で JSON fetch を先に試し、file open や fetch 失敗時には `.js` 側の window global fallback を使います。GitHub Pages では JSON を正として読み込み、ローカル直開きでは JS fallback が保険になります。
 
 ## Current Script Loading
 

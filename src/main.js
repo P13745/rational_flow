@@ -18,11 +18,6 @@ import {
   addVectors,
   approximateFraction,
   fractionLabel,
-  normalizeVectorsToPositive,
-  parseFraction,
-  positiveVectorFactorLabel,
-  subtractVectors,
-  tryIntegerRatioFromVectors,
   vectorFactorLabel,
   vectorFromFraction,
   vectorKey,
@@ -30,10 +25,10 @@ import {
 } from "./core/ratio-math.js";
 import {
   diesisIndex,
-  loadDiesisCollection,
   markDiesisDiscovered as recordDiesisDiscovered,
   resetDiesisCollection as clearDiesisCollection,
 } from "./diesis/diesis-collection.js";
+import { loadNamedCommas, loadRatioPresets } from "./data/loaders.js";
 import {
   diesisFrequencies as getDiesisFrequencies,
   diesisRatioLabel as formatDiesisRatioLabel,
@@ -45,11 +40,13 @@ import {
 } from "./diesis/diesis-view.js";
 import {
   activeAt,
-  descendantIds,
   exactRatioBetween,
   hasDuplicateFrequency,
 } from "./generation/note-model.js";
+import { normalizeNoteGenerations } from "./generation/depth-normalization.js";
+import { fillGenerationEventQueue } from "./generation/scheduler.js";
 import { t } from "./i18n/i18n.js";
+import { i18nHelpTargets, i18nTargets } from "./i18n/targets.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
 import {
   canvasMetrics as getCanvasMetrics,
@@ -58,6 +55,12 @@ import {
   rightEdgeOffset as getRightEdgeOffset,
 } from "./ui/canvas-metrics.js";
 import { drawRoundedRect, fitCanvasText } from "./ui/canvas-primitives.js";
+import { activeRatioText as formatActiveRatioText } from "./ui/active-ratio.js";
+import {
+  updateParentDirectionLabels as syncParentDirectionControls,
+  updateRatioCurveState as syncRatioCurveControls,
+  updateVibratoState as syncVibratoControls,
+} from "./ui/control-state.js";
 import { closePairLabel, placeMarkerLabel } from "./ui/marker-layout.js";
 import { setMobileToolsOpen, setMobileView as applyMobileView } from "./ui/mobile-view.js";
 import {
@@ -72,177 +75,11 @@ import {
 import { renderTimelineTable } from "./ui/timeline-table.js";
 import { initialSeedDelay, tableRenderInterval } from "./config.js";
 
-const i18nTargets = [
-  ["header > div > p", "subtitle"],
-  ["header .transport", "transport.label", "aria-label"],
-  [".mobile-view-switch", "mobile.ariaLabel", "aria-label"],
-  ["#mobileControlsView", "mobile.controls"],
-  ["#mobileMainView", "mobile.main"],
-  ["#mobileListView", "mobile.list"],
-  ["#startStop", "transport.startStopTitle", "title"],
-  ["#pauseResume", "transport.pauseTitle", "title"],
-  ["#timerOpen", "labels.timer", "title"],
-  ["#seedMode", "transport.seedModeTitle", "title"],
-  ["#seed", "transport.seedTitle", "title"],
-  ["#clear", "transport.clear"],
-  ["#clear", "transport.clearTitle", "title"],
-  [".controls .hint:nth-of-type(1)", "hints.fractionMode"],
-  [".controls .hint:nth-of-type(2)", "hints.ratioBias"],
-  ['label[for="nMax"]', "labels.numeratorMax"],
-  ['label[for="dMax"]', "labels.denominatorMax"],
-  ['label[for="fractionList"]', "labels.fractions"],
-  ['label[for="minFreq"]', "labels.minHz"],
-  ['label[for="maxFreq"]', "labels.maxHz"],
-  ['label[for="minDur"]', "labels.durationMin"],
-  ['label[for="maxDur"]', "labels.durationMax"],
-  ['label[for="nextMin"]', "labels.nextMin"],
-  ['label[for="nextMax"]', "labels.nextMax"],
-  ['label[for="windowSize"]', "labels.window"],
-  ['label[for="timerMinutes"]', "labels.timerMinutes"],
-  ['label[for="volume"]', "labels.volume"],
-  ["#allowDuplication", "labels.duplicate", "checkbox-label"],
-  ["#rootedDepth", "labels.rootedDepth", "checkbox-label"],
-  ["#collectionReset", "labels.resetCollection"],
-  ["#detailsCollection h3", "dialogs.collectionTitle"],
-  ["#detailsCollection p", "dialogs.collectionText"],
-  ['label[for="parentBiasBasis"]', "labels.parentBias"],
-  [".control-group small", "hints.parentBias"],
-  ["#detailsOpen", "labels.settings"],
-  ["#helpOpen", "labels.help"],
-  ["#diesisOpen", "labels.diesis"],
-  ['#globalRatioDisplay option[value="ratio"]', "dialogs.ratioMode"],
-  ['#globalRatioDisplay option[value="factors"]', "dialogs.factorMode"],
-  [".list-toolbar-title", "labels.timeline"],
-  ["#timerDialog h2", "dialogs.timerTitle"],
-  ["#timerDialog .details-head p", "dialogs.timerIntro"],
-  ["#timerDialog .setting-block:nth-child(1) h3", "dialogs.timerDurationTitle"],
-  ["#timerDialog .setting-block:nth-child(1) p", "dialogs.timerDurationText"],
-  ["#timerDialog .setting-block:nth-child(2) h3", "dialogs.timerStatusTitle"],
-  [".timer-readout div:nth-child(1) small", "labels.timer"],
-  [".stats-readout div:nth-child(1) small", "labels.notes"],
-  [".stats-readout div:nth-child(2) small", "labels.depth"],
-  ["thead th:nth-child(1)", "table.start"],
-  ["thead th:nth-child(2)", "table.hz"],
-  ["thead th:nth-child(3)", "table.duration"],
-  ["thead th:nth-child(4)", "table.depth"],
-  ["thead th:nth-child(5)", "table.ratio"],
-  ["#detailsDialog h2", "dialogs.settingsTitle"],
-  ["#detailsDialog .details-head p", "dialogs.settingsIntro"],
-  ["#detailsClose", "dialogs.closeTitle", "title"],
-  ["#helpDialog h2", "dialogs.helpTitle"],
-  ["#helpDialog .details-head p", "dialogs.helpIntro"],
-  ["#helpClose", "dialogs.closeTitle", "title"],
-  ["#helpTabAbout", "help.aboutTab"],
-  ["#helpTabControls", "help.controlsTab"],
-  ["#helpTabSettings", "help.settingsTab"],
-  ["#presetsDialog h2", "dialogs.presetsTitle"],
-  ["#presetsDialog .details-head p", "dialogs.presetsIntro"],
-  ["#presetsClose", "dialogs.closeTitle", "title"],
-  ["#presetLoad", "dialogs.loadPreset"],
-  ["#diesisDialog h2", "dialogs.diesisTitle"],
-  ["#diesisDialog .details-head p", "dialogs.diesisIntro"],
-  ["#diesisClose", "dialogs.closeTitle", "title"],
-  [".playback-group .toolbar-label", "dialogs.baseNote"],
-  ['label[for="diesisLimitFilter"]', "dialogs.limitFilter"],
-  ["#diesisDerivedToggle", "dialogs.showDerived", "checkbox-label"],
-  ["#diesisPowerToggle", "dialogs.powerForm", "checkbox-label"],
-  ['label[for="diesisCollectionFilter"]', "dialogs.collection"],
-  [".display-group .toolbar-label", "dialogs.ratioDisplay"],
-  ['#diesisRatioDisplay option[value="ratio"]', "dialogs.ratioMode"],
-  ['#diesisRatioDisplay option[value="factors"]', "dialogs.factorMode"],
-];
 
 function timelineNow() {
   return state.isPaused && state.pausedAt !== null ? state.pausedAt : performance.now() / 1000;
 }
 
-const i18nHelpTargets = [
-  ["#detailsDialog .setting-block:nth-child(1) h3", "dialogs.parentBiasTitle"],
-  ["#detailsDialog .setting-block:nth-child(1) p", "dialogs.parentBiasText"],
-  ["#detailsDialog .setting-block:nth-child(2) h3", "dialogs.biasStructureTitle"],
-  ["#detailsDialog .setting-block:nth-child(2) p", "dialogs.biasStructureText"],
-  ["#detailsDialog .setting-block:nth-child(3) h3", "dialogs.ratioSourceTitle"],
-  ["#detailsDialog .setting-block:nth-child(3) p", "dialogs.ratioSourceText"],
-  ["#detailsDialog .setting-block:nth-child(4) h3", "dialogs.timingTitle"],
-  ["#detailsDialog .setting-block:nth-child(4) p", "dialogs.timingText"],
-  ["#detailsDialog .setting-block:nth-child(5) h3", "dialogs.vibratoTitle"],
-  ["#detailsDialog .setting-block:nth-child(5) p", "dialogs.vibratoText"],
-  ["#vibratoEnabled", "labels.vibratoEnabled", "checkbox-label"],
-  [".vibrato-hint", "hints.vibrato"],
-  ['label[for="vibratoRateMin"]', "labels.vibratoRateMin"],
-  ['label[for="vibratoRateMax"]', "labels.vibratoRateMax"],
-  ['label[for="vibratoDepthMin"]', "labels.vibratoDepthMin"],
-  ['label[for="vibratoDepthMax"]', "labels.vibratoDepthMax"],
-  ['label[for="ratioIntegerLimit"]', "labels.ratioIntegerLimit"],
-  [".ratio-limit-hint", "hints.ratioIntegerLimit"],
-  ["#helpAppOverview h3", "help.appTitle"],
-  ["#helpAppOverview p", "help.appText"],
-  ["#helpTerms h3", "help.termsTitle"],
-  ["#helpTerms li:nth-child(1) span", "help.termSeed"],
-  ["#helpTerms li:nth-child(2) span", "help.termDrone"],
-  ["#helpTerms li:nth-child(3) span", "help.termParent"],
-  ["#helpTerms li:nth-child(4) span", "help.termChild"],
-  ["#helpTerms li:nth-child(5) span", "help.termRatio"],
-  ["#helpTerms li:nth-child(6) span", "help.termTree"],
-  ["#helpTerms li:nth-child(7) span", "help.termDepth"],
-  ["#helpBasicFlow h3", "help.basicTitle"],
-  ["#helpBasicFlow p", "help.basicText"],
-  ["#helpCanvas h3", "help.canvasTitle"],
-  ["#helpCanvas p", "help.canvasText"],
-  ["#helpTransport h3", "help.transportTitle"],
-  ["#helpTransport li:nth-child(1) span", "help.play"],
-  ["#helpTransport li:nth-child(2) span", "help.pause"],
-  ["#helpTransport li:nth-child(3) span", "help.stop"],
-  ["#helpTransport li:nth-child(4) span", "help.clear"],
-  ["#helpSeedDroneControl h3", "help.seedDroneTitle"],
-  ["#helpSeedDroneControl p", "help.seedDrone"],
-  ["#helpPlusControl h3", "help.plusTitle"],
-  ["#helpPlusControl p", "help.plus"],
-  ["#helpCanvasTapControl h3", "help.canvasTapTitle"],
-  ["#helpCanvasTapControl p", "help.canvasTap"],
-  ["#helpRatioSource h3", "dialogs.ratioSourceTitle"],
-  ["#helpRatioSource li:nth-child(1) span", "help.ratioAuto"],
-  ["#helpRatioSource li:nth-child(2) span", "help.ratioList"],
-  ["#helpRatioSource li:nth-child(3) span", "help.ratioNumerator"],
-  ["#helpRatioSource li:nth-child(4) span", "help.ratioDenominator"],
-  ["#helpRatioSource li:nth-child(5) span", "help.ratioSimple"],
-  ["#helpRatioSource li:nth-child(6) span", "help.ratioComplex"],
-  ["#helpRatioSource li:nth-child(7) span", "help.ratioLinear"],
-  ["#helpRatioSource li:nth-child(8) span", "help.ratioExponential"],
-  ["#helpRatioSource li:nth-child(9) span", "help.ratioEqual"],
-  ["#helpPitchRange h3", "help.pitchRangeTitle"],
-  ["#helpPitchRange li:nth-child(1) span", "help.minHz"],
-  ["#helpPitchRange li:nth-child(2) span", "help.maxHz"],
-  ["#helpPitchRange li:nth-child(3) span", "help.volume"],
-  ["#helpTiming h3", "dialogs.timingTitle"],
-  ["#helpTiming li:nth-child(1) span", "help.timingDurationMin"],
-  ["#helpTiming li:nth-child(2) span", "help.timingDurationMax"],
-  ["#helpTiming li:nth-child(3) span", "help.timingNextMin"],
-  ["#helpTiming li:nth-child(4) span", "help.timingNextMax"],
-  ["#helpTiming li:nth-child(5) span", "help.timingWindow"],
-  ["#helpParentBias h3", "dialogs.parentBiasTitle"],
-  ["#helpParentBias li:nth-child(1) span", "help.parentEqual"],
-  ["#helpParentBias li:nth-child(2) span", "help.parentDepth"],
-  ["#helpParentBias li:nth-child(3) span", "help.parentRooted"],
-  ["#helpParentBias li:nth-child(4) span", "help.parentTime"],
-  ["#helpParentBias li:nth-child(5) span", "help.parentLinear"],
-  ["#helpParentBias li:nth-child(6) span", "help.parentExponential"],
-  ["#helpParentBias li:nth-child(7) span", "help.parentStrength"],
-  ["#helpVibrato h3", "dialogs.vibratoTitle"],
-  ["#helpVibrato p", "help.vibratoText"],
-  ["#helpDepth h3", "help.depthTitle"],
-  ["#helpDepth p", "help.depthText"],
-  ["#helpActiveRatio h3", "help.activeRatioTitle"],
-  ["#helpActiveRatio p", "help.activeRatioText"],
-  ["#helpDiesisMarker h3", "help.diesisTitle"],
-  ["#helpDiesisMarker p", "help.diesisText"],
-  ["#helpTable h3", "help.tableTitle"],
-  ["#helpTable li:nth-child(1) span", "help.tableStart"],
-  ["#helpTable li:nth-child(2) span", "help.tableHz"],
-  ["#helpTable li:nth-child(3) span", "help.tableDur"],
-  ["#helpTable li:nth-child(4) span", "help.tableDepth"],
-  ["#helpTable li:nth-child(5) span", "help.tableRatio"],
-];
 function setCheckboxLabel(input, text) {
   if (!input?.parentNode) return;
   [...input.parentNode.childNodes].forEach((node) => {
@@ -309,64 +146,6 @@ function ratioDisplayFromVector(vector, preferredMode = state.diesisRatioDisplay
     if (frac) return fractionLabel(frac);
   }
   return vectorFactorLabel(vector);
-}
-
-function installNamedCommas(data) {
-  if (!data?.intervals) return false;
-  state.namedCommaIntervals = data.intervals;
-  state.namedCommaByVectorKey = new Map();
-  data.intervals.forEach((entry) => {
-    const frac = parseFraction(entry.ratio);
-    if (!frac) return;
-    const key = vectorKey(vectorFromFraction(frac));
-    state.namedCommaByVectorKey.set(key, entry);
-  });
-  loadDiesisCollection();
-  if (els.diesisDialog.open) {
-    renderDiesisControls();
-    renderDiesisList();
-  }
-  return true;
-}
-
-async function loadNamedCommas() {
-  const hasFallback = installNamedCommas(window.NAMED_COMMAS_DATA);
-  if (hasFallback) render();
-  try {
-    const response = await fetch("named_commas.json");
-    if (!response.ok) throw new Error("named commas unavailable");
-    const data = await response.json();
-    if (installNamedCommas(data)) render();
-  } catch (_) {
-    // The generated JS fallback is installed before fetch, so direct file opening still works.
-    if (!hasFallback && installNamedCommas(window.NAMED_COMMAS_DATA)) render();
-  }
-}
-
-function installRatioPresets(data) {
-  if (!data?.presets?.length) return false;
-  state.ratioPresets = data.presets;
-  state.selectedPresetId = state.ratioPresets[0]?.id || "";
-  renderPresetBrowser();
-  return true;
-}
-
-async function loadRatioPresets() {
-  try {
-    const response = await fetch("ratio_presets.json");
-    if (!response.ok) throw new Error("ratio presets unavailable");
-    const data = await response.json();
-    installRatioPresets(data);
-  } catch (_) {
-    installRatioPresets(window.RATIO_PRESETS_DATA);
-  }
-}
-
-function relativeVectorForActiveNote(note, base) {
-  if (note.absoluteVector && base.absoluteVector && note.rootId === base.rootId) {
-    return subtractVectors(note.absoluteVector, base.absoluteVector);
-  }
-  return vectorFromFraction(approximateFraction(note.frequency / base.frequency));
 }
 
 function getSettings() {
@@ -625,49 +404,18 @@ function queueScheduler(seconds) {
   state.schedulerTimer = window.setTimeout(scheduleNext, Math.max(120, seconds * 1000));
 }
 
-function sampleEventWait(settings) {
-  const mean = (settings.nextMin + settings.nextMax) / 2;
-  const exponential = -Math.log(Math.max(0.000001, 1 - Math.random())) * mean;
-  return clamp(exponential, settings.nextMin, settings.nextMax);
-}
-
-function firstSeedReadyTime(now) {
-  if (state.notes.some((note) => note.generation > 0)) return now;
-  const living = state.notes.filter((note) => note.start + note.duration >= now);
-  if (!living.length) return Infinity;
-  return Math.min(...living.map((note) => Math.max(now, note.start + initialSeedDelay)));
-}
-
 function fillEventQueue() {
   const settings = getSettings();
   const now = performance.now() / 1000;
-  if (state.timerEndTime !== null && now >= state.timerEndTime) {
-    finishTimedRun();
-    return;
-  }
-  const horizon = now + rightEdgeOffset();
-  const readyAt = firstSeedReadyTime(now);
-  if (!Number.isFinite(readyAt)) return;
-  if (state.nextEventTime === null || state.nextEventTime < now) {
-    state.nextEventTime = Math.max(now, readyAt) + sampleEventWait(settings);
-  }
-
-  let guard = 0;
-  while (state.nextEventTime <= horizon && guard < 64) {
-    if (state.timerEndTime !== null && state.nextEventTime >= state.timerEndTime) break;
-    if (Math.random() <= generationProbabilityAt(state.nextEventTime)) {
-      addGeneratedChild(state.nextEventTime);
-    }
-    state.nextEventTime += sampleEventWait(settings);
-    guard += 1;
-  }
-}
-
-function generationProbabilityAt(time) {
-  if (state.timerEndTime === null) return 1;
-  const total = Math.max(1, state.timerEndTime - state.startTime);
-  const remaining = clamp((state.timerEndTime - time) / total, 0, 1);
-  return remaining;
+  fillGenerationEventQueue({
+    addGeneratedChild,
+    finishTimedRun,
+    initialDelay: initialSeedDelay,
+    now,
+    rightEdgeOffset: rightEdgeOffset(),
+    settings,
+    state,
+  });
 }
 
 function finishTimedRun() {
@@ -702,65 +450,7 @@ function trimNotes() {
 }
 
 function normalizeGenerations(now = performance.now() / 1000) {
-  const settings = getSettings();
-  const living = state.notes.filter((note) => note.start + note.duration >= now);
-  if (!living.length) return;
-  const minGeneration = Math.min(...living.map((note) => note.generation));
-  if (minGeneration <= 0) return;
-  if (settings.rootedDepth) {
-    normalizeRootedGenerations(living, settings);
-    return;
-  }
-  state.notes.forEach((note) => {
-    note.generation = Math.max(0, note.generation - minGeneration);
-  });
-}
-
-function normalizeRootedGenerations(living, settings) {
-  const livingById = new Map(living.map((note) => [note.id, note]));
-  const groups = new Map();
-
-  living.forEach((note) => {
-    let root = note;
-    while (root.parentId && livingById.has(root.parentId)) {
-      root = livingById.get(root.parentId);
-    }
-    if (!groups.has(root.id)) groups.set(root.id, { root, notes: [], maxGeneration: root.generation });
-    const group = groups.get(root.id);
-    group.notes.push(note);
-    group.maxGeneration = Math.max(group.maxGeneration, note.generation);
-  });
-
-  const candidates = [...groups.values()].filter((group) => group.root.generation > 0);
-  if (!candidates.length) return;
-  const selected = chooseRootedDepthGroup(candidates, settings);
-  const decrement = Math.max(1, selected.root.generation);
-  const selectedIds = descendantIds(selected.root.id);
-  state.notes.forEach((note) => {
-    if (selectedIds.has(note.id)) {
-      note.generation = Math.max(0, note.generation - decrement);
-    }
-  });
-}
-
-function chooseRootedDepthGroup(groups, settings) {
-  if (groups.length < 2) return groups[0];
-  const scored = groups.map((group) => ({
-    group,
-    score: settings.parentBiasDirection === "high" ? group.maxGeneration : group.root.generation,
-  }));
-  const minScore = Math.min(...scored.map((item) => item.score));
-  const maxScore = Math.max(...scored.map((item) => item.score));
-  const span = Math.max(0.0001, maxScore - minScore);
-  const curvePower = 1 + settings.parentBiasStrength * 5;
-  return chooseWeighted(scored.map((item) => {
-    const position = (item.score - minScore) / span;
-    const target = settings.parentBiasDirection === "low" ? 1 - position : position;
-    const weight = settings.parentBiasCurve === "exponential"
-      ? Math.exp(target * curvePower)
-      : 1 + target * curvePower;
-    return { note: item.group, weight };
-  })).note;
+  normalizeNoteGenerations({ now, settings: getSettings(), state });
 }
 
 function findCloseActivePairs(activeNotes) {
@@ -790,22 +480,6 @@ function findCloseActivePairs(activeNotes) {
     }
   }
   return pairs.sort((a, b) => a.cents - b.cents);
-}
-
-function activeRatioText(now = timelineNow()) {
-  if (!state.isRunning && !state.isPaused && !state.isDraining) return `${t("status.activeRatio")}: ---`;
-  const active = activeAt(now).sort((a, b) => a.frequency - b.frequency);
-  if (!active.length) return `${t("status.activeRatio")}: ---`;
-  const base = active[0];
-  const vectors = active.map((note) => relativeVectorForActiveNote(note, base));
-  if (state.diesisRatioDisplay !== "factors") {
-    const integers = tryIntegerRatioFromVectors(vectors);
-    if (integers) return `${t("status.activeRatio")}: ${integers.join(" : ")}`;
-  }
-  const sameRoot = active.every((note) => note.absoluteVector && note.rootId === base.rootId);
-  const factorVectors = sameRoot ? active.map((note) => note.absoluteVector) : vectors;
-  const labels = normalizeVectorsToPositive(factorVectors).map(positiveVectorFactorLabel);
-  return `${t("status.activeRatio")}: ${labels.join(" : ")}`;
 }
 
 function drawCanvas() {
@@ -1014,7 +688,7 @@ function updateLabels() {
   els.timerBadge.classList.remove("hidden");
   els.seed.setAttribute("title", state.isRunning || state.isDraining ? "Add Child" : "Add Seed");
   els.seed.setAttribute("aria-label", state.isRunning || state.isDraining ? "Add Child" : "Add Seed");
-  els.activeRatioLabel.textContent = activeRatioText();
+  els.activeRatioLabel.textContent = formatActiveRatioText({ now: timelineNow(), state, t });
   els.autoMode.classList.toggle("active", state.mode === "auto");
   els.listMode.classList.toggle("active", state.mode === "list");
   els.simpleRatioMode.classList.toggle("active", state.ratioBias === "simple");
@@ -1196,40 +870,15 @@ function setRatioBias(nextBias) {
 }
 
 function updateParentDirectionLabels() {
-  const previousValue = els.parentBiasDirection.value === "none" ? "low" : els.parentBiasDirection.value;
-  const isTime = els.parentBiasBasis.value === "time";
-  const low = els.parentBiasDirection.querySelector('option[value="low"]');
-  const high = els.parentBiasDirection.querySelector('option[value="high"]');
-  if (low) low.textContent = isTime ? "Old" : "Shallow";
-  if (high) high.textContent = isTime ? "New" : "Deep";
-  const isEqual = els.parentBiasBasis.value === "equal";
-  const isDepth = els.parentBiasBasis.value === "depth";
-  els.parentBiasDirection.disabled = isEqual;
-  els.parentBiasCurve.disabled = isEqual;
-  els.parentBiasStrength.disabled = isEqual;
-  els.rootedDepth.disabled = !isDepth;
-  els.parentBiasDirection.value = isEqual ? "none" : previousValue;
-  if (isEqual) els.parentBiasCurve.value = "none";
-  if (!isEqual && els.parentBiasCurve.value === "none") els.parentBiasCurve.value = "linear";
+  syncParentDirectionControls(els);
 }
 
 function updateRatioCurveState() {
-  const isEqual = state.ratioBias === "equal";
-  els.ratioBiasCurve.disabled = isEqual;
-  if (isEqual) els.ratioBiasCurve.value = "none";
-  if (!isEqual && els.ratioBiasCurve.value === "none") els.ratioBiasCurve.value = "linear";
+  syncRatioCurveControls(els, state.ratioBias);
 }
 
 function updateVibratoState() {
-  const disabled = !els.vibratoEnabled.checked;
-  [
-    els.vibratoRateMin,
-    els.vibratoRateMax,
-    els.vibratoDepthMin,
-    els.vibratoDepthMax,
-  ].forEach((input) => {
-    input.disabled = disabled;
-  });
+  syncVibratoControls(els);
 }
 
 registerEventBindings({
@@ -1254,6 +903,12 @@ registerEventBindings({
   toggleLanguage,
   togglePause,
 });
-loadNamedCommas();
-loadRatioPresets();
+loadNamedCommas({
+  isDiesisDialogOpen: () => els.diesisDialog.open,
+  render,
+  renderDiesisControls,
+  renderDiesisList,
+  state,
+});
+loadRatioPresets({ renderPresetBrowser, state });
 applyLanguage();
