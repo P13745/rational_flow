@@ -71,8 +71,8 @@ Rational Flow のレファクタリングで既存挙動を保つための目視
 - [ ] Collection Filter の All / Seen / Unseen が切り替わる。
 - [ ] 再生中に出会った diesis が保存され、星と回数に反映される。
 - [ ] collection reset が動く。
-- [ ] Diesis List の通常 preview、Delta preview、Fundamental preview が鳴る。
-- [ ] Delta や Fundamental が 20Hz 未満になる場合は warning 表示になる。
+- [ ] Diesis List の通常 preview、Delta preview が鳴る。
+- [ ] Delta が 20Hz 未満になる場合は warning 表示になる。
 
 ## Mobile
 

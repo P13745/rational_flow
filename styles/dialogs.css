@@ -193,3 +193,107 @@
   margin: 0;
   line-height: 1.6;
 }
+
+#detailsClose,
+#timerClose,
+#helpClose,
+#presetsClose,
+#diesisClose {
+  flex: 0 0 auto;
+  width: 38px;
+  min-width: 38px;
+}
+
+.timer-panel {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.timer-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.timer-readout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.timer-readout .wide-button {
+  margin-top: 0;
+}
+
+.readonly-ratio-panel[readonly] {
+  cursor: text;
+  background: rgba(16, 20, 18, 0.72);
+}
+
+.help-tabs button,
+.compact-button-row button,
+.preset-item {
+  white-space: normal;
+}
+
+#timerDialog.details-dialog {
+  width: min(520px, calc(100vw - 28px));
+}
+
+#timerDialog .timer-grid,
+#timerDialog .details-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+#timerDialog .setting-block {
+  border-right: 0;
+}
+
+@media (max-width: 740px) {
+  .details-dialog {
+    width: calc(100vw - 12px);
+    max-height: calc(100dvh - 12px);
+  }
+
+  .details-head {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .details-head h2 {
+    font-size: 17px;
+  }
+
+  .details-head p {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .details-grid,
+  .timer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .setting-block {
+    border-right: 0;
+  }
+
+  .setting-list li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+  }
+
+  .setting-list strong,
+  .setting-list span {
+    overflow-wrap: anywhere;
+  }
+
+  .preset-browser {
+    grid-template-columns: 1fr;
+  }
+
+  .preset-list {
+    max-height: 180px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .preset-preview {
+    overflow-wrap: anywhere;
+  }
+}

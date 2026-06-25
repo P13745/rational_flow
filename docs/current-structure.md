@@ -4,11 +4,11 @@ Rational Flow のレファクタリング前の構造メモです。今後の分
 
 ## File Sizes
 
-2026-06-25 時点の主なファイル規模です。
+2026-06-26 時点の主なファイル規模です。
 
 ```text
 index.html             603 lines
-styles/               3350 lines total
+styles/               1623 lines total
 src/main.js            914 lines
 src/dom.js              82 lines
 src/config.js            5 lines
@@ -57,6 +57,8 @@ README.md               51 lines
 
 Phase 1 で、旧 `styles.css` は `styles/` 配下の機能別 CSS に分割されました。`index.html` は明示的に次の順序で読み込みます。
 
+Next phase focuses on responsive CSS consolidation. `styles/responsive.css` should become app-wide viewport and pane responsive rules only. Header, Diesis, and dialog-specific responsive rules should live near their component CSS.
+
 ```text
 styles/tokens.css
 styles/base.css
@@ -79,15 +81,15 @@ styles/header-responsive.css
 - `layout.css`: `.app`、`.workbench`、主要 pane
 - `header.css`: brand、transport、header controls
 - `controls.css`: sidebar controls、readout
-- `dialogs.css`: details/help/timer/preset dialog
+- `dialogs.css`: details/help/timer/preset dialog と dialog responsive
 - `timeline.css`: timeline table と event row
 - `visualizer.css`: canvas stage、status、nowline
 - `diesis.css`: Diesis List toolbar と rows
-- `responsive.css`: 既存の breakpoint と component 横断の viewport 指定
-- `diesis-responsive.css`: Diesis List toolbar の最終 responsive override
-- `header-responsive.css`: header / transport / mobile More まわりの最終 responsive override
+- `responsive.css`: app 全体の viewport、pane 切替、workbench / table height
+- `diesis-responsive.css`: Diesis List dialog、toolbar、row の responsive override
+- `header-responsive.css`: header / transport / mobile More まわりの responsive override
 
-挙動維持を優先したため、`Final`, `Last`, `proposal`, `refinement` などの作業履歴コメント付き override は、まだ CSS 内に残っています。ヘッダー系の最終 override は `header-responsive.css`、Diesis toolbar の最終 override は `diesis-responsive.css` に切り出しました。次の整理段階では、dialog や古い viewport 指定も正式な component CSS へ吸収し、不要な重複を削除します。
+Responsive CSS consolidation により、`responsive.css` は component 横断の上書き置き場ではなく、app-wide の viewport / pane 切替だけを持つファイルになりました。Header、Diesis List、dialog 系の responsive 指定はそれぞれ component 側の CSS に近接配置されています。
 
 ## src/main.js / src/dom.js / src/config.js / src/state.js / src/ui/event-bindings.js / src/core/pitch.js
 
