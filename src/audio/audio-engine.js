@@ -62,6 +62,64 @@ export function scheduleAudio(note, settings) {
   };
 }
 
+export function scheduleVisibleAudio(now, settings) {
+  state.notes.forEach((note) => {
+    const endsAfterNow = !Number.isFinite(note.duration) || note.start + note.duration > now;
+    if (endsAfterNow && !note.nodes) scheduleAudio(note, settings);
+  });
+}
+
+export function cancelFutureAudio(now) {
+  state.notes.forEach((note) => {
+    if (note.start > now && note.nodes) stopNode(note, 0.03);
+  });
+}
+
+export function holdActiveAudio(now) {
+  if (!state.audioContext) return;
+  const audioNow = state.audioContext.currentTime;
+  state.notes.forEach((note) => {
+    const isActive = note.start <= now && (!Number.isFinite(note.duration) || note.start + note.duration > now);
+    if (!isActive || !note.nodes) return;
+    const heldGain = Math.max(0, estimatedGainAt(note, now));
+    const gainParam = note.nodes.gain.gain;
+    gainParam.cancelScheduledValues(audioNow);
+    gainParam.setValueAtTime(heldGain, audioNow);
+    note.nodes.pausedHold = true;
+  });
+}
+
+export function resumeHeldAudio(now) {
+  if (!state.audioContext) return;
+  const audioNow = state.audioContext.currentTime;
+  state.notes.forEach((note) => {
+    if (!note.nodes?.pausedHold) return;
+    note.nodes.pausedHold = false;
+    const gainParam = note.nodes.gain.gain;
+    const currentGain = Math.max(0, estimatedGainAt(note, now));
+    gainParam.cancelScheduledValues(audioNow);
+    gainParam.setValueAtTime(currentGain, audioNow);
+
+    if (!Number.isFinite(note.duration)) {
+      gainParam.linearRampToValueAtTime(note.volume, audioNow + 0.12);
+      return;
+    }
+
+    const releaseStart = note.start + note.duration * 0.3;
+    const end = note.start + note.duration;
+    if (end <= now) {
+      gainParam.linearRampToValueAtTime(0, audioNow + 0.05);
+      return;
+    }
+
+    if (releaseStart > now) {
+      gainParam.linearRampToValueAtTime(note.volume, audioNow + 0.12);
+      gainParam.setValueAtTime(note.volume, audioNow + (releaseStart - now));
+    }
+    gainParam.linearRampToValueAtTime(0, audioNow + (end - now));
+  });
+}
+
 export function estimatedGainAt(note, time) {
   if (time < note.start) return 0;
   if (!Number.isFinite(note.duration)) return note.volume;

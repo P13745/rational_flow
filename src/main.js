@@ -1,6 +1,14 @@
 import { els } from "./dom.js";
 import { state } from "./state.js";
-import { ensureAudio, estimatedGainAt, scheduleAudio as scheduleNoteAudio, stopNode } from "./audio/audio-engine.js";
+import {
+  cancelFutureAudio as cancelFutureNoteAudio,
+  ensureAudio,
+  holdActiveAudio as holdActiveNoteAudio,
+  resumeHeldAudio as resumeHeldNoteAudio,
+  scheduleAudio as scheduleNoteAudio,
+  scheduleVisibleAudio as scheduleVisibleNoteAudio,
+  stopNode,
+} from "./audio/audio-engine.js";
 import { playDiesisPreview, playFrequencyPreview } from "./audio/preview.js";
 import { syncWakeLock } from "./audio/wake-lock.js";
 import { buildCandidates as buildCandidateList, chooseBase as chooseCandidateBase, chooseWeighted } from "./core/candidates.js";
@@ -422,61 +430,19 @@ function scheduleAudio(note) {
 }
 
 function scheduleVisibleAudio(now = performance.now() / 1000) {
-  state.notes.forEach((note) => {
-    const endsAfterNow = !Number.isFinite(note.duration) || note.start + note.duration > now;
-    if (endsAfterNow && !note.nodes) scheduleAudio(note);
-  });
+  scheduleVisibleNoteAudio(now, getSettings());
 }
 
 function cancelFutureAudio(now = performance.now() / 1000) {
-  state.notes.forEach((note) => {
-    if (note.start > now && note.nodes) stopNode(note, 0.03);
-  });
+  cancelFutureNoteAudio(now);
 }
 
 function holdActiveAudio(now = performance.now() / 1000) {
-  if (!state.audioContext) return;
-  const audioNow = state.audioContext.currentTime;
-  state.notes.forEach((note) => {
-    const isActive = note.start <= now && (!Number.isFinite(note.duration) || note.start + note.duration > now);
-    if (!isActive || !note.nodes) return;
-    const heldGain = Math.max(0, estimatedGainAt(note, now));
-    const gainParam = note.nodes.gain.gain;
-    gainParam.cancelScheduledValues(audioNow);
-    gainParam.setValueAtTime(heldGain, audioNow);
-    note.nodes.pausedHold = true;
-  });
+  holdActiveNoteAudio(now);
 }
 
 function resumeHeldAudio(now = performance.now() / 1000) {
-  if (!state.audioContext) return;
-  const audioNow = state.audioContext.currentTime;
-  state.notes.forEach((note) => {
-    if (!note.nodes?.pausedHold) return;
-    note.nodes.pausedHold = false;
-    const gainParam = note.nodes.gain.gain;
-    const currentGain = Math.max(0, estimatedGainAt(note, now));
-    gainParam.cancelScheduledValues(audioNow);
-    gainParam.setValueAtTime(currentGain, audioNow);
-
-    if (!Number.isFinite(note.duration)) {
-      gainParam.linearRampToValueAtTime(note.volume, audioNow + 0.12);
-      return;
-    }
-
-    const releaseStart = note.start + note.duration * 0.3;
-    const end = note.start + note.duration;
-    if (end <= now) {
-      gainParam.linearRampToValueAtTime(0, audioNow + 0.05);
-      return;
-    }
-
-    if (releaseStart > now) {
-      gainParam.linearRampToValueAtTime(note.volume, audioNow + 0.12);
-      gainParam.setValueAtTime(note.volume, audioNow + (releaseStart - now));
-    }
-    gainParam.linearRampToValueAtTime(0, audioNow + (end - now));
-  });
+  resumeHeldNoteAudio(now);
 }
 
 function applyPausedTimeShift() {
