@@ -1,6 +1,6 @@
 import { els } from "./dom.js";
 import { state } from "./state.js";
-import { ensureAudio, estimatedGainAt, stopNode } from "./audio/audio-engine.js";
+import { ensureAudio, estimatedGainAt, scheduleAudio as scheduleNoteAudio, stopNode } from "./audio/audio-engine.js";
 import { playDiesisPreview, playFrequencyPreview } from "./audio/preview.js";
 import { syncWakeLock } from "./audio/wake-lock.js";
 import { buildCandidates as buildCandidateList, chooseBase as chooseCandidateBase, chooseWeighted } from "./core/candidates.js";
@@ -418,60 +418,7 @@ function chooseBase(bases) {
 }
 
 function scheduleAudio(note) {
-  if (note.nodes) return;
-  const settings = getSettings();
-  const ctx = ensureAudio();
-  const oscillator = ctx.createOscillator();
-  const gain = ctx.createGain();
-  let vibratoOscillator = null;
-  let vibratoGain = null;
-  const startAt = Math.max(ctx.currentTime + 0.01, note.start - performance.now() / 1000 + ctx.currentTime);
-  const isDrone = !Number.isFinite(note.duration);
-  const attack = isDrone ? 0.45 : Math.min(0.5, note.duration * 0.2);
-  const releaseStart = startAt + note.duration * 0.3;
-  const endAt = startAt + note.duration;
-
-  oscillator.type = "triangle";
-  oscillator.frequency.value = note.frequency;
-  if (settings.vibratoEnabled && settings.vibratoRateMax > 0 && settings.vibratoDepthMax > 0) {
-    const rate = randomBetween(settings.vibratoRateMin, settings.vibratoRateMax);
-    const depth = randomBetween(settings.vibratoDepthMin, settings.vibratoDepthMax);
-    if (rate > 0 && depth > 0) {
-      vibratoOscillator = ctx.createOscillator();
-      vibratoGain = ctx.createGain();
-      vibratoOscillator.type = "sine";
-      vibratoOscillator.frequency.value = rate;
-      vibratoGain.gain.value = depth;
-      vibratoOscillator.connect(vibratoGain).connect(oscillator.detune);
-      vibratoOscillator.start(startAt);
-    }
-  }
-  gain.gain.value = 0;
-  gain.gain.setValueAtTime(0, startAt);
-  gain.gain.linearRampToValueAtTime(note.volume, startAt + attack);
-  if (!isDrone) {
-    gain.gain.setValueAtTime(note.volume, releaseStart);
-    gain.gain.linearRampToValueAtTime(0, endAt);
-  }
-  oscillator.connect(gain).connect(ctx.destination);
-  oscillator.start(startAt);
-  note.nodes = { oscillator, gain, startAt, vibratoOscillator, vibratoGain };
-  oscillator.onended = () => {
-    if (vibratoOscillator) {
-      try {
-        vibratoOscillator.stop();
-      } catch (_) {
-        // The vibrato oscillator may already have been stopped explicitly.
-      }
-      vibratoOscillator.disconnect();
-    }
-    if (vibratoGain) vibratoGain.disconnect();
-    oscillator.disconnect();
-    gain.disconnect();
-    if (note.nodes?.oscillator === oscillator) {
-      note.nodes = null;
-    }
-  };
+  scheduleNoteAudio(note, getSettings());
 }
 
 function scheduleVisibleAudio(now = performance.now() / 1000) {
