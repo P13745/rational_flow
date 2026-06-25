@@ -1406,63 +1406,6 @@
   }
 }
 
-/* Diesis toolbar refinement: all toolbar boxes use the same internal rhythm. */
-.diesis-toolbar {
-  align-items: stretch;
-}
-
-.diesis-toolbar-group {
-  display: grid;
-  grid-template-rows: auto 30px 30px;
-  align-content: start;
-  gap: 6px;
-  min-height: 94px;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.018);
-}
-
-.diesis-toolbar-group .toolbar-label {
-  margin: 0;
-  min-height: 14px;
-}
-
-.playback-group .compact-button-row {
-  grid-row: 2 / 4;
-  align-content: start;
-}
-
-.filter-group,
-.display-group,
-.collection-group {
-  grid-template-rows: auto 30px 30px;
-}
-
-.filter-group > div {
-  display: contents;
-}
-
-.diesis-toolbar-group .compact-select,
-.diesis-toolbar-group .compact-check,
-.diesis-toolbar-group .collection-stats {
-  min-height: 30px;
-  height: 30px;
-  margin: 0;
-}
-
-.collection-stats {
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-}
-
-@media (max-width: 740px) {
-  .diesis-toolbar-group {
-    min-height: auto;
-  }
-}
-
 /* Last transport override: make intermediate widths use two rows without stretching controls. */
 @media (max-width: 1280px) {
   .transport {

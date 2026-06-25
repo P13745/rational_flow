@@ -7,7 +7,7 @@ Rational Flow のレファクタリング前の構造メモです。今後の分
 2026-06-25 時点の主なファイル規模です。
 
 ```text
-index.html             602 lines
+index.html             603 lines
 styles/               3350 lines total
 src/main.js           1259 lines
 src/dom.js              82 lines
@@ -62,6 +62,7 @@ styles/timeline.css
 styles/visualizer.css
 styles/diesis.css
 styles/responsive.css
+styles/diesis-responsive.css
 styles/header-responsive.css
 ```
 
@@ -77,9 +78,10 @@ styles/header-responsive.css
 - `visualizer.css`: canvas stage、status、nowline
 - `diesis.css`: Diesis List toolbar と rows
 - `responsive.css`: 既存の breakpoint と component 横断の viewport 指定
+- `diesis-responsive.css`: Diesis List toolbar の最終 responsive override
 - `header-responsive.css`: header / transport / mobile More まわりの最終 responsive override
 
-挙動維持を優先したため、`Final`, `Last`, `proposal`, `refinement` などの作業履歴コメント付き override は、まだ CSS 内に残っています。ヘッダー系の最終 override は `header-responsive.css` に切り出しました。次の整理段階では、Diesis List や dialog などの viewport 指定も正式な component CSS へ吸収し、不要な重複を削除します。
+挙動維持を優先したため、`Final`, `Last`, `proposal`, `refinement` などの作業履歴コメント付き override は、まだ CSS 内に残っています。ヘッダー系の最終 override は `header-responsive.css`、Diesis toolbar の最終 override は `diesis-responsive.css` に切り出しました。次の整理段階では、dialog や古い viewport 指定も正式な component CSS へ吸収し、不要な重複を削除します。
 
 ## src/main.js / src/dom.js / src/config.js / src/state.js / src/ui/event-bindings.js / src/core/pitch.js
 
