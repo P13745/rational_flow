@@ -1,3 +1,5 @@
+import { t } from "../i18n/i18n.js";
+
 export function timerCountdownText(timerEndTime, now) {
   if (timerEndTime === null) return "";
   const remaining = Math.max(0, timerEndTime - now);
@@ -7,13 +9,13 @@ export function timerCountdownText(timerEndTime, now) {
 }
 
 export function timerStatusText({ timerCompleted, timerEndTime, now }) {
-  if (timerCompleted) return "Done";
+  if (timerCompleted) return t("status.done");
   const countdown = timerCountdownText(timerEndTime, now);
-  if (!countdown) return "No Timer Set";
-  return `${countdown} left`;
+  if (!countdown) return t("status.noTimerSet");
+  return `${countdown} ${t("status.timeLeft")}`;
 }
 
 export function timerBadgeText({ timerCompleted, timerEndTime, now }) {
-  if (timerCompleted) return "Done";
-  return timerCountdownText(timerEndTime, now) || "OFF";
+  if (timerCompleted) return t("status.done");
+  return timerCountdownText(timerEndTime, now) || t("status.off");
 }

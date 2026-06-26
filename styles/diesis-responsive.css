@@ -1,16 +1,22 @@
 @media (max-width: 1100px) {
   .diesis-item {
-    grid-template-columns: 40px minmax(82px, max-content) minmax(130px, 1fr) minmax(76px, max-content) 30px;
+    grid-template-columns:
+      40px
+      minmax(54px, max-content)
+      minmax(0, 1fr)
+      minmax(34px, max-content);
     grid-template-areas:
-      "actions cents ratio limit star"
-      "actions name name name star";
-    gap: 6px 10px;
+      "actions cents ratio star"
+      "actions name  name  limit";
+    gap: 5px 10px;
     align-items: center;
   }
 
   .diesis-actions {
     grid-area: actions;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    align-self: stretch;
     gap: 6px;
   }
 
@@ -21,61 +27,56 @@
 
   .diesis-cents {
     grid-area: cents;
+    justify-self: start;
+    white-space: nowrap;
   }
 
   .diesis-ratio {
     grid-area: ratio;
+    justify-self: stretch;
+    min-width: 0;
+    color: var(--text);
     overflow: visible;
     text-overflow: clip;
     white-space: normal;
+    overflow-wrap: anywhere;
     line-height: 1.2;
-  }
-
-  .diesis-limit {
-    grid-area: limit;
-  }
-
-  .diesis-name {
-    grid-area: name;
-    overflow: visible;
-    text-overflow: clip;
-    white-space: normal;
-    line-height: 1.25;
   }
 
   .diesis-star {
     grid-area: star;
+    justify-self: end;
+  }
+
+  .diesis-name {
+    grid-area: name;
+    justify-self: stretch;
+    min-width: 0;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+  }
+
+  .diesis-limit {
+    grid-area: limit;
+    justify-self: end;
+    white-space: nowrap;
   }
 }
 
 @media (max-width: 740px) {
-  .diesis-panel {
-    grid-template-rows: auto minmax(0, auto) minmax(220px, 1fr);
-  }
-
-  .diesis-toolbar {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 8px 12px;
-    overflow: auto;
-  }
-
-  .diesis-toolbar-group {
-    min-height: auto;
-    padding: 8px;
-  }
-
-  .diesis-list {
-    min-height: 0;
-    padding: 10px 12px 12px;
-  }
-
   .diesis-item {
-    grid-template-columns: auto 68px minmax(0, 1fr) 54px 24px;
+    grid-template-columns:
+      40px
+      minmax(52px, max-content)
+      minmax(0, 1fr)
+      minmax(44px, max-content);
     grid-template-areas:
-      "actions cents ratio limit star"
-      "name name name name name";
-    gap: 6px 7px;
+      "actions cents ratio star"
+      "actions name  name  limit";
+    gap: 5px 8px;
     padding: 8px;
   }
 
@@ -89,134 +90,112 @@
 
   .diesis-limit {
     font-size: 11px;
+    justify-self: end;
+    white-space: nowrap;
   }
 
   .diesis-name {
     font-size: 12px;
-  }
-
-  .compact-button-row button {
-    height: 28px;
-    font-size: 11px;
   }
 }
 
 @media (max-width: 560px) {
-  .diesis-toolbar {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: start;
-    gap: 8px;
-    padding: 8px 10px;
-  }
-
-  .diesis-toolbar-group {
-    min-height: 0;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-  }
-
-  .diesis-toolbar-group .toolbar-label {
-    min-height: 0;
-    margin-bottom: 5px;
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 750;
-  }
-
-  .playback-group {
-    grid-column: 1 / -1;
-    grid-template-rows: auto auto;
-  }
-
-  .playback-group .compact-button-row {
-    grid-row: auto;
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 6px;
-  }
-
-  .playback-group .compact-button-row button {
-    min-width: 0;
-    height: 32px;
-    padding: 0 6px;
-  }
-
-  .filter-group,
-  .display-group,
-  .collection-group {
-    grid-template-rows: auto 30px 30px;
-    gap: 5px;
-  }
-
-  .diesis-toolbar-group .compact-select,
-  .diesis-toolbar-group .compact-check,
-  .diesis-toolbar-group .collection-stats {
-    width: 100%;
-    min-width: 0;
-    height: 30px;
-    min-height: 30px;
-    font-size: 12px;
-  }
-
-  .diesis-toolbar-group .compact-check {
-    padding-inline: 7px;
-  }
-
-  .collection-stats {
-    justify-content: center;
-    padding-inline: 6px;
-  }
-
-  .diesis-list {
-    padding-top: 8px;
-  }
-
   .diesis-item {
-    grid-template-columns: 42px minmax(66px, 0.85fr) minmax(92px, 1.25fr) minmax(54px, 0.75fr) 26px;
+    grid-template-columns:
+      40px
+      minmax(48px, max-content)
+      minmax(0, 1fr)
+      minmax(38px, max-content);
     grid-template-areas:
-      "actions cents ratio limit star"
-      "name name name name name";
+      "actions cents ratio star"
+      "actions name  name  limit";
     align-items: center;
     gap: 5px 7px;
+    padding: 8px;
   }
 
   .diesis-actions {
     grid-area: actions;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    align-self: stretch;
     justify-self: start;
+    gap: 5px;
   }
 
-  .diesis-cents,
-  .diesis-ratio,
-  .diesis-limit {
-    text-align: center;
+  .diesis-cents {
+    grid-area: cents;
+    justify-self: start;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .diesis-ratio {
+    grid-area: ratio;
     justify-self: stretch;
+    min-width: 0;
+    text-align: left;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .diesis-star {
+    grid-area: star;
+    justify-self: end;
+    align-self: center;
   }
 
   .diesis-name {
     grid-area: name;
-    padding-top: 2px;
+    justify-self: stretch;
+    min-width: 0;
+    padding-top: 0;
     color: var(--text);
     font-size: 13px;
     font-weight: 700;
-    text-align: center;
+    line-height: 1.25;
+    text-align: left;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .diesis-limit {
+    grid-area: limit;
+    justify-self: end;
+    text-align: right;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.1;
+    white-space: nowrap;
   }
 }
 
 @media (max-width: 390px) {
-  .diesis-toolbar {
-    gap: 6px;
-    padding-inline: 8px;
+  .diesis-item {
+    grid-template-columns:
+      38px
+      minmax(44px, max-content)
+      minmax(0, 1fr)
+      minmax(34px, max-content);
+    gap: 4px 6px;
+    padding-inline: 6px;
   }
 
-  .diesis-toolbar-group .toolbar-label {
+  .diesis-ratio,
+  .diesis-name {
     font-size: 12px;
   }
 
-  .diesis-toolbar-group .compact-select,
-  .diesis-toolbar-group .compact-check,
-  .diesis-toolbar-group .collection-stats {
-    font-size: 11px;
+  .diesis-limit,
+  .diesis-cents {
+    font-size: 10px;
   }
 }

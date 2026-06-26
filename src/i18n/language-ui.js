@@ -24,9 +24,28 @@ function applyTranslationTarget(selector, key, attribute = "text") {
   }
 }
 
+function applyDataTranslationAttributes() {
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach((element) => {
+    element.setAttribute("title", t(element.dataset.i18nTitle));
+  });
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+    element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    element.setAttribute("placeholder", t(element.dataset.i18nPlaceholder));
+  });
+  document.querySelectorAll("[data-i18n-checkbox-label]").forEach((element) => {
+    setCheckboxLabel(element, t(element.dataset.i18nCheckboxLabel));
+  });
+}
+
 export function applyLanguageTargets({ els, helpTargets, language, targets }) {
   document.documentElement.lang = language;
   document.title = t("title");
+  applyDataTranslationAttributes();
   els.languageToggle.textContent = t("langToggle");
   [...targets, ...helpTargets].forEach(([selector, key, attribute]) => {
     applyTranslationTarget(selector, key, attribute);

@@ -27,8 +27,9 @@ export function updateStatusLabels({
   els.timerOpen.textContent = t("labels.timer");
   els.timerBadge.textContent = timerBadgeText();
   els.timerBadge.classList.remove("hidden");
-  els.seed.setAttribute("title", state.isRunning || state.isDraining ? "Add Child" : "Add Seed");
-  els.seed.setAttribute("aria-label", state.isRunning || state.isDraining ? "Add Child" : "Add Seed");
+  const seedActionLabel = t(state.isRunning || state.isDraining ? "transport.addChildTitle" : "transport.seedTitle");
+  els.seed.setAttribute("title", seedActionLabel);
+  els.seed.setAttribute("aria-label", seedActionLabel);
   els.activeRatioLabel.textContent = formatActiveRatioText({ now, state, t });
   els.autoMode.classList.toggle("active", state.mode === "auto");
   els.listMode.classList.toggle("active", state.mode === "list");
@@ -48,6 +49,6 @@ export function updateStatusLabels({
     return;
   }
 
-  const base = selected.baseFrequency === null ? "Seed" : `${selected.baseFrequency.toFixed(2)}Hz`;
-  els.detailLabel.textContent = `${selected.frequency.toFixed(2)}Hz  ${nearestPitchLabel(selected.frequency)}  Depth ${selected.generation}  ${selected.ratio || base}`;
+  const base = selected.baseFrequency === null ? t("labels.seed") : `${selected.baseFrequency.toFixed(2)}Hz`;
+  els.detailLabel.textContent = `${selected.frequency.toFixed(2)}Hz  ${nearestPitchLabel(selected.frequency)}  ${t("labels.depth")} ${selected.generation}  ${selected.ratio || base}`;
 }

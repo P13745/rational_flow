@@ -3,21 +3,35 @@ import { state } from "../state.js";
 import { t } from "../i18n/i18n.js";
 import { ratioLimitLabel, ratioLimitValue } from "../core/ratio-math.js";
 
+const BASE_NOTE_OCTAVES = [3, 4, 5, 6, 7, 8, 9];
+
+function syncBaseNoteOptions(select, selectedOctave) {
+  const needsOptions =
+    select.options.length !== BASE_NOTE_OCTAVES.length ||
+    BASE_NOTE_OCTAVES.some((octave, index) => select.options[index]?.value !== String(octave));
+  if (needsOptions) {
+    select.replaceChildren(
+      ...BASE_NOTE_OCTAVES.map((octave) => {
+        const option = document.createElement("option");
+        option.value = String(octave);
+        option.textContent = `C${octave}`;
+        return option;
+      }),
+    );
+  }
+  select.value = String(selectedOctave);
+}
+
 export function renderDiesisControls({ renderDiesisControls, renderDiesisList }) {
   if (!els.diesisBaseControls) return;
-  els.diesisBaseControls.textContent = "";
-  for (let octave = 3; octave <= 9; octave += 1) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = `C${octave}`;
-    button.className = octave === state.diesisBaseOctave ? "active" : "";
-    button.addEventListener("click", () => {
-      state.diesisBaseOctave = octave;
-      renderDiesisControls();
-      renderDiesisList();
-    });
-    els.diesisBaseControls.appendChild(button);
-  }
+  const baseSelect = els.diesisBaseControls;
+  const selectedOctave = BASE_NOTE_OCTAVES.includes(state.diesisBaseOctave) ? state.diesisBaseOctave : 5;
+  state.diesisBaseOctave = selectedOctave;
+  syncBaseNoteOptions(baseSelect, selectedOctave);
+  baseSelect.onchange = () => {
+    state.diesisBaseOctave = Number(baseSelect.value);
+    renderDiesisList();
+  };
   els.globalRatioDisplay.value = state.diesisRatioDisplay;
   els.diesisRatioDisplay.value = state.diesisRatioDisplay;
   els.diesisDerivedToggle.checked = state.diesisShowDerived;

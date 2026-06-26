@@ -1,4 +1,5 @@
 import { els } from "../dom.js";
+import { t } from "../i18n/i18n.js";
 
 export function setMobileView(view, { renderTable, drawCanvas }) {
   const nextView = ["controls", "main", "list"].includes(view) ? view : "main";
@@ -20,5 +21,5 @@ export function setMobileToolsOpen(open) {
   if (!transport || !els.mobileToolsToggle) return;
   transport.dataset.toolsOpen = String(isOpen);
   els.mobileToolsToggle.setAttribute("aria-expanded", String(isOpen));
-  els.mobileToolsToggle.textContent = isOpen ? "Less ▴" : "More ▾";
+  els.mobileToolsToggle.textContent = t(isOpen ? "mobile.less" : "mobile.more");
 }

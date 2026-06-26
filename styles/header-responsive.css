@@ -1,4 +1,4 @@
-@media (min-width: 641px) {
+@media (min-width: 761px) {
   .title-line + .title-line::before {
     content: "";
   }
@@ -40,7 +40,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 760px) {
   :root {
     --rf-play-w: 40px;
     --rf-pause-w: 40px;
@@ -146,17 +146,41 @@
     display: none;
     justify-self: end;
     width: max-content;
-    max-width: min(100%, calc(var(--rf-diesis-w) + var(--rf-ratio-w) + var(--rf-gap)));
+    max-width: 100%;
     justify-content: flex-end;
   }
 
   .transport[data-tools-open="true"] .transport-lower {
-    display: flex;
+    display: grid;
+    grid-template-columns: 82px 116px 42px 70px;
+    gap: var(--rf-gap);
+    align-items: center;
   }
 
   .session-group,
   .diesis-group {
+    display: contents;
     width: max-content;
+  }
+
+  #globalRatioDisplay {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  #diesisOpen {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  #timerBadge {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  #timerOpen {
+    grid-column: 4;
+    grid-row: 1;
   }
 }
 
@@ -188,6 +212,10 @@
   .timer-badge {
     padding-inline: 5px;
     font-size: 15px;
+  }
+
+  .transport[data-tools-open="true"] .transport-lower {
+    grid-template-columns: 72px 104px 38px 58px;
   }
 
   .playback-group-top,

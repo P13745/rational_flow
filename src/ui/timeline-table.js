@@ -40,12 +40,12 @@ function appendEventGroup(fragment, label, items, now, rowState, options = {}) {
     const isCommaHit = options.commaNoteIds?.has(note.id);
     const isSeed = !note.ratio;
     tr.className = `event-row ${rowState}${isSeed ? " seed" : ""}${note.id === state.selectedNoteId ? " active" : ""}${isCommaHit ? " comma-hit" : ""}`;
-    tr.title = "Preview this note";
+    tr.title = t("dialogs.previewNoteTitle");
     const start = note.start - now;
     tr.innerHTML = `
       <td>${start >= 0 ? "+" : ""}${start.toFixed(1)}</td>
       <td>${note.frequency.toFixed(1)}</td>
-      <td>${Number.isFinite(note.duration) ? note.duration.toFixed(1) : "Drone"}</td>
+      <td>${Number.isFinite(note.duration) ? note.duration.toFixed(1) : t("table.drone")}</td>
       <td>${note.generation}</td>
       <td>${note.ratio || "---"}</td>
     `;
