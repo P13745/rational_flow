@@ -1,4 +1,4 @@
-@media (max-width: 920px) {
+@media (max-width: 1100px) {
   .diesis-item {
     grid-template-columns: 40px minmax(82px, max-content) minmax(130px, 1fr) minmax(76px, max-content) 30px;
     grid-template-areas:
