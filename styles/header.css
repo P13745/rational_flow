@@ -189,14 +189,15 @@
   max-width: 100%;
   height: var(--rf-control-h);
   padding-inline: 8px;
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1;
+  white-space: nowrap;
 }
 
 #startStop,
 #pauseResume,
 #seed {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 #seedMode,

@@ -67,6 +67,54 @@
 }
 
 @media (max-width: 740px) {
+  .diesis-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "base collection"
+      "filter display";
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .diesis-toolbar-group {
+    min-height: 0;
+    padding: 8px;
+  }
+
+  .playback-group {
+    grid-area: base;
+  }
+
+  .filter-group {
+    grid-area: filter;
+  }
+
+  .display-group {
+    grid-area: display;
+  }
+
+  .collection-group {
+    grid-area: collection;
+  }
+
+  .diesis-toolbar-group .toolbar-label {
+    min-height: 0;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .diesis-toolbar-group .compact-select,
+  .diesis-toolbar-group .compact-check,
+  .diesis-toolbar-group .collection-stats {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .diesis-toolbar .base-note-select {
+    width: 100%;
+    inline-size: 100%;
+  }
+
   .diesis-item {
     grid-template-columns:
       40px

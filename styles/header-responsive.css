@@ -139,7 +139,7 @@
     width: var(--rf-more-w);
     min-width: var(--rf-more-w);
     padding-inline: 6px;
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .transport-lower {
@@ -152,7 +152,7 @@
 
   .transport[data-tools-open="true"] .transport-lower {
     display: grid;
-    grid-template-columns: 82px 116px 42px 70px;
+    grid-template-columns: 82px 108px 42px 82px;
     gap: var(--rf-gap);
     align-items: center;
   }
@@ -215,7 +215,7 @@
   }
 
   .transport[data-tools-open="true"] .transport-lower {
-    grid-template-columns: 72px 104px 38px 58px;
+    grid-template-columns: 70px 94px 38px 78px;
   }
 
   .playback-group-top,
