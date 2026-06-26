@@ -11,7 +11,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(130px, 0.75fr) minmax(150px, 0.9fr) minmax(110px, 0.6fr);
   gap: 14px;
-  align-items: start;
+  align-items: stretch;
   padding: 12px 18px;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
@@ -19,16 +19,42 @@
 
 .diesis-toolbar-group {
   display: grid;
+  grid-template-rows: auto 30px 30px;
   align-content: start;
   gap: 6px;
+  min-height: 94px;
   min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.018);
 }
 
 .toolbar-label {
   display: block;
-  margin-bottom: 6px;
+  min-height: 14px;
+  margin: 0;
   color: var(--muted);
   font-size: 11px;
+}
+
+.filter-group,
+.display-group,
+.collection-group {
+  grid-template-rows: auto 30px 30px;
+}
+
+.filter-group > div {
+  display: contents;
+}
+
+.playback-group {
+  grid-template-rows: auto minmax(30px, 1fr);
+}
+
+.playback-group .compact-button-row {
+  grid-row: 2 / 4;
+  align-content: start;
 }
 
 .compact-button-row {
@@ -78,11 +104,25 @@
 }
 
 .collection-stats {
-  display: block;
-  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid rgba(239, 200, 74, 0.26);
+  border-radius: 6px;
+  background: rgba(239, 200, 74, 0.07);
   color: var(--accent);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
+}
+
+.diesis-toolbar-group .compact-select,
+.diesis-toolbar-group .compact-check {
+  min-height: 30px;
+  height: 30px;
+  margin: 0;
 }
 
 .diesis-cents,

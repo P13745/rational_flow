@@ -4,11 +4,11 @@ Rational Flow の現在構造メモです。今後の分割作業では、ここ
 
 ## File Sizes
 
-2026-06-26 時点の主なファイル規模です。
+2026-06-27 時点の主なファイル規模です。
 
 ```text
 index.html             603 lines
-styles/               1623 lines total
+styles/               1763 lines total
 src/main.js            725 lines
 src/dom.js              82 lines
 src/config.js            5 lines
@@ -82,17 +82,17 @@ styles/header-responsive.css
 - `tokens.css`: color token と CSS variables
 - `base.css`: reset、typography、form、button などの基礎
 - `layout.css`: `.app`、`.workbench`、主要 pane
-- `header.css`: brand、transport、header controls
+- `header.css`: brand、transport、header controls の通常状態
 - `controls.css`: sidebar controls、readout
 - `dialogs.css`: details/help/timer/preset dialog と dialog responsive
 - `timeline.css`: timeline table と event row
 - `visualizer.css`: canvas stage、status、nowline
-- `diesis.css`: Diesis List toolbar と rows
+- `diesis.css`: Diesis List toolbar と rows の通常状態
 - `responsive.css`: app 全体の viewport、pane 切替、workbench / table height
-- `diesis-responsive.css`: Diesis List dialog、toolbar、row の responsive override
-- `header-responsive.css`: header / transport / mobile More まわりの responsive override
+- `diesis-responsive.css`: Diesis List dialog、toolbar、row の breakpoint 指定
+- `header-responsive.css`: header / transport / mobile More まわりの breakpoint 指定
 
-Responsive CSS consolidation により、`responsive.css` は component 横断の上書き置き場ではなく、app-wide の viewport / pane 切替だけを持つファイルになりました。Header、Diesis List、dialog 系の responsive 指定はそれぞれ component 側の CSS に近接配置されています。
+Responsive CSS consolidation により、`responsive.css` は component 横断の上書き置き場ではなく、app-wide の viewport / pane 切替だけを持つファイルになりました。Header と Diesis List は通常状態を component CSS に寄せ、`*-responsive.css` は breakpoint ごとの調整だけを持つ構成にしています。
 
 ## src/main.js / src/dom.js / src/config.js / src/state.js / src/ui/event-bindings.js / src/core/pitch.js
 

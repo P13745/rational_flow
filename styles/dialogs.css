@@ -47,15 +47,6 @@
   max-width: 640px;
 }
 
-#detailsClose,
-#helpClose,
-#presetsClose,
-#diesisClose {
-  flex: 0 0 auto;
-  width: 38px;
-  min-width: 38px;
-}
-
 .details-grid {
   min-height: 0;
   overflow: auto;
