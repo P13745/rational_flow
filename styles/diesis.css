@@ -1,0 +1,278 @@
+.diesis-list {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-height: min(520px, calc(100vh - 260px));
+  overflow: auto;
+  padding: 14px 18px 18px;
+}
+
+.diesis-toolbar {
+  display: grid;
+  grid-template-columns: minmax(86px, 0.5fr) repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.diesis-toolbar-group {
+  display: grid;
+  grid-template-rows: auto 30px 30px;
+  align-content: start;
+  gap: 6px;
+  min-height: 94px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.toolbar-label {
+  display: block;
+  min-height: 14px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.filter-group,
+.display-group,
+.collection-group {
+  grid-template-rows: auto 30px 30px;
+}
+
+.filter-group {
+  grid-template-rows: auto 30px 30px 30px;
+}
+
+.playback-group {
+  grid-template-rows: auto 30px;
+  justify-items: start;
+}
+
+.filter-group > div {
+  display: contents;
+}
+
+.compact-select {
+  height: 30px;
+  min-height: 30px;
+  padding: 0 8px;
+  font-size: 12px;
+  line-height: 30px;
+}
+
+.compact-check {
+  height: 30px;
+  min-height: 30px;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.diesis-item {
+  display: grid;
+  grid-template-columns: 62px 72px minmax(130px, 1.05fr) 68px minmax(220px, 2.4fr) 28px 28px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.diesis-item.discovered {
+  border-color: rgba(239, 200, 74, 0.44);
+  background: rgba(239, 200, 74, 0.055);
+}
+
+.collection-stats {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid rgba(239, 200, 74, 0.26);
+  border-radius: 6px;
+  background: rgba(239, 200, 74, 0.07);
+  color: var(--accent);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.diesis-toolbar-group .compact-select,
+.diesis-toolbar-group .compact-check {
+  min-height: 30px;
+  height: 30px;
+  margin: 0;
+}
+
+.diesis-toolbar .base-note-select {
+  width: 64px;
+  inline-size: 64px;
+  max-width: 100%;
+  color: var(--text);
+  background: var(--field);
+  appearance: auto;
+  -webkit-appearance: menulist;
+}
+
+.diesis-toolbar .base-note-select option {
+  color: var(--text);
+  background: var(--field);
+}
+
+.diesis-cents,
+.diesis-ratio,
+.diesis-limit {
+  font-variant-numeric: tabular-nums;
+}
+
+.diesis-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.diesis-play {
+  min-width: 0;
+  width: 26px;
+  height: 28px;
+  padding: 0;
+  font-size: 11px;
+}
+
+.diesis-detail-button {
+  justify-self: center;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.diesis-play.warning {
+  border-color: rgba(240, 87, 76, 0.7);
+  background: rgba(240, 87, 76, 0.16);
+  color: #ffd2cc;
+}
+
+.diesis-cents {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.diesis-ratio {
+  min-width: 0;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diesis-limit {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.diesis-name {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diesis-star {
+  min-width: 24px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.diesis-star small {
+  display: block;
+  margin-top: 2px;
+  color: var(--accent);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+#presetRatios {
+  min-height: 180px;
+}
+
+.diesis-detail-panel {
+  width: 100%;
+}
+
+.diesis-detail-body {
+  display: grid;
+  gap: 12px;
+  padding: 14px 18px 18px;
+  overflow: auto;
+}
+
+.diesis-detail-section {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.diesis-detail-section h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.diesis-detail-grid {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.diesis-detail-field {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.diesis-detail-field dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.diesis-detail-field dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.diesis-detail-field a {
+  color: var(--accent);
+}
+
+.diesis-relations {
+  display: grid;
+  gap: 8px;
+}
+
+.diesis-relation-button {
+  justify-self: start;
+  max-width: 100%;
+  min-height: 30px;
+  padding: 0 10px;
+  color: var(--accent);
+}
+
+.diesis-detail-empty {
+  margin: 0;
+  color: var(--muted);
+}

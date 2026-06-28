@@ -1,0 +1,242 @@
+:root {
+  --rf-control-h: 40px;
+  --rf-gap: 6px;
+  --rf-play-w: 46px;
+  --rf-pause-w: 46px;
+  --rf-seed-w: 100px;
+  --rf-plus-w: 46px;
+  --rf-clear-w: 74px;
+  --rf-diesis-w: 128px;
+  --rf-ratio-w: 94px;
+  --rf-timer-badge-w: 50px;
+  --rf-timer-w: 90px;
+  --rf-more-w: 72px;
+  --rf-brand-w: 340px;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: max-content max-content minmax(0, 1fr);
+  grid-template-areas: "brand title-actions transport";
+  align-items: start;
+  gap: 16px 0;
+  min-height: 0;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  background: #151817;
+}
+
+.brand {
+  grid-area: brand;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.brand p {
+  margin-top: 10px;
+  max-width: 100%;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.title-row {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.title-row h1 {
+  display: block;
+  margin: 0;
+  font-size: 32px;
+  line-height: 0.98;
+  white-space: normal;
+}
+
+.title-line {
+  display: block;
+  white-space: nowrap;
+}
+
+.version-label {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  vertical-align: 0.1em;
+}
+
+.title-actions {
+  grid-area: title-actions;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  width: max-content;
+  min-width: 0;
+  margin: 0;
+  transform: translate(-64px, -4px);
+}
+
+.top-help-button {
+  height: 28px;
+  min-width: 0;
+  padding: 0 9px;
+  color: var(--muted);
+  font-size: 12px;
+  background: transparent;
+}
+
+.title-actions .top-help-button {
+  height: 34px;
+  padding-inline: 6px;
+  font-size: 13px;
+  line-height: 1;
+}
+
+#helpOpen.top-help-button {
+  width: 52px;
+}
+
+#languageToggle.top-help-button {
+  width: 44px;
+}
+
+.transport {
+  grid-area: transport;
+  justify-self: end;
+  align-self: start;
+  display: grid;
+  grid-template-columns: max-content;
+  grid-template-areas:
+    "playback"
+    "more"
+    "tools";
+  justify-content: end;
+  justify-items: end;
+  align-items: start;
+  gap: var(--rf-gap);
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+  margin-top: 0;
+  overflow: visible;
+}
+
+.transport-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.transport-group + .transport-group {
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+}
+
+.playback-group-top,
+.diesis-group,
+.session-group {
+  flex: none;
+  flex-wrap: nowrap;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+  gap: var(--rf-gap);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.playback-group-top {
+  grid-area: playback;
+  display: grid;
+  grid-template-columns: var(--rf-play-w) var(--rf-pause-w) var(--rf-seed-w) var(--rf-plus-w) var(--rf-clear-w);
+}
+
+.transport-lower {
+  grid-area: tools;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--rf-gap);
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.diesis-group {
+  display: grid;
+  grid-template-columns: var(--rf-diesis-w) var(--rf-ratio-w);
+}
+
+.session-group {
+  display: grid;
+  grid-template-columns: var(--rf-timer-badge-w) var(--rf-timer-w);
+  justify-content: end;
+}
+
+.transport button,
+.transport-select,
+.timer-badge {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: var(--rf-control-h);
+  padding-inline: 8px;
+  font-size: 15px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+#startStop,
+#pauseResume,
+#seed {
+  font-size: 18px;
+}
+
+#seedMode,
+#globalRatioDisplay {
+  padding-right: 24px;
+}
+
+.timer-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  white-space: nowrap;
+}
+
+.timer-badge.hidden {
+  display: inline-flex;
+}
+
+.diesis-nav-button {
+  min-width: 0;
+  border-color: var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.mobile-tools-toggle {
+  grid-area: more;
+  display: none;
+  width: var(--rf-more-w);
+  min-width: var(--rf-more-w);
+  height: var(--rf-control-h);
+  padding: 0 8px;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #171205;
+  white-space: nowrap;
+}
+
+.mobile-view-switch {
+  display: none;
+}
