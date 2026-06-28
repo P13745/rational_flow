@@ -15,9 +15,6 @@ window.RF_I18N = {
     },
     "mobile": {
       "ariaLabel": "モバイル表示切替",
-      "controls": "操作",
-      "main": "表示",
-      "list": "タイムライン",
       "more": "開く ▾",
       "less": "閉じる ▴"
     },
@@ -79,9 +76,8 @@ window.RF_I18N = {
       "settings": "詳細設定",
       "help": "Help",
       "language": "言語",
-      "controls": "操作",
-      "visualizer": "表示",
-      "events": "生成イベント",
+      "controls": "コントロール",
+      "canvas": "キャンバス",
       "fractionMode": "比率の入力方法",
       "ratioBias": "Ratio の選び方",
       "presets": "プリセット",
@@ -243,9 +239,6 @@ window.RF_I18N = {
     },
     "mobile": {
       "ariaLabel": "Mobile view",
-      "controls": "Controls",
-      "main": "Main",
-      "list": "List",
       "more": "More ▾",
       "less": "Less ▴"
     },
@@ -308,8 +301,7 @@ window.RF_I18N = {
       "help": "Help",
       "language": "Language",
       "controls": "Controls",
-      "visualizer": "Canvas",
-      "events": "Event Flow",
+      "canvas": "Canvas",
       "fractionMode": "Ratio Source",
       "ratioBias": "Ratio Weighting",
       "presets": "Presets",
