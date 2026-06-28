@@ -31,6 +31,7 @@ export const state = {
   diesisBaseOctave: 5,
   diesisRatioDisplay: "ratio",
   diesisLimitFilter: Infinity,
+  diesisDenominatorDigitsFilter: Infinity,
   diesisShowDerived: true,
   diesisShowPower: true,
   diesisCollectionFilter: "all",

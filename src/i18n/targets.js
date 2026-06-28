@@ -69,7 +69,7 @@ export const i18nTargets = [
   ["#diesisDialog .details-head p", "dialogs.diesisIntro"],
   ["#diesisClose", "dialogs.closeTitle", "title"],
   [".playback-group .toolbar-label", "dialogs.baseNote"],
-  ['label[for="diesisLimitFilter"]', "dialogs.limitFilter"],
+  ['label[for="diesisLimitFilter"]', "dialogs.filter"],
   ["#diesisDerivedToggle", "dialogs.showDerived", "checkbox-label"],
   ["#diesisPowerToggle", "dialogs.powerForm", "checkbox-label"],
   ['label[for="diesisCollectionFilter"]', "dialogs.collection"],

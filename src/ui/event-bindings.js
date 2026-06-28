@@ -75,6 +75,7 @@ export function registerEventBindings({
     openDialog(els.diesisDialog);
   });
   closeOnBackdrop(els.diesisDialog);
+  closeOnBackdrop(els.diesisDetailDialog);
 
   const setRatioDisplayMode = (nextMode) => {
     state.diesisRatioDisplay = nextMode;
@@ -99,6 +100,11 @@ export function registerEventBindings({
   els.diesisLimitFilter.addEventListener("change", () => {
     const value = els.diesisLimitFilter.value;
     state.diesisLimitFilter = value === "all" ? Infinity : Number(value);
+    renderDiesisList();
+  });
+  els.diesisDenominatorDigitsFilter.addEventListener("change", () => {
+    const value = els.diesisDenominatorDigitsFilter.value;
+    state.diesisDenominatorDigitsFilter = value === "all" ? Infinity : Number(value);
     renderDiesisList();
   });
   if (els.mobileToolsToggle) {

@@ -44,6 +44,10 @@
   grid-template-rows: auto 30px 30px;
 }
 
+.filter-group {
+  grid-template-rows: auto 30px 30px 30px;
+}
+
 .playback-group {
   grid-template-rows: auto 30px;
   justify-items: start;
@@ -71,7 +75,7 @@
 
 .diesis-item {
   display: grid;
-  grid-template-columns: 72px 72px minmax(135px, 1.25fr) 68px minmax(130px, 1.8fr) 28px;
+  grid-template-columns: 62px 72px minmax(130px, 1.05fr) 68px minmax(220px, 2.4fr) 28px 28px;
   gap: 8px;
   align-items: center;
   padding: 8px 10px;
@@ -130,15 +134,21 @@
 
 .diesis-actions {
   display: flex;
-  gap: 5px;
+  gap: 4px;
 }
 
 .diesis-play {
   min-width: 0;
-  width: 28px;
+  width: 26px;
   height: 28px;
   padding: 0;
   font-size: 11px;
+}
+
+.diesis-detail-button {
+  justify-self: center;
+  font-weight: 700;
+  font-style: italic;
 }
 
 .diesis-play.warning {
@@ -168,6 +178,7 @@
 .diesis-name {
   min-width: 0;
   color: var(--muted);
+  font-size: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -190,4 +201,78 @@
 
 #presetRatios {
   min-height: 180px;
+}
+
+.diesis-detail-panel {
+  width: 100%;
+}
+
+.diesis-detail-body {
+  display: grid;
+  gap: 12px;
+  padding: 14px 18px 18px;
+  overflow: auto;
+}
+
+.diesis-detail-section {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.diesis-detail-section h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.diesis-detail-grid {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.diesis-detail-field {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.diesis-detail-field dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.diesis-detail-field dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.diesis-detail-field a {
+  color: var(--accent);
+}
+
+.diesis-relations {
+  display: grid;
+  gap: 8px;
+}
+
+.diesis-relation-button {
+  justify-self: start;
+  max-width: 100%;
+  min-height: 30px;
+  padding: 0 10px;
+  color: var(--accent);
+}
+
+.diesis-detail-empty {
+  margin: 0;
+  color: var(--muted);
 }
