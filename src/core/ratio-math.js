@@ -1,5 +1,32 @@
 import { maxSafeRatioInteger } from "../config.js";
 
+const superscriptDigits = {
+  "-": "⁻",
+  0: "⁰",
+  1: "¹",
+  2: "²",
+  3: "³",
+  4: "⁴",
+  5: "⁵",
+  6: "⁶",
+  7: "⁷",
+  8: "⁸",
+  9: "⁹",
+};
+
+export function superscriptNumber(value) {
+  return String(value)
+    .split("")
+    .map((character) => superscriptDigits[character] ?? character)
+    .join("");
+}
+
+export function superscriptPowers(label) {
+  return String(label)
+    .replace(/\^(-?\d+)/g, (_, exponent) => superscriptNumber(exponent))
+    .replace(/\s*\/\s*/g, "/");
+}
+
 export function gcd(a, b) {
   let x = Math.abs(Math.trunc(a));
   let y = Math.abs(Math.trunc(b));
@@ -118,7 +145,7 @@ export function vectorFactorLabel(vector) {
   const negative = [];
   [...vector.entries()].sort(([a], [b]) => a - b).forEach(([prime, exponent]) => {
     if (!exponent) return;
-    const label = Math.abs(exponent) === 1 ? String(prime) : `${prime}^${Math.abs(exponent)}`;
+    const label = Math.abs(exponent) === 1 ? String(prime) : `${prime}${superscriptNumber(Math.abs(exponent))}`;
     if (exponent > 0) positive.push(label);
     else negative.push(label);
   });
@@ -131,7 +158,7 @@ export function positiveVectorFactorLabel(vector) {
   const parts = [];
   [...vector.entries()].sort(([a], [b]) => a - b).forEach(([prime, exponent]) => {
     if (exponent <= 0) return;
-    parts.push(exponent === 1 ? String(prime) : `${prime}^${exponent}`);
+    parts.push(exponent === 1 ? String(prime) : `${prime}${superscriptNumber(exponent)}`);
   });
   return parts.length ? parts.join("·") : "1";
 }
@@ -168,7 +195,7 @@ export function factorIntegerLabel(value) {
       exponent += 1;
       n /= factor;
     }
-    if (exponent) parts.push(exponent === 1 ? String(factor) : `${factor}^${exponent}`);
+    if (exponent) parts.push(exponent === 1 ? String(factor) : `${factor}${superscriptNumber(exponent)}`);
   }
   if (n > 1) parts.push(String(n));
   return parts.join("·");
@@ -177,7 +204,7 @@ export function factorIntegerLabel(value) {
 export function factorRatioLabel(ratio) {
   const frac = parseFraction(ratio);
   if (!frac) return ratio;
-  return `${factorIntegerLabel(frac.numerator)} / ${factorIntegerLabel(frac.denominator)}`;
+  return `${factorIntegerLabel(frac.numerator)}/${factorIntegerLabel(frac.denominator)}`;
 }
 
 export function parseFraction(raw) {

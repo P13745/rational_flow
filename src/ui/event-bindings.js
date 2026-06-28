@@ -18,7 +18,7 @@ export function registerEventBindings({
   setRatioBias,
   setSeedMode,
   start,
-  startCanvasSeed,
+  handleCanvasPointer,
   stop,
   syncWakeLock,
   toggleLanguage,
@@ -40,8 +40,10 @@ export function registerEventBindings({
   els.seedMode.addEventListener("change", () => setSeedMode(els.seedMode.value));
   els.seed.addEventListener("click", addManualNote);
   els.clear.addEventListener("click", clearAll);
-  els.visualizer.addEventListener("click", startCanvasSeed);
-  els.visualizer.addEventListener("touchstart", startCanvasSeed, { passive: false });
+  els.visualizer.addEventListener("pointerdown", handleCanvasPointer);
+  els.visualizer.addEventListener("pointermove", handleCanvasPointer);
+  els.visualizer.addEventListener("pointerup", handleCanvasPointer);
+  els.visualizer.addEventListener("pointercancel", handleCanvasPointer);
   els.autoMode.addEventListener("click", () => setMode("auto"));
   els.listMode.addEventListener("click", () => setMode("list"));
   els.simpleRatioMode.addEventListener("click", () => setRatioBias("simple"));

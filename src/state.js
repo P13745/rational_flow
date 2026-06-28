@@ -36,4 +36,6 @@ export const state = {
   diesisCollectionFilter: "all",
   discoveredDiesisCounts: new Map(),
   activeDiesisEncounterKeys: new Set(),
+  canvasPreviewPointerId: null,
+  canvasPreviewLastNoteId: null,
 };

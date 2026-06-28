@@ -332,21 +332,26 @@ function addManualNote() {
   render(true);
 }
 
-function startCanvasSeed(event) {
-  event.preventDefault();
-  const source = event.touches?.[0] || event.changedTouches?.[0] || event;
-  const hitNote = noteAtCanvasPoint(source.clientX, source.clientY);
-  if (hitNote) {
-    state.selectedNoteId = hitNote.id;
-    previewFrequency(hitNote.frequency);
-    render(true);
-    return;
+function previewCanvasNoteAt(clientX, clientY) {
+  const hitNote = noteAtCanvasPoint(clientX, clientY);
+  if (!hitNote) {
+    state.canvasPreviewLastNoteId = null;
+    return false;
   }
+  if (hitNote.id === state.canvasPreviewLastNoteId) return true;
+  state.canvasPreviewLastNoteId = hitNote.id;
+  state.selectedNoteId = hitNote.id;
+  previewFrequency(hitNote.frequency);
+  render(true);
+  return true;
+}
+
+function startCanvasSeedAt(clientY) {
   if (state.isRunning || state.isPaused || state.isDraining) return;
   state.notes.forEach((note) => stopNode(note, 0.24));
   state.notes = [];
   state.activeDiesisEncounterKeys = new Set();
-  const note = seedNote(2, null, frequencyFromCanvasY(source.clientY));
+  const note = seedNote(2, null, frequencyFromCanvasY(clientY));
   ensureAudio().resume();
   state.isRunning = true;
   state.isPaused = false;
@@ -365,6 +370,28 @@ function startCanvasSeed(event) {
   syncWakeLock();
   if (!state.rafId) tick();
   render(true);
+}
+
+function handleCanvasPointer(event) {
+  event.preventDefault();
+  if (event.type === "pointerdown") {
+    state.canvasPreviewPointerId = event.pointerId;
+    state.canvasPreviewLastNoteId = null;
+    els.visualizer.setPointerCapture?.(event.pointerId);
+    if (previewCanvasNoteAt(event.clientX, event.clientY)) return;
+    startCanvasSeedAt(event.clientY);
+    return;
+  }
+  if (event.pointerId !== state.canvasPreviewPointerId) return;
+  if (event.type === "pointermove") {
+    previewCanvasNoteAt(event.clientX, event.clientY);
+    return;
+  }
+  state.canvasPreviewPointerId = null;
+  state.canvasPreviewLastNoteId = null;
+  if (els.visualizer.hasPointerCapture?.(event.pointerId)) {
+    els.visualizer.releasePointerCapture(event.pointerId);
+  }
 }
 
 function scheduleNext() {
@@ -708,7 +735,7 @@ registerEventBindings({
   setRatioBias,
   setSeedMode,
   start,
-  startCanvasSeed,
+  handleCanvasPointer,
   stop,
   syncWakeLock,
   toggleLanguage,

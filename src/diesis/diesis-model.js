@@ -1,11 +1,12 @@
-import { factorRatioLabel, parseFraction } from "../core/ratio-math.js";
+import { factorRatioLabel, parseFraction, superscriptPowers } from "../core/ratio-math.js";
 
 export function diesisRatioLabel(entry, { displayMode, showPower }) {
+  const displayLabel = (label) => superscriptPowers(label);
   if (displayMode === "factors") {
-    if (showPower && entry.display?.powerFactors) return entry.display.powerFactors;
-    return entry.display?.factors || factorRatioLabel(entry.ratio);
+    if (showPower && entry.display?.powerFactors) return displayLabel(entry.display.powerFactors);
+    return displayLabel(entry.display?.factors || factorRatioLabel(entry.ratio));
   }
-  if (showPower && entry.display?.powerRatio) return entry.display.powerRatio;
+  if (showPower && entry.display?.powerRatio) return displayLabel(entry.display.powerRatio);
   return entry.display?.ratio || entry.ratio;
 }
 

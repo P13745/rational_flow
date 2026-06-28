@@ -38,7 +38,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "4375/4374",
-        "factors": "5^4·7 / 2·3^7"
+        "factors": "5^4·7/2·3^7"
       }
     },
     {
@@ -51,7 +51,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "2401/2400",
-        "factors": "7^4 / 2^5·3·5^2"
+        "factors": "7^4/2^5·3·5^2"
       }
     },
     {
@@ -64,7 +64,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "2080/2079",
-        "factors": "2^5·5·13 / 3^3·7·11"
+        "factors": "2^5·5·13/3^3·7·11"
       }
     },
     {
@@ -77,7 +77,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "2058/2057",
-        "factors": "2·3·7^3 / 11^2·17"
+        "factors": "2·3·7^3/11^2·17"
       }
     },
     {
@@ -90,7 +90,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "1729/1728",
-        "factors": "7·13·19 / 2^6·3^3"
+        "factors": "7·13·19/2^6·3^3"
       }
     },
     {
@@ -105,7 +105,7 @@
       "source": "wikipedia-comma",
       "display": {
         "ratio": "32805/32768",
-        "factors": "3^8·5 / 2^15"
+        "factors": "3^8·5/2^15"
       }
     },
     {
@@ -120,7 +120,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "513/512",
-        "factors": "3^3·19 / 2^9"
+        "factors": "3^3·19/2^9"
       }
     },
     {
@@ -133,7 +133,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "441/440",
-        "factors": "3^2·7^2 / 2^3·5·11"
+        "factors": "3^2·7^2/2^3·5·11"
       }
     },
     {
@@ -148,7 +148,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "385/384",
-        "factors": "5·7·11 / 2^7·3"
+        "factors": "5·7·11/2^7·3"
       }
     },
     {
@@ -161,7 +161,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "289/288",
-        "factors": "17^2 / 2^5·3^2"
+        "factors": "17^2/2^5·3^2"
       }
     },
     {
@@ -174,7 +174,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "256/255",
-        "factors": "2^8 / 3·5·17"
+        "factors": "2^8/3·5·17"
       }
     },
     {
@@ -189,7 +189,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "243/242",
-        "factors": "3^5 / 2·11^2"
+        "factors": "3^5/2·11^2"
       }
     },
     {
@@ -202,7 +202,7 @@
       "source": "wikipedia-comma",
       "display": {
         "ratio": "225/224",
-        "factors": "3^2·5^2 / 2^5·7"
+        "factors": "3^2·5^2/2^5·7"
       }
     },
     {
@@ -217,7 +217,7 @@
       "source": "wikipedia-comma",
       "display": {
         "ratio": "15625/15552",
-        "factors": "5^6 / 2^6·3^5"
+        "factors": "5^6/2^6·3^5"
       }
     },
     {
@@ -230,7 +230,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "2187/2176",
-        "factors": "3^7 / 2^7·17"
+        "factors": "3^7/2^7·17"
       }
     },
     {
@@ -245,7 +245,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "896/891",
-        "factors": "2^7·7 / 3^4·11"
+        "factors": "2^7·7/3^4·11"
       }
     },
     {
@@ -260,7 +260,7 @@
       "source": "wikipedia-semicomma",
       "display": {
         "ratio": "2109375/2097152",
-        "factors": "3^3·5^7 / 2^21"
+        "factors": "3^3·5^7/2^21"
       }
     },
     {
@@ -273,7 +273,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "160/159",
-        "factors": "2^5·5 / 3·53"
+        "factors": "2^5·5/3·53"
       }
     },
     {
@@ -286,7 +286,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "145/144",
-        "factors": "5·29 / 2^4·3^2"
+        "factors": "5·29/2^4·3^2"
       }
     },
     {
@@ -307,9 +307,9 @@
       "display": {
         "ratio": "83521/82944",
         "power": "(289/288)^2",
-        "factors": "17^4 / 2^10·3^4",
+        "factors": "17^4/2^10·3^4",
         "powerRatio": "(289/288)^2",
-        "powerFactors": "(17^2 / 2^5·3^2)^2"
+        "powerFactors": "(17^2/2^5·3^2)^2"
       }
     },
     {
@@ -322,7 +322,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "129/128",
-        "factors": "3·43 / 2^7"
+        "factors": "3·43/2^7"
       }
     },
     {
@@ -343,9 +343,9 @@
       "display": {
         "ratio": "65536/65025",
         "power": "(256/255)^2",
-        "factors": "2^16 / 3^2·5^2·17^2",
+        "factors": "2^16/3^2·5^2·17^2",
         "powerRatio": "(256/255)^2",
-        "powerFactors": "(2^8 / 3·5·17)^2"
+        "powerFactors": "(2^8/3·5·17)^2"
       }
     },
     {
@@ -360,7 +360,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "126/125",
-        "factors": "2·3^2·7 / 5^3"
+        "factors": "2·3^2·7/5^3"
       }
     },
     {
@@ -375,7 +375,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "245/243",
-        "factors": "5·7^2 / 3^5"
+        "factors": "5·7^2/3^5"
       }
     },
     {
@@ -396,9 +396,9 @@
       "display": {
         "ratio": "59049/58564",
         "power": "(243/242)^2",
-        "factors": "3^10 / 2^2·11^4",
+        "factors": "3^10/2^2·11^4",
         "powerRatio": "(243/242)^2",
-        "powerFactors": "(3^5 / 2·11^2)^2"
+        "powerFactors": "(3^5/2·11^2)^2"
       }
     },
     {
@@ -413,7 +413,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "121/120",
-        "factors": "11^2 / 2^3·3·5"
+        "factors": "11^2/2^3·3·5"
       }
     },
     {
@@ -434,9 +434,9 @@
       "display": {
         "ratio": "50625/50176",
         "power": "(225/224)^2",
-        "factors": "3^4·5^4 / 2^10·7^2",
+        "factors": "3^4·5^4/2^10·7^2",
         "powerRatio": "(225/224)^2",
-        "powerFactors": "(3^2·5^2 / 2^5·7)^2"
+        "powerFactors": "(3^2·5^2/2^5·7)^2"
       }
     },
     {
@@ -449,7 +449,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "512/507",
-        "factors": "2^9 / 3·13^2"
+        "factors": "2^9/3·13^2"
       }
     },
     {
@@ -464,7 +464,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "100/99",
-        "factors": "2^2·5^2 / 3^2·11"
+        "factors": "2^2·5^2/3^2·11"
       }
     },
     {
@@ -477,7 +477,7 @@
       "source": "wikipedia-comma",
       "display": {
         "ratio": "99/98",
-        "factors": "3^2·11 / 2·7^2"
+        "factors": "3^2·11/2·7^2"
       }
     },
     {
@@ -490,7 +490,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "96/95",
-        "factors": "2^5·3 / 5·19"
+        "factors": "2^5·3/5·19"
       }
     },
     {
@@ -505,7 +505,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "91/90",
-        "factors": "7·13 / 2·3^2·5"
+        "factors": "7·13/2·3^2·5"
       }
     },
     {
@@ -520,7 +520,7 @@
       "source": "wikipedia-comma",
       "display": {
         "ratio": "2048/2025",
-        "factors": "2^11 / 3^4·5^2"
+        "factors": "2^11/3^4·5^2"
       }
     },
     {
@@ -533,7 +533,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "85/84",
-        "factors": "5·17 / 2^2·3·7"
+        "factors": "5·17/2^2·3·7"
       }
     },
     {
@@ -552,7 +552,7 @@
       "source": "wikipedia-syntonic-comma",
       "display": {
         "ratio": "81/80",
-        "factors": "3^4 / 2^4·5"
+        "factors": "3^4/2^4·5"
       }
     },
     {
@@ -573,9 +573,9 @@
       "display": {
         "ratio": "25600/25281",
         "power": "(160/159)^2",
-        "factors": "2^10·5^2 / 3^2·53^2",
+        "factors": "2^10·5^2/3^2·53^2",
         "powerRatio": "(160/159)^2",
-        "powerFactors": "(2^5·5 / 3·53)^2"
+        "powerFactors": "(2^5·5/3·53)^2"
       }
     },
     {
@@ -590,7 +590,7 @@
       "source": "wikipedia-pythagorean-comma",
       "display": {
         "ratio": "531441/524288",
-        "factors": "3^12 / 2^19"
+        "factors": "3^12/2^19"
       }
     },
     {
@@ -611,9 +611,9 @@
       "display": {
         "ratio": "21025/20736",
         "power": "(145/144)^2",
-        "factors": "5^2·29^2 / 2^8·3^4",
+        "factors": "5^2·29^2/2^8·3^4",
         "powerRatio": "(145/144)^2",
-        "powerFactors": "(5·29 / 2^4·3^2)^2"
+        "powerFactors": "(5·29/2^4·3^2)^2"
       }
     },
     {
@@ -634,9 +634,9 @@
       "display": {
         "ratio": "16641/16384",
         "power": "(129/128)^2",
-        "factors": "3^2·43^2 / 2^14",
+        "factors": "3^2·43^2/2^14",
         "powerRatio": "(129/128)^2",
-        "powerFactors": "(3·43 / 2^7)^2"
+        "powerFactors": "(3·43/2^7)^2"
       }
     },
     {
@@ -651,7 +651,7 @@
       "source": "wikipedia-septimal-comma",
       "display": {
         "ratio": "64/63",
-        "factors": "2^6 / 3^2·7"
+        "factors": "2^6/3^2·7"
       }
     },
     {
@@ -672,9 +672,9 @@
       "display": {
         "ratio": "15876/15625",
         "power": "(126/125)^2",
-        "factors": "2^2·3^4·7^2 / 5^6",
+        "factors": "2^2·3^4·7^2/5^6",
         "powerRatio": "(126/125)^2",
-        "powerFactors": "(2·3^2·7 / 5^3)^2"
+        "powerFactors": "(2·3^2·7/5^3)^2"
       }
     },
     {
@@ -695,9 +695,9 @@
       "display": {
         "ratio": "60025/59049",
         "power": "(245/243)^2",
-        "factors": "5^2·7^4 / 3^10",
+        "factors": "5^2·7^4/3^10",
         "powerRatio": "(245/243)^2",
-        "powerFactors": "(5·7^2 / 3^5)^2"
+        "powerFactors": "(5·7^2/3^5)^2"
       }
     },
     {
@@ -718,9 +718,9 @@
       "display": {
         "ratio": "14641/14400",
         "power": "(121/120)^2",
-        "factors": "11^4 / 2^6·3^2·5^2",
+        "factors": "11^4/2^6·3^2·5^2",
         "powerRatio": "(121/120)^2",
-        "powerFactors": "(11^2 / 2^3·3·5)^2"
+        "powerFactors": "(11^2/2^3·3·5)^2"
       }
     },
     {
@@ -733,7 +733,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "57/56",
-        "factors": "3·19 / 2^3·7"
+        "factors": "3·19/2^3·7"
       }
     },
     {
@@ -748,7 +748,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "56/55",
-        "factors": "2^3·7 / 5·11"
+        "factors": "2^3·7/5·11"
       }
     },
     {
@@ -761,7 +761,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "51/50",
-        "factors": "3·17 / 2·5^2"
+        "factors": "3·17/2·5^2"
       }
     },
     {
@@ -782,9 +782,9 @@
       "display": {
         "ratio": "10000/9801",
         "power": "(100/99)^2",
-        "factors": "2^4·5^4 / 3^4·11^2",
+        "factors": "2^4·5^4/3^4·11^2",
         "powerRatio": "(100/99)^2",
-        "powerFactors": "(2^2·5^2 / 3^2·11)^2"
+        "powerFactors": "(2^2·5^2/3^2·11)^2"
       }
     },
     {
@@ -800,7 +800,7 @@
       "source": "wikipedia-septimal-comma",
       "display": {
         "ratio": "50/49",
-        "factors": "2·5^2 / 7^2"
+        "factors": "2·5^2/7^2"
       }
     },
     {
@@ -821,9 +821,9 @@
       "display": {
         "ratio": "9801/9604",
         "power": "(99/98)^2",
-        "factors": "3^4·11^2 / 2^2·7^4",
+        "factors": "3^4·11^2/2^2·7^4",
         "powerRatio": "(99/98)^2",
-        "powerFactors": "(3^2·11 / 2·7^2)^2"
+        "powerFactors": "(3^2·11/2·7^2)^2"
       }
     },
     {
@@ -836,7 +836,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "248/243",
-        "factors": "2^3·31 / 3^5"
+        "factors": "2^3·31/3^5"
       }
     },
     {
@@ -851,7 +851,7 @@
       "source": "wikipedia-septimal-comma",
       "display": {
         "ratio": "49/48",
-        "factors": "7^2 / 2^4·3"
+        "factors": "7^2/2^4·3"
       }
     },
     {
@@ -872,9 +872,9 @@
       "display": {
         "ratio": "9216/9025",
         "power": "(96/95)^2",
-        "factors": "2^10·3^2 / 5^2·19^2",
+        "factors": "2^10·3^2/5^2·19^2",
         "powerRatio": "(96/95)^2",
-        "powerFactors": "(2^5·3 / 5·19)^2"
+        "powerFactors": "(2^5·3/5·19)^2"
       }
     },
     {
@@ -887,7 +887,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "46/45",
-        "factors": "2·23 / 3^2·5"
+        "factors": "2·23/3^2·5"
       }
     },
     {
@@ -908,9 +908,9 @@
       "display": {
         "ratio": "8281/8100",
         "power": "(91/90)^2",
-        "factors": "7^2·13^2 / 2^2·3^4·5^2",
+        "factors": "7^2·13^2/2^2·3^4·5^2",
         "powerRatio": "(91/90)^2",
-        "powerFactors": "(7·13 / 2·3^2·5)^2"
+        "powerFactors": "(7·13/2·3^2·5)^2"
       }
     },
     {
@@ -931,9 +931,9 @@
       "display": {
         "ratio": "7225/7056",
         "power": "(85/84)^2",
-        "factors": "5^2·17^2 / 2^4·3^2·7^2",
+        "factors": "5^2·17^2/2^4·3^2·7^2",
         "powerRatio": "(85/84)^2",
-        "powerFactors": "(5·17 / 2^2·3·7)^2"
+        "powerFactors": "(5·17/2^2·3·7)^2"
       }
     },
     {
@@ -949,7 +949,7 @@
       "source": "wikipedia-comma",
       "display": {
         "ratio": "128/125",
-        "factors": "2^7 / 5^3"
+        "factors": "2^7/5^3"
       }
     },
     {
@@ -962,7 +962,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "42/41",
-        "factors": "2·3·7 / 41"
+        "factors": "2·3·7/41"
       }
     },
     {
@@ -975,7 +975,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "41/40",
-        "factors": "41 / 2^3·5"
+        "factors": "41/2^3·5"
       }
     },
     {
@@ -996,9 +996,9 @@
       "display": {
         "ratio": "6561/6400",
         "power": "(81/80)^2",
-        "factors": "3^8 / 2^8·5^2",
+        "factors": "3^8/2^8·5^2",
         "powerRatio": "(81/80)^2",
-        "powerFactors": "(3^4 / 2^4·5)^2"
+        "powerFactors": "(3^4/2^4·5)^2"
       }
     },
     {
@@ -1011,7 +1011,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "40/39",
-        "factors": "2^3·5 / 3·13"
+        "factors": "2^3·5/3·13"
       }
     },
     {
@@ -1026,7 +1026,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "39/38",
-        "factors": "3·13 / 2·19"
+        "factors": "3·13/2·19"
       }
     },
     {
@@ -1039,7 +1039,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "1331/1296",
-        "factors": "11^3 / 2^4·3^4"
+        "factors": "11^3/2^4·3^4"
       }
     },
     {
@@ -1052,7 +1052,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "38/37",
-        "factors": "2·19 / 37"
+        "factors": "2·19/37"
       }
     },
     {
@@ -1065,7 +1065,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "37/36",
-        "factors": "37 / 2^2·3^2"
+        "factors": "37/2^2·3^2"
       }
     },
     {
@@ -1078,7 +1078,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "1053/1024",
-        "factors": "3^4·13 / 2^10"
+        "factors": "3^4·13/2^10"
       }
     },
     {
@@ -1093,7 +1093,7 @@
       "source": "wikipedia-septimal-comma",
       "display": {
         "ratio": "36/35",
-        "factors": "2^2·3^2 / 5·7"
+        "factors": "2^2·3^2/5·7"
       }
     },
     {
@@ -1108,7 +1108,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "250/243",
-        "factors": "2·5^3 / 3^5"
+        "factors": "2·5^3/3^5"
       }
     },
     {
@@ -1123,7 +1123,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "35/34",
-        "factors": "5·7 / 2·17"
+        "factors": "5·7/2·17"
       }
     },
     {
@@ -1138,7 +1138,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "59049/57344",
-        "factors": "3^10 / 2^13·7"
+        "factors": "3^10/2^13·7"
       }
     },
     {
@@ -1151,7 +1151,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "34/33",
-        "factors": "2·17 / 3·11"
+        "factors": "2·17/3·11"
       }
     },
     {
@@ -1166,7 +1166,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "33/32",
-        "factors": "3·11 / 2^5"
+        "factors": "3·11/2^5"
       }
     },
     {
@@ -1187,9 +1187,9 @@
       "display": {
         "ratio": "4096/3969",
         "power": "(64/63)^2",
-        "factors": "2^12 / 3^4·7^2",
+        "factors": "2^12/3^4·7^2",
         "powerRatio": "(64/63)^2",
-        "powerFactors": "(2^6 / 3^2·7)^2"
+        "powerFactors": "(2^6/3^2·7)^2"
       }
     },
     {
@@ -1204,7 +1204,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "32/31",
-        "factors": "2^5 / 31"
+        "factors": "2^5/31"
       }
     },
     {
@@ -1217,7 +1217,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "529/512",
-        "factors": "23^2 / 2^9"
+        "factors": "23^2/2^9"
       }
     },
     {
@@ -1232,7 +1232,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "31/30",
-        "factors": "31 / 2·3·5"
+        "factors": "31/2·3·5"
       }
     },
     {
@@ -1245,7 +1245,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "30/29",
-        "factors": "2·3·5 / 29"
+        "factors": "2·3·5/29"
       }
     },
     {
@@ -1258,7 +1258,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "29/28",
-        "factors": "29 / 2^2·7"
+        "factors": "29/2^2·7"
       }
     },
     {
@@ -1279,9 +1279,9 @@
       "display": {
         "ratio": "3249/3136",
         "power": "(57/56)^2",
-        "factors": "3^2·19^2 / 2^6·7^2",
+        "factors": "3^2·19^2/2^6·7^2",
         "powerRatio": "(57/56)^2",
-        "powerFactors": "(3·19 / 2^3·7)^2"
+        "powerFactors": "(3·19/2^3·7)^2"
       }
     },
     {
@@ -1302,9 +1302,9 @@
       "display": {
         "ratio": "3136/3025",
         "power": "(56/55)^2",
-        "factors": "2^6·7^2 / 5^2·11^2",
+        "factors": "2^6·7^2/5^2·11^2",
         "powerRatio": "(56/55)^2",
-        "powerFactors": "(2^3·7 / 5·11)^2"
+        "powerFactors": "(2^3·7/5·11)^2"
       }
     },
     {
@@ -1319,7 +1319,7 @@
       "source": "wikipedia-comma",
       "display": {
         "ratio": "648/625",
-        "factors": "2^3·3^4 / 5^4"
+        "factors": "2^3·3^4/5^4"
       }
     },
     {
@@ -1335,7 +1335,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "28/27",
-        "factors": "2^2·7 / 3^3"
+        "factors": "2^2·7/3^3"
       }
     },
     {
@@ -1350,7 +1350,7 @@
       "source": "wikipedia-comma",
       "display": {
         "ratio": "27/26",
-        "factors": "3^3 / 2·13"
+        "factors": "3^3/2·13"
       }
     },
     {
@@ -1363,7 +1363,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "133/128",
-        "factors": "7·19 / 2^7"
+        "factors": "7·19/2^7"
       }
     },
     {
@@ -1378,7 +1378,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "26/25",
-        "factors": "2·13 / 5^2"
+        "factors": "2·13/5^2"
       }
     },
     {
@@ -1399,9 +1399,9 @@
       "display": {
         "ratio": "2601/2500",
         "power": "(51/50)^2",
-        "factors": "3^2·17^2 / 2^2·5^4",
+        "factors": "3^2·17^2/2^2·5^4",
         "powerRatio": "(51/50)^2",
-        "powerFactors": "(3·17 / 2·5^2)^2"
+        "powerFactors": "(3·17/2·5^2)^2"
       }
     },
     {
@@ -1422,9 +1422,9 @@
       "display": {
         "ratio": "2500/2401",
         "power": "(50/49)^2",
-        "factors": "2^2·5^4 / 7^4",
+        "factors": "2^2·5^4/7^4",
         "powerRatio": "(50/49)^2",
-        "powerFactors": "(2·5^2 / 7^2)^2"
+        "powerFactors": "(2·5^2/7^2)^2"
       }
     },
     {
@@ -1445,9 +1445,9 @@
       "display": {
         "ratio": "61504/59049",
         "power": "(248/243)^2",
-        "factors": "2^6·31^2 / 3^10",
+        "factors": "2^6·31^2/3^10",
         "powerRatio": "(248/243)^2",
-        "powerFactors": "(2^3·31 / 3^5)^2"
+        "powerFactors": "(2^3·31/3^5)^2"
       }
     },
     {
@@ -1463,7 +1463,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "25/24",
-        "factors": "5^2 / 2^3·3"
+        "factors": "5^2/2^3·3"
       }
     },
     {
@@ -1484,9 +1484,9 @@
       "display": {
         "ratio": "2401/2304",
         "power": "(49/48)^2",
-        "factors": "7^4 / 2^8·3^2",
+        "factors": "7^4/2^8·3^2",
         "powerRatio": "(49/48)^2",
-        "powerFactors": "(7^2 / 2^4·3)^2"
+        "powerFactors": "(7^2/2^4·3)^2"
       }
     },
     {
@@ -1499,7 +1499,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "24/23",
-        "factors": "2^3·3 / 23"
+        "factors": "2^3·3/23"
       }
     },
     {
@@ -1520,9 +1520,9 @@
       "display": {
         "ratio": "2116/2025",
         "power": "(46/45)^2",
-        "factors": "2^2·23^2 / 3^4·5^2",
+        "factors": "2^2·23^2/3^4·5^2",
         "powerRatio": "(46/45)^2",
-        "powerFactors": "(2·23 / 3^2·5)^2"
+        "powerFactors": "(2·23/3^2·5)^2"
       }
     },
     {
@@ -1535,7 +1535,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "23/22",
-        "factors": "23 / 2·11"
+        "factors": "23/2·11"
       }
     },
     {
@@ -1548,7 +1548,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "67/64",
-        "factors": "67 / 2^6"
+        "factors": "67/2^6"
       }
     },
     {
@@ -1563,7 +1563,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "22/21",
-        "factors": "2·11 / 3·7"
+        "factors": "2·11/3·7"
       }
     },
     {
@@ -1584,9 +1584,9 @@
       "display": {
         "ratio": "16384/15625",
         "power": "(128/125)^2",
-        "factors": "2^14 / 5^6",
+        "factors": "2^14/5^6",
         "powerRatio": "(128/125)^2",
-        "powerFactors": "(2^7 / 5^3)^2"
+        "powerFactors": "(2^7/5^3)^2"
       }
     },
     {
@@ -1607,9 +1607,9 @@
       "display": {
         "ratio": "1764/1681",
         "power": "(42/41)^2",
-        "factors": "2^2·3^2·7^2 / 41^2",
+        "factors": "2^2·3^2·7^2/41^2",
         "powerRatio": "(42/41)^2",
-        "powerFactors": "(2·3·7 / 41)^2"
+        "powerFactors": "(2·3·7/41)^2"
       }
     },
     {
@@ -1624,7 +1624,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "21/20",
-        "factors": "3·7 / 2^2·5"
+        "factors": "3·7/2^2·5"
       }
     },
     {
@@ -1645,9 +1645,9 @@
       "display": {
         "ratio": "1681/1600",
         "power": "(41/40)^2",
-        "factors": "41^2 / 2^6·5^2",
+        "factors": "41^2/2^6·5^2",
         "powerRatio": "(41/40)^2",
-        "powerFactors": "(41 / 2^3·5)^2"
+        "powerFactors": "(41/2^3·5)^2"
       }
     },
     {
@@ -1668,9 +1668,9 @@
       "display": {
         "ratio": "1600/1521",
         "power": "(40/39)^2",
-        "factors": "2^6·5^2 / 3^2·13^2",
+        "factors": "2^6·5^2/3^2·13^2",
         "powerRatio": "(40/39)^2",
-        "powerFactors": "(2^3·5 / 3·13)^2"
+        "powerFactors": "(2^3·5/3·13)^2"
       }
     },
     {
@@ -1683,7 +1683,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "20/19",
-        "factors": "2^2·5 / 19"
+        "factors": "2^2·5/19"
       }
     },
     {
@@ -1704,9 +1704,9 @@
       "display": {
         "ratio": "1521/1444",
         "power": "(39/38)^2",
-        "factors": "3^2·13^2 / 2^2·19^2",
+        "factors": "3^2·13^2/2^2·19^2",
         "powerRatio": "(39/38)^2",
-        "powerFactors": "(3·13 / 2·19)^2"
+        "powerFactors": "(3·13/2·19)^2"
       }
     },
     {
@@ -1721,7 +1721,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "256/243",
-        "factors": "2^8 / 3^5"
+        "factors": "2^8/3^5"
       }
     },
     {
@@ -1736,7 +1736,7 @@
       "source": "huygens-fokker-list-of-intervals",
       "display": {
         "ratio": "135/128",
-        "factors": "3^3·5 / 2^7"
+        "factors": "3^3·5/2^7"
       }
     },
     {
@@ -1757,9 +1757,9 @@
       "display": {
         "ratio": "1444/1369",
         "power": "(38/37)^2",
-        "factors": "2^2·19^2 / 37^2",
+        "factors": "2^2·19^2/37^2",
         "powerRatio": "(38/37)^2",
-        "powerFactors": "(2·19 / 37)^2"
+        "powerFactors": "(2·19/37)^2"
       }
     },
     {
@@ -1772,7 +1772,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "19/18",
-        "factors": "19 / 2·3^2"
+        "factors": "19/2·3^2"
       }
     },
     {
@@ -1793,9 +1793,9 @@
       "display": {
         "ratio": "1369/1296",
         "power": "(37/36)^2",
-        "factors": "37^2 / 2^4·3^4",
+        "factors": "37^2/2^4·3^4",
         "powerRatio": "(37/36)^2",
-        "powerFactors": "(37 / 2^2·3^2)^2"
+        "powerFactors": "(37/2^2·3^2)^2"
       }
     },
     {
@@ -1810,7 +1810,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "128/121",
-        "factors": "2^7 / 11^2"
+        "factors": "2^7/11^2"
       }
     },
     {
@@ -1831,9 +1831,9 @@
       "display": {
         "ratio": "1296/1225",
         "power": "(36/35)^2",
-        "factors": "2^4·3^4 / 5^2·7^2",
+        "factors": "2^4·3^4/5^2·7^2",
         "powerRatio": "(36/35)^2",
-        "powerFactors": "(2^2·3^2 / 5·7)^2"
+        "powerFactors": "(2^2·3^2/5·7)^2"
       }
     },
     {
@@ -1854,9 +1854,9 @@
       "display": {
         "ratio": "62500/59049",
         "power": "(250/243)^2",
-        "factors": "2^2·5^6 / 3^10",
+        "factors": "2^2·5^6/3^10",
         "powerRatio": "(250/243)^2",
-        "powerFactors": "(2·5^3 / 3^5)^2"
+        "powerFactors": "(2·5^3/3^5)^2"
       }
     },
     {
@@ -1871,7 +1871,7 @@
       "source": "wikipedia-list-of-pitch-intervals",
       "display": {
         "ratio": "18/17",
-        "factors": "2·3^2 / 17"
+        "factors": "2·3^2/17"
       }
     }
   ]
