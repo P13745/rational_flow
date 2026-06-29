@@ -18,6 +18,12 @@ export function registerEventBindings({
   setMobileView,
   setMode,
   setEditorRatioSource,
+  exportEditorLoop,
+  exportEditorLoopUrl,
+  shareEditorLoopToTwitter,
+  importEditorLoop,
+  saveEditorSlot,
+  loadEditorSlot,
   syncEditorControls,
   setRatioBias,
   setSeedMode,
@@ -69,6 +75,22 @@ export function registerEventBindings({
   els.listMode.addEventListener("click", () => setMode("list"));
   els.editorPartialGrid.addEventListener("click", () => setEditorRatioSource("partialGrid"));
   els.editorSingleRatio.addEventListener("click", () => setEditorRatioSource("single"));
+  els.editorTransposeAll.addEventListener("change", () => {
+    state.editor.transposeAll = els.editorTransposeAll.checked;
+    render(true);
+  });
+  els.editorStorageOpen.addEventListener("click", () => openDialog(els.editorStorageDialog));
+  closeOnBackdrop(els.editorStorageDialog);
+  els.editorExport.addEventListener("click", exportEditorLoop);
+  els.editorImport.addEventListener("click", importEditorLoop);
+  els.editorExportUrl.addEventListener("click", exportEditorLoopUrl);
+  els.editorShareTwitter.addEventListener("click", shareEditorLoopToTwitter);
+  document.querySelectorAll("[data-editor-save-slot]").forEach((button) => {
+    button.addEventListener("click", () => saveEditorSlot(Number(button.dataset.editorSaveSlot)));
+  });
+  document.querySelectorAll("[data-editor-load-slot]").forEach((button) => {
+    button.addEventListener("click", () => loadEditorSlot(Number(button.dataset.editorLoadSlot)));
+  });
   els.simpleRatioMode.addEventListener("click", () => setRatioBias("simple"));
   els.equalRatioMode.addEventListener("click", () => setRatioBias("equal"));
   els.complexRatioMode.addEventListener("click", () => setRatioBias("complex"));
@@ -174,7 +196,8 @@ export function registerEventBindings({
     els.editorGridNumeratorMin,
     els.editorGridNumeratorMax,
     els.editorSingleRatioInput,
-    els.editorPairSelect,
+    els.editorSingleDirection,
+    els.editorBinderMode,
   ].forEach((el) => el.addEventListener("input", () => {
     syncEditorControls();
     render(true);

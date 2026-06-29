@@ -13,7 +13,7 @@ export function renderEditorTable({
 
   const header = document.createElement("tr");
   header.className = "group-row editor";
-  header.innerHTML = `<td colspan="5">${t("labels.graph")}<span>${state.editor.notes.length}</span></td>`;
+  header.innerHTML = `<td colspan="5">${t("labels.editorTimeline")}<span>${state.editor.notes.length}</span></td>`;
   fragment.appendChild(header);
 
   if (!state.editor.notes.length) {

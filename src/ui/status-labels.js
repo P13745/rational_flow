@@ -1,6 +1,9 @@
 import { nearestPitchLabel } from "../core/pitch.js";
 import { t } from "../i18n/i18n.js";
-import { activeRatioText as formatActiveRatioText } from "./active-ratio.js";
+import {
+  activeRatioText as formatActiveRatioText,
+  editorActiveRatioText as formatEditorActiveRatioText,
+} from "./active-ratio.js";
 
 export function updateStatusLabels({
   els,
@@ -34,9 +37,11 @@ export function updateStatusLabels({
     els.timerBadge.classList.remove("hidden");
     els.seed.setAttribute("title", t("editor.addRootTitle"));
     els.seed.setAttribute("aria-label", t("editor.addRootTitle"));
-    els.activeRatioLabel.textContent = editorIntervalText || (selectedEditorNote
-      ? `${t("editor.selectedNote")}: ${selectedEditorNote.frequency.toFixed(2)}Hz`
-      : t("editor.activeRatioPlaceholder"));
+    els.activeRatioLabel.textContent = state.editor.isLooping || state.editor.isPaused
+      ? formatEditorActiveRatioText({ state, t })
+      : editorIntervalText || (selectedEditorNote
+        ? `${t("editor.selectedNote")}: ${selectedEditorNote.frequency.toFixed(2)}Hz`
+        : t("editor.activeRatioPlaceholder"));
     els.globalRatioDisplay.value = state.diesisRatioDisplay;
     if (els.diesisRatioDisplay) els.diesisRatioDisplay.value = state.diesisRatioDisplay;
     updateRatioCurveState();

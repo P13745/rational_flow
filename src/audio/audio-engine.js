@@ -43,6 +43,7 @@ export function scheduleAudio(note, settings) {
   }
   oscillator.connect(gain).connect(ctx.destination);
   oscillator.start(startAt);
+  if (!isDrone) oscillator.stop(endAt + 0.03);
   note.nodes = { oscillator, gain, startAt, vibratoOscillator, vibratoGain };
   oscillator.onended = () => {
     if (vibratoOscillator) {

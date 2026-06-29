@@ -22,6 +22,39 @@ function candidateFromParts(numerator, denominator, direction = "above") {
   };
 }
 
+function octaveShiftCandidate(candidate, octave) {
+  if (octave === 0) return candidate;
+  const numerator = octave > 0
+    ? candidate.frac.numerator * (2 ** octave)
+    : candidate.frac.numerator;
+  const denominator = octave < 0
+    ? candidate.frac.denominator * (2 ** Math.abs(octave))
+    : candidate.frac.denominator;
+  const shifted = reduceFraction(numerator, denominator);
+  return {
+    ...candidate,
+    frac: shifted,
+    rawRatio: fractionLabel(shifted),
+    ratio: fractionLabel(shifted),
+    numericRatio: candidate.numericRatio * (2 ** octave),
+  };
+}
+
+export function expandCandidatesByOctaves(candidates, minOctave = -2, maxOctave = 2) {
+  const expanded = [];
+  const seen = new Set();
+  for (let octave = minOctave; octave <= maxOctave; octave += 1) {
+    candidates.forEach((candidate) => {
+      const shifted = octaveShiftCandidate(candidate, octave);
+      const key = `${shifted.frac.numerator}/${shifted.frac.denominator}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      expanded.push(shifted);
+    });
+  }
+  return expanded;
+}
+
 export function buildPartialGridCandidates({
   base,
   numeratorMin,
@@ -50,6 +83,21 @@ export function buildSingleRatioCandidate(input) {
   const denominator = Number(match[2]);
   if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator <= 0) return null;
   return candidateFromParts(numerator, denominator, "above");
+}
+
+export function buildSingleRatioCandidates(input, direction = "above") {
+  const candidate = buildSingleRatioCandidate(input);
+  if (!candidate) return [];
+  if (direction === "both") {
+    return [
+      candidate,
+      candidateFromParts(candidate.frac.numerator, candidate.frac.denominator, "under"),
+    ];
+  }
+  const inversion = candidate.numericRatio >= 1
+    ? octaveShiftCandidate(candidate, -1)
+    : octaveShiftCandidate(candidate, 1);
+  return [candidate, inversion];
 }
 
 export function candidateFrequency(parent, candidate) {

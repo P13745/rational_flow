@@ -224,6 +224,18 @@
   background: rgba(16, 20, 18, 0.72);
 }
 
+.editor-transfer-code {
+  min-height: 92px;
+  margin-bottom: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.editor-transfer-status {
+  min-height: 18px;
+}
+
 .help-tabs button,
 .preset-item {
   white-space: normal;

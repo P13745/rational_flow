@@ -18,6 +18,7 @@ import {
   addVectors,
   approximateFraction,
   fractionLabel,
+  parseFraction,
   vectorFactorLabel,
   vectorFromFraction,
   vectorKey,
@@ -41,12 +42,15 @@ import {
 import {
   createEditorRootNote,
   createEditorChildNote,
-  deleteEditorNoteSubtree,
+  deleteEditorNote,
+  editorRelations,
+  removeEditorRelation,
   moveEditorNote,
   resizeEditorNoteEnd,
   resizeEditorNoteStart,
   selectedEditorInterval,
   toggleEditorNoteMute,
+  toggleEditorBind,
 } from "./editor/editor-model.js";
 import {
   fillEditorPlaybackQueue,
@@ -55,7 +59,8 @@ import {
 import { renderEditorTable } from "./editor/editor-table.js";
 import {
   buildPartialGridCandidates,
-  buildSingleRatioCandidate,
+  buildSingleRatioCandidates,
+  expandCandidatesByOctaves,
   nearestCandidateByY,
 } from "./editor/ratio-tools.js";
 import {
@@ -97,6 +102,7 @@ import { updateStatusLabels } from "./ui/status-labels.js";
 import { renderVisualizerCanvas } from "./ui/visualizer-renderer.js";
 import { initialSeedDelay, tableRenderInterval } from "./config.js";
 
+const productionAppUrl = "https://p13745.github.io/rational_flow/";
 
 function timelineNow() {
   return state.isPaused && state.pausedAt !== null ? state.pausedAt : performance.now() / 1000;
@@ -307,21 +313,37 @@ function canvasMetrics() {
 }
 
 function syncEditorControls() {
-  state.editor.gridBase = Math.max(1, Math.floor(Number(els.editorGridBase.value) || 32));
-  state.editor.gridNumeratorMin = Math.max(1, Math.floor(Number(els.editorGridNumeratorMin.value) || state.editor.gridBase + 1));
-  state.editor.gridNumeratorMax = Math.max(state.editor.gridNumeratorMin, Math.floor(Number(els.editorGridNumeratorMax.value) || state.editor.gridNumeratorMin));
+  const gridBase = Number(els.editorGridBase.value);
+  const gridMin = Number(els.editorGridNumeratorMin.value);
+  const gridMax = Number(els.editorGridNumeratorMax.value);
+  if (Number.isFinite(gridBase) && els.editorGridBase.value !== "") {
+    state.editor.gridBase = Math.max(1, Math.floor(gridBase));
+  }
+  if (Number.isFinite(gridMin) && els.editorGridNumeratorMin.value !== "") {
+    state.editor.gridNumeratorMin = Math.max(1, Math.floor(gridMin));
+  }
+  if (Number.isFinite(gridMax) && els.editorGridNumeratorMax.value !== "") {
+    state.editor.gridNumeratorMax = Math.max(state.editor.gridNumeratorMin, Math.floor(gridMax));
+  }
   state.editor.gridDirection = ["above", "under", "both"].includes(els.editorGridDirection.value)
     ? els.editorGridDirection.value
-    : "both";
-  state.editor.singleRatioInput = els.editorSingleRatioInput.value || "3/2";
-  state.editor.pairSelect = els.editorPairSelect.checked;
+    : "above";
+  state.editor.singleRatioInput = els.editorSingleRatioInput.value;
+  state.editor.singleDirection = ["above", "both"].includes(els.editorSingleDirection.value)
+    ? els.editorSingleDirection.value
+    : "above";
+  state.editor.binderMode = els.editorBinderMode.checked;
+}
+
+function setControlValueUnlessEditing(element, value) {
+  if (!element || document.activeElement === element) return;
+  element.value = String(value);
 }
 
 function editorRatioCandidates() {
   syncEditorControls();
   if (state.editor.ratioSource === "single") {
-    const candidate = buildSingleRatioCandidate(state.editor.singleRatioInput);
-    return candidate ? [candidate] : [];
+    return buildSingleRatioCandidates(state.editor.singleRatioInput, state.editor.singleDirection);
   }
   return buildPartialGridCandidates({
     base: state.editor.gridBase,
@@ -331,17 +353,226 @@ function editorRatioCandidates() {
   });
 }
 
+function expandedEditorRatioCandidates() {
+  const candidates = editorRatioCandidates();
+  return state.editor.ratioSource === "single"
+    ? candidates
+    : expandCandidatesByOctaves(candidates, -4, 4);
+}
+
+function selectedEditorParents(excludeNoteId = null) {
+  return state.editor.selectedNoteIds
+    .map((id) => state.editor.notes.find((note) => note.id === id))
+    .filter((note) => note && note.id !== excludeNoteId);
+}
+
+function editorGridParents({ excludeNoteId = null, preserveParentOf = null, fallbackToAll = true } = {}) {
+  const selectedParents = selectedEditorParents(excludeNoteId);
+  if (selectedParents.length) return selectedParents;
+  if (preserveParentOf?.parentId) {
+    const parent = state.editor.notes.find((note) => note.id === preserveParentOf.parentId);
+    if (parent && parent.id !== excludeNoteId) return [parent];
+  }
+  if (!fallbackToAll) return [];
+  return state.editor.notes.filter((note) => note.id !== excludeNoteId);
+}
+
+function editorGridTargets({ metrics, parents, excludeNoteId = null } = {}) {
+  if (!state.editor.notes.length) return [];
+  const candidates = expandedEditorRatioCandidates();
+  const settings = getSettings();
+  const gridParents = parents || editorGridParents({ excludeNoteId });
+  const targets = [];
+  gridParents.forEach((parent) => {
+    candidates.forEach((candidate) => {
+      const frequency = parent.frequency * candidate.numericRatio;
+      if (frequency < settings.minFreq || frequency > settings.maxFreq) return;
+      targets.push({
+        parent,
+        candidate,
+        frequency,
+      });
+    });
+  });
+  return targets;
+}
+
+function captureEditorRelationSnapTargets(note) {
+  if (!note) return [];
+  return editorRelations(state.editor)
+    .filter((relation) => relation.aId === note.id || relation.bId === note.id)
+    .map((relation) => {
+      const other = relation.aId === note.id ? relation.b : relation.a;
+      const frac = parseFraction(relation.label);
+      if (!other || !frac) return null;
+      const ratio = Math.abs(frac.numerator / frac.denominator);
+      if (!Number.isFinite(ratio) || ratio <= 0) return null;
+      return {
+        otherId: other.id,
+        ratio,
+        label: relation.label,
+        noteIsHigher: note.frequency >= other.frequency,
+      };
+    })
+    .filter(Boolean);
+}
+
+function editorRelationSnapTargets(note, preservedRelations = null) {
+  if (!note) return [];
+  const settings = getSettings();
+  const relations = preservedRelations || captureEditorRelationSnapTargets(note);
+  return relations.flatMap((relation) => {
+      const other = state.editor.notes.find((item) => item.id === relation.otherId);
+      const frac = parseFraction(relation.label);
+      const ratio = relation.ratio;
+      if (!Number.isFinite(ratio) || ratio <= 0) return [];
+      if (!other || !frac) return [];
+      const frequency = relation.noteIsHigher ? other.frequency * ratio : other.frequency / ratio;
+      if (frequency < settings.minFreq || frequency > settings.maxFreq) return [];
+      return [{
+        parent: other,
+        candidate: {
+          frac: relation.noteIsHigher ? frac : { numerator: frac.denominator, denominator: frac.numerator },
+          rawRatio: relation.label,
+          ratio: relation.label,
+          numericRatio: relation.noteIsHigher ? ratio : 1 / ratio,
+        },
+        frequency,
+        preserveRelation: true,
+      }];
+    });
+}
+
+function nearestEditorGridTarget(clientY, metrics, options = {}) {
+  const pointerY = clientY - metrics.rect.top;
+  const targets = [
+    ...editorGridTargets({ metrics, ...options }),
+    ...(options.preserveNote ? editorRelationSnapTargets(options.preserveNote, options.preservedRelations) : []),
+  ];
+  targets.forEach((target) => {
+    target.distance = Math.abs(pointerY - metrics.yOf(target.frequency));
+  });
+  return targets.sort((a, b) => a.distance - b.distance)[0] || null;
+}
+
+function editorGridPreviewLines(metrics) {
+  if (state.workspaceMode !== "editor") return [];
+  const drag = state.editor.drag;
+  const parents = drag?.gridParentIds
+    ? drag.gridParentIds.map((id) => state.editor.notes.find((note) => note.id === id)).filter(Boolean)
+    : selectedEditorParents();
+  const seen = new Set();
+  const preserveNote = drag?.noteId
+    ? state.editor.notes.find((note) => note.id === drag.noteId)
+    : state.editor.selectedNoteIds.length === 1
+      ? state.editor.notes.find((note) => note.id === state.editor.selectedNoteIds[0])
+      : null;
+  if (!parents.length && !preserveNote) return [];
+  return [
+    ...editorGridTargets({ metrics, parents }),
+    ...editorRelationSnapTargets(preserveNote, drag?.preservedRelations || null),
+  ]
+    .map((target) => {
+      const y = metrics.yOf(target.frequency);
+      const key = Math.round(y * 2) / 2;
+      if (seen.has(key)) return null;
+      seen.add(key);
+      return { y, label: target.candidate.ratio };
+    })
+    .filter(Boolean)
+    .slice(0, 96);
+}
+
+function applyEditorGridTarget(note, target) {
+  note.frequency = target.frequency;
+  if (target.preserveRelation) return;
+  note.ratio = target.candidate.ratio;
+  note.sourceRatio = target.candidate.rawRatio;
+  note.baseFrequency = target.parent.frequency;
+  note.generation = target.parent.generation + 1;
+  note.parentId = target.parent.id;
+  note.rootId = target.parent.rootId;
+  note.absoluteVector = addVectors(target.parent.absoluteVector, vectorFromFraction(target.candidate.frac));
+}
+
+function clearEditorGridTarget(note) {
+  note.ratio = "";
+  note.sourceRatio = "";
+  note.baseFrequency = null;
+  note.generation = 0;
+  note.parentId = null;
+  note.rootId = note.id;
+  note.absoluteVector = new Map();
+}
+
+function refreshEditorBaseFrequencies() {
+  const notesById = new Map(state.editor.notes.map((note) => [note.id, note]));
+  state.editor.notes.forEach((note) => {
+    const parent = note.parentId ? notesById.get(note.parentId) : null;
+    note.baseFrequency = parent ? parent.frequency : null;
+  });
+}
+
+function transposeAllEditorNotes(drag, targetFrequency) {
+  if (!Number.isFinite(targetFrequency) || targetFrequency <= 0) return;
+  const originals = new Map(drag.transposeFrequencies || []);
+  const originFrequency = originals.get(drag.noteId);
+  if (!Number.isFinite(originFrequency) || originFrequency <= 0) return;
+  const settings = getSettings();
+  let ratio = targetFrequency / originFrequency;
+  let minRatio = 0;
+  let maxRatio = Infinity;
+  originals.forEach((frequency) => {
+    if (!Number.isFinite(frequency) || frequency <= 0) return;
+    minRatio = Math.max(minRatio, settings.minFreq / frequency);
+    maxRatio = Math.min(maxRatio, settings.maxFreq / frequency);
+  });
+  ratio = clamp(ratio, minRatio, maxRatio);
+  state.editor.notes.forEach((note) => {
+    const original = originals.get(note.id);
+    if (!Number.isFinite(original) || original <= 0) return;
+    note.frequency = original * ratio;
+  });
+  refreshEditorBaseFrequencies();
+}
+
+function distanceToSegment(px, py, ax, ay, bx, by) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const lengthSquared = dx * dx + dy * dy;
+  if (!lengthSquared) return Math.hypot(px - ax, py - ay);
+  const tValue = clamp(((px - ax) * dx + (py - ay) * dy) / lengthSquared, 0, 1);
+  return Math.hypot(px - (ax + tValue * dx), py - (ay + tValue * dy));
+}
+
+function editorRelationAtCanvasPoint(clientX, clientY) {
+  const metrics = canvasMetrics();
+  const pointerX = clientX - metrics.rect.left;
+  const pointerY = clientY - metrics.rect.top;
+  const hitRadius = 12;
+  return editorRelations(state.editor)
+    .map((relation) => ({
+      relation,
+      distance: distanceToSegment(
+        pointerX,
+        pointerY,
+        metrics.xOf(relation.a.start),
+        metrics.yOf(relation.a.frequency),
+        metrics.xOf(relation.b.start),
+        metrics.yOf(relation.b.frequency),
+      ),
+    }))
+    .filter((hit) => hit.distance <= hitRadius)
+    .sort((a, b) => a.distance - b.distance)[0]?.relation || null;
+}
+
 function selectEditorNote(noteId, { extend = false } = {}) {
+  state.editor.selectedRelationKey = null;
   if (extend) {
     const selected = new Set(state.editor.selectedNoteIds);
     if (selected.has(noteId)) selected.delete(noteId);
     else selected.add(noteId);
     state.editor.selectedNoteIds = [...selected].slice(-2);
-    return;
-  }
-  if (state.editor.pairSelect && state.editor.selectedNoteIds.length) {
-    const previous = state.editor.selectedNoteIds[state.editor.selectedNoteIds.length - 1];
-    state.editor.selectedNoteIds = previous === noteId ? [noteId] : [previous, noteId];
     return;
   }
   state.editor.selectedNoteIds = [noteId];
@@ -456,10 +687,68 @@ function editorNoteAtCanvasPoint(clientX, clientY) {
 
 function handleEditorCanvasPointer(event) {
   if (event.type === "pointerdown") {
+    if (state.editor.binderMode) {
+      const relation = editorRelationAtCanvasPoint(event.clientX, event.clientY);
+      if (relation) {
+        removeEditorRelation(state.editor, relation);
+        state.editor.selectedNoteIds = [];
+        state.editor.drag = null;
+        render(true);
+        return;
+      }
+      const hit = editorNoteAtCanvasPoint(event.clientX, event.clientY);
+      state.editor.drag = null;
+      if (!hit) {
+        state.editor.selectedNoteIds = [];
+        state.editor.selectedRelationKey = null;
+        render(true);
+        return;
+      }
+      const selected = new Set(state.editor.selectedNoteIds);
+      if (selected.has(hit.note.id)) selected.delete(hit.note.id);
+      else selected.add(hit.note.id);
+      state.editor.selectedNoteIds = [...selected].slice(-2);
+      state.editor.selectedRelationKey = null;
+      if (state.editor.selectedNoteIds.length === 2) {
+        const [aId, bId] = state.editor.selectedNoteIds;
+        const result = toggleEditorBind(state.editor, aId, bId);
+        if (result?.action === "removed") state.editor.selectedNoteIds = [bId];
+      }
+      render(true);
+      return;
+    }
     const hit = editorNoteAtCanvasPoint(event.clientX, event.clientY);
     state.editor.drag = null;
     if (!hit) {
-      state.editor.selectedNoteIds = [];
+      const metrics = canvasMetrics();
+      const settings = getSettings();
+      const gridParents = editorGridParents({ fallbackToAll: true });
+      const pointerX = event.clientX - metrics.rect.left;
+      const pointerY = event.clientY - metrics.rect.top;
+      const start = Math.min(
+        Math.max(0, metrics.timeFromX(pointerX)),
+        Math.max(0, state.editor.loopLength - state.editor.defaultDuration),
+      );
+      const gridTarget = nearestEditorGridTarget(event.clientY, metrics, { parents: gridParents });
+      const note = createEditorRootNote({
+        editor: state.editor,
+        frequency: gridTarget ? gridTarget.frequency : metrics.frequencyFromY(pointerY),
+        settings,
+        start,
+      });
+      if (gridTarget) applyEditorGridTarget(note, gridTarget);
+      state.editor.drag = {
+        pointerId: event.pointerId,
+        kind: "place",
+        noteId: note.id,
+        grabOffset: 0,
+        startedAt: performance.now(),
+        candidate: gridTarget?.candidate || null,
+        candidateFrequency: gridTarget?.frequency || null,
+        childStart: start,
+        gridParentIds: gridParents.map((parent) => parent.id),
+      };
+      els.visualizer.setPointerCapture?.(event.pointerId);
       render(true);
       return;
     }
@@ -477,9 +766,13 @@ function handleEditorCanvasPointer(event) {
       duration: note.duration,
       originX: event.clientX,
       originY: event.clientY,
+      startedAt: performance.now(),
       candidate: null,
       candidateFrequency: null,
       childStart: null,
+      gridParentIds: editorGridParents({ excludeNoteId: note.id, preserveParentOf: note }).map((parent) => parent.id),
+      preservedRelations: captureEditorRelationSnapTargets(note),
+      transposeFrequencies: state.editor.notes.map((item) => [item.id, item.frequency]),
     };
     els.visualizer.setPointerCapture?.(event.pointerId);
     render(true);
@@ -494,13 +787,33 @@ function handleEditorCanvasPointer(event) {
     if (!note) return;
     const metrics = canvasMetrics();
     const pointerTime = metrics.timeFromX(event.clientX - metrics.rect.left);
-    if (drag.kind === "resize-start") {
+    if (drag.kind === "place") {
+      const pointerY = event.clientY - metrics.rect.top;
+      moveEditorNote({ editor: state.editor, note, start: pointerTime });
+      const gridParents = drag.gridParentIds
+        .map((id) => state.editor.notes.find((item) => item.id === id))
+        .filter((item) => item && item.id !== note.id);
+      const gridTarget = gridParents.length || note.parentId || state.editor.links.length
+        ? nearestEditorGridTarget(event.clientY, metrics, { parents: gridParents, preserveNote: note, preservedRelations: drag.preservedRelations })
+        : null;
+      if (gridTarget) {
+        applyEditorGridTarget(note, gridTarget);
+        drag.candidate = gridTarget.candidate;
+        drag.candidateFrequency = gridTarget.frequency;
+      } else {
+        clearEditorGridTarget(note);
+        note.frequency = metrics.frequencyFromY(pointerY);
+        drag.candidate = null;
+        drag.candidateFrequency = null;
+      }
+      drag.childStart = note.start;
+    } else if (drag.kind === "resize-start") {
       resizeEditorNoteStart({ editor: state.editor, note, start: pointerTime });
     } else if (drag.kind === "resize-end") {
       resizeEditorNoteEnd({ editor: state.editor, note, end: pointerTime });
     } else if (drag.kind === "branch") {
       const pointerY = event.clientY - metrics.rect.top;
-      const nearest = nearestCandidateByY(pointerY, editorRatioCandidates(), metrics, note);
+      const nearest = nearestCandidateByY(pointerY, expandedEditorRatioCandidates(), metrics, note);
       if (nearest) {
         drag.candidate = nearest.candidate;
         drag.candidateFrequency = nearest.frequency;
@@ -510,7 +823,34 @@ function handleEditorCanvasPointer(event) {
         );
       }
     } else {
+      if (state.editor.transposeAll) {
+        const pointerY = event.clientY - metrics.rect.top;
+        const gridParents = drag.gridParentIds
+          .map((id) => state.editor.notes.find((item) => item.id === id))
+          .filter((item) => item && item.id !== note.id);
+        const gridTarget = performance.now() - drag.startedAt > 450 && (gridParents.length || note.parentId || state.editor.links.length)
+          ? nearestEditorGridTarget(event.clientY, metrics, { parents: gridParents, preserveNote: note, preservedRelations: drag.preservedRelations })
+          : null;
+        transposeAllEditorNotes(drag, gridTarget?.frequency || metrics.frequencyFromY(pointerY));
+        render();
+        return;
+      }
       moveEditorNote({ editor: state.editor, note, start: pointerTime - drag.grabOffset });
+      if (performance.now() - drag.startedAt > 450) {
+        const pointerY = event.clientY - metrics.rect.top;
+        const gridParents = drag.gridParentIds
+          .map((id) => state.editor.notes.find((item) => item.id === id))
+          .filter((item) => item && item.id !== note.id);
+        const gridTarget = gridParents.length || note.parentId || state.editor.links.length
+          ? nearestEditorGridTarget(event.clientY, metrics, { parents: gridParents, preserveNote: note, preservedRelations: drag.preservedRelations })
+          : null;
+        if (gridTarget) {
+          applyEditorGridTarget(note, gridTarget);
+        } else {
+          clearEditorGridTarget(note);
+          note.frequency = metrics.frequencyFromY(pointerY);
+        }
+      }
     }
     render();
     return;
@@ -662,9 +1002,12 @@ function drawCanvas() {
       closeNoteIds: new Set(),
       closePairs: [],
       editorDrag: state.editor.drag,
+      editorGridLines: editorGridPreviewLines(metrics),
+      editorRelations: editorRelations(state.editor),
       metrics,
       notes: state.editor.notes,
       selectedNoteId: state.editor.selectedNoteIds[0] || null,
+      selectedRelationKey: state.editor.selectedRelationKey,
     });
     return;
   }
@@ -687,9 +1030,12 @@ function drawCanvas() {
     closeNoteIds,
     closePairs,
     editorDrag: null,
+    editorGridLines: [],
+    editorRelations: [],
     metrics,
     notes: state.notes,
     selectedNoteId: state.selectedNoteId,
+    selectedRelationKey: null,
   });
 }
 
@@ -697,7 +1043,7 @@ function renderTable() {
   if (state.workspaceMode === "editor") {
     renderEditorTable({
       onDelete: (noteId) => {
-        deleteEditorNoteSubtree(state.editor, noteId);
+        deleteEditorNote(state.editor, noteId);
         stopEditorScheduledAudio({ editor: state.editor, stopNode });
         render(true);
       },
@@ -775,15 +1121,24 @@ function renderWorkspaceControls() {
   els.editorSingleRatio.classList.toggle("active", state.editor.ratioSource === "single");
   els.editorGridControls.classList.toggle("hidden", state.editor.ratioSource !== "partialGrid");
   els.editorSingleControls.classList.toggle("hidden", state.editor.ratioSource !== "single");
-  els.editorGridBase.value = String(state.editor.gridBase);
-  els.editorGridNumeratorMin.value = String(state.editor.gridNumeratorMin);
-  els.editorGridNumeratorMax.value = String(state.editor.gridNumeratorMax);
+  setControlValueUnlessEditing(els.editorGridBase, state.editor.gridBase);
+  setControlValueUnlessEditing(els.editorGridNumeratorMin, state.editor.gridNumeratorMin);
+  setControlValueUnlessEditing(els.editorGridNumeratorMax, state.editor.gridNumeratorMax);
   els.editorGridDirection.value = state.editor.gridDirection;
-  els.editorSingleRatioInput.value = state.editor.singleRatioInput;
-  els.editorPairSelect.checked = state.editor.pairSelect;
+  setControlValueUnlessEditing(els.editorSingleRatioInput, state.editor.singleRatioInput);
+  els.editorSingleDirection.value = state.editor.singleDirection;
+  els.editorBinderMode.checked = state.editor.binderMode;
+  els.editorTransposeAll.checked = state.editor.transposeAll;
+  if (isEditor) renderEditorSaveSlots();
+  document.querySelectorAll(".play-only-control").forEach((element) => {
+    element.classList.toggle("hidden", isEditor);
+  });
+  document.querySelectorAll(".editor-only-control").forEach((element) => {
+    element.classList.toggle("hidden", !isEditor);
+  });
   els.stage.dataset.workspaceMode = state.workspaceMode;
-  els.listToolbarTitle.textContent = isEditor ? t("labels.graph") : t("labels.timeline");
-  els.mobileListView.textContent = isEditor ? t("labels.graph") : t("labels.timeline");
+  els.listToolbarTitle.textContent = isEditor ? t("labels.editorTimeline") : t("labels.timeline");
+  els.mobileListView.textContent = isEditor ? t("labels.editorTimeline") : t("labels.timeline");
   document.querySelectorAll("thead th").forEach((heading, index) => {
     heading.textContent = tableHeadings[index] || "";
   });
@@ -810,13 +1165,21 @@ function timerBadgeText() {
 }
 
 function render(forceTable = false) {
-  updateLabels();
-  renderWorkspaceControls();
-  drawCanvas();
   if (state.workspaceMode === "editor") {
+    const now = performance.now();
+    const shouldUpdateUi = forceTable || now - state.editor.lastUiRenderAt >= 250;
+    if (shouldUpdateUi) {
+      updateLabels();
+      renderWorkspaceControls();
+      state.editor.lastUiRenderAt = now;
+    }
+    drawCanvas();
     if (forceTable) renderTable();
     return;
   }
+  updateLabels();
+  renderWorkspaceControls();
+  drawCanvas();
   const now = performance.now();
   if (forceTable || now - state.lastTableRenderAt >= tableRenderInterval) {
     renderTable();
@@ -831,12 +1194,15 @@ function tick() {
   if (state.editor.isLooping && state.editor.loopStartWallTime !== null) {
     const now = performance.now() / 1000;
     state.editor.playheadTime = (now - state.editor.loopStartWallTime) % state.editor.loopLength;
-    fillEditorPlaybackQueue({
-      editor: state.editor,
-      now,
-      scheduleAudio,
-      settings: getSettings(),
-    });
+    if (now - state.editor.lastPlaybackQueueAt >= 0.1) {
+      fillEditorPlaybackQueue({
+        editor: state.editor,
+        now,
+        scheduleAudio,
+        settings: getSettings(),
+      });
+      state.editor.lastPlaybackQueueAt = now;
+    }
   }
   trimNotes();
   if (state.isDraining && !state.notes.length) {
@@ -846,7 +1212,12 @@ function tick() {
     state.timerCompleted = false;
     syncWakeLock();
   }
-  render();
+  const frameNow = performance.now();
+  const editorFrameDue = !state.editor.isLooping || frameNow - state.editor.lastFrameRenderAt >= 1000 / 30;
+  if (editorFrameDue) {
+    render();
+    if (state.editor.isLooping) state.editor.lastFrameRenderAt = frameNow;
+  }
   state.rafId = state.isRunning || state.isDraining || state.editor.isLooping ? window.requestAnimationFrame(tick) : null;
 }
 
@@ -890,6 +1261,9 @@ function startEditorLoop() {
   state.editor.isPaused = false;
   state.editor.loopStartWallTime = performance.now() / 1000 - state.editor.pausedAtLoopTime;
   state.editor.playheadTime = state.editor.pausedAtLoopTime;
+  state.editor.lastPlaybackQueueAt = -Infinity;
+  state.editor.lastFrameRenderAt = -Infinity;
+  state.editor.lastUiRenderAt = -Infinity;
   fillEditorPlaybackQueue({
     editor: state.editor,
     now: performance.now() / 1000,
@@ -908,6 +1282,8 @@ function stopEditorLoop() {
   state.editor.loopStartWallTime = null;
   state.editor.pausedAtLoopTime = 0;
   state.editor.playheadTime = 0;
+  state.editor.lastPlaybackQueueAt = -Infinity;
+  state.editor.lastFrameRenderAt = -Infinity;
   syncWakeLock();
   if (state.rafId && !state.isRunning && !state.isDraining) {
     window.cancelAnimationFrame(state.rafId);
@@ -919,14 +1295,16 @@ function stopEditorLoop() {
 function clearEditorClip() {
   stopEditorLoop();
   state.editor.notes = [];
+  state.editor.links = [];
   state.editor.selectedNoteIds = [];
+  state.editor.selectedRelationKey = null;
   state.editor.drag = null;
   render(true);
 }
 
 function deleteSelectedEditorNotes() {
   if (!state.editor.selectedNoteIds.length) return;
-  [...state.editor.selectedNoteIds].forEach((noteId) => deleteEditorNoteSubtree(state.editor, noteId));
+  [...state.editor.selectedNoteIds].forEach((noteId) => deleteEditorNote(state.editor, noteId));
   stopEditorScheduledAudio({ editor: state.editor, stopNode });
   render(true);
 }
@@ -1003,6 +1381,8 @@ function toggleEditorPause() {
     state.editor.isPaused = false;
     state.editor.isLooping = true;
     state.editor.loopStartWallTime = performance.now() / 1000 - state.editor.pausedAtLoopTime;
+    state.editor.lastPlaybackQueueAt = -Infinity;
+    state.editor.lastFrameRenderAt = -Infinity;
     fillEditorPlaybackQueue({
       editor: state.editor,
       now: performance.now() / 1000,
@@ -1054,6 +1434,324 @@ function setEditorRatioSource(nextSource) {
   render(true);
 }
 
+function encodeEditorPayload(payload) {
+  const bytes = new TextEncoder().encode(JSON.stringify(payload));
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return `rf1:${btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "")}`;
+}
+
+function decodeEditorPayload(raw) {
+  const text = String(raw || "").trim();
+  let code = text;
+  try {
+    const url = new URL(text);
+    code = url.searchParams.get("loop") || text;
+  } catch (_) {
+    code = text;
+  }
+  const encoded = code.startsWith("rf1:") ? code.slice(4) : code;
+  const padded = encoded.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(encoded.length / 4) * 4, "=");
+  const binary = atob(padded);
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+function vectorEntries(vector) {
+  return [...(vector || new Map()).entries()];
+}
+
+function importVector(entries) {
+  return new Map(Array.isArray(entries) ? entries.map(([prime, exponent]) => [Number(prime), Number(exponent)]).filter(([prime, exponent]) => Number.isFinite(prime) && Number.isFinite(exponent) && exponent !== 0) : []);
+}
+
+function editorSlotStorageKey(slot) {
+  return `rationalFlowEditorSlot${slot}`;
+}
+
+function editorText(key, values = {}) {
+  return Object.entries(values).reduce(
+    (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+    t(`editor.${key}`),
+  );
+}
+
+function setEditorTransferStatus(key, values = {}) {
+  if (!els.editorTransferStatus) return;
+  els.editorTransferStatus.textContent = key ? editorText(key, values) : "";
+}
+
+function createEditorLoopCode() {
+  syncEditorControls();
+  const noteIds = new Set(state.editor.notes.map((note) => note.id));
+  const payload = {
+    version: 2,
+    kind: "rational-flow-editor-loop",
+    settings: {
+      minFreq: Number(els.minFreq.value),
+      maxFreq: Number(els.maxFreq.value),
+      windowSize: Number(els.windowSize.value),
+      volume: Number(els.volume.value),
+    },
+    editor: {
+      loopLength: state.editor.loopLength,
+      viewStart: state.editor.viewStart,
+      viewEnd: state.editor.viewEnd,
+      defaultDuration: state.editor.defaultDuration,
+      timeSnap: state.editor.timeSnap,
+      nextEditorId: state.editor.nextEditorId,
+      nextEditorLinkId: state.editor.nextEditorLinkId,
+      ratioSource: state.editor.ratioSource,
+      singleRatioInput: state.editor.singleRatioInput,
+      singleDirection: state.editor.singleDirection,
+      transposeAll: state.editor.transposeAll,
+      gridBase: state.editor.gridBase,
+      gridNumeratorMin: state.editor.gridNumeratorMin,
+      gridNumeratorMax: state.editor.gridNumeratorMax,
+      gridDirection: state.editor.gridDirection,
+      notes: state.editor.notes.map((note) => {
+        const absoluteVector = vectorEntries(note.absoluteVector);
+        const needsFrequency = !note.rootId || note.rootId === note.id || !noteIds.has(note.rootId);
+        return {
+          id: note.id,
+          start: note.start,
+          duration: note.duration,
+          ...(needsFrequency ? { frequency: note.frequency } : {}),
+          ratio: note.ratio,
+          sourceRatio: note.sourceRatio,
+          generation: note.generation,
+          parentId: note.parentId,
+          rootId: note.rootId,
+          absoluteVector,
+          muted: note.muted,
+          volume: note.volume,
+        };
+      }),
+      links: state.editor.links.map((link) => ({ id: link.id, aId: link.aId, bId: link.bId })),
+    },
+  };
+  return encodeEditorPayload(payload);
+}
+
+function exportEditorLoop() {
+  const code = createEditorLoopCode();
+  if (els.editorTransferCode) {
+    els.editorTransferCode.value = code;
+    els.editorTransferCode.focus();
+    els.editorTransferCode.select();
+  }
+  setEditorTransferStatus("exportReady", { length: code.length });
+}
+
+function createEditorLoopUrl(baseUrl = window.location.href) {
+  const url = new URL(baseUrl);
+  url.searchParams.set("loop", createEditorLoopCode());
+  return url.toString();
+}
+
+function exportEditorLoopUrl() {
+  const url = createEditorLoopUrl();
+  if (els.editorTransferCode) {
+    els.editorTransferCode.value = url;
+    els.editorTransferCode.focus();
+    els.editorTransferCode.select();
+  }
+  setEditorTransferStatus("urlReady", { length: url.length });
+}
+
+function formatShareTimestamp() {
+  return new Date().toLocaleString(state.currentLanguage === "ja" ? "ja-JP" : "en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function shareEditorLoopToTwitter() {
+  const sharedUrl = createEditorLoopUrl(productionAppUrl);
+  const intentUrl = new URL("https://twitter.com/intent/tweet");
+  intentUrl.searchParams.set("text", `#RationalFlow ${formatShareTimestamp()}`);
+  intentUrl.searchParams.set("url", sharedUrl);
+  window.open(intentUrl.toString(), "_blank", "noopener,noreferrer");
+  setEditorTransferStatus("twitterReady", { length: sharedUrl.length });
+}
+
+function finiteNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function applyEditorLoopCode(raw) {
+  if (!raw) return;
+  let payload;
+  try {
+    payload = decodeEditorPayload(raw);
+  } catch (_) {
+    setEditorTransferStatus("importInvalid");
+    return false;
+  }
+  if (payload?.kind !== "rational-flow-editor-loop" || payload.version !== 2 || !payload.editor) {
+    setEditorTransferStatus("importUnsupported");
+    return false;
+  }
+  const editor = payload.editor;
+  stopEditorLoop();
+  state.workspaceMode = "editor";
+  state.editor.loopLength = Math.max(0.5, finiteNumber(editor.loopLength, 8));
+  state.editor.viewStart = finiteNumber(editor.viewStart, 0);
+  state.editor.viewEnd = Math.max(state.editor.viewStart + 0.5, finiteNumber(editor.viewEnd, state.editor.loopLength));
+  state.editor.defaultDuration = Math.max(0.1, finiteNumber(editor.defaultDuration, 2));
+  state.editor.timeSnap = Math.max(0, finiteNumber(editor.timeSnap, 0.25));
+  state.editor.nextEditorId = Math.max(1, Math.floor(finiteNumber(editor.nextEditorId, 1)));
+  state.editor.nextEditorLinkId = Math.max(1, Math.floor(finiteNumber(editor.nextEditorLinkId, 1)));
+  state.editor.ratioSource = editor.ratioSource === "single" ? "single" : "partialGrid";
+  state.editor.singleRatioInput = String(editor.singleRatioInput || "3/2");
+  state.editor.singleDirection = editor.singleDirection === "both" ? "both" : "above";
+  state.editor.transposeAll = Boolean(editor.transposeAll);
+  state.editor.gridBase = Math.max(1, Math.floor(finiteNumber(editor.gridBase, 8)));
+  state.editor.gridNumeratorMin = Math.max(1, Math.floor(finiteNumber(editor.gridNumeratorMin, 8)));
+  state.editor.gridNumeratorMax = Math.max(state.editor.gridNumeratorMin, Math.floor(finiteNumber(editor.gridNumeratorMax, 16)));
+  state.editor.gridDirection = ["above", "under", "both"].includes(editor.gridDirection) ? editor.gridDirection : "above";
+  state.editor.notes = (Array.isArray(editor.notes) ? editor.notes : []).map((note) => {
+    const importedFrequency = Number(note.frequency);
+    return {
+      id: String(note.id || `e${state.editor.nextEditorId++}`),
+      start: Math.min(Math.max(0, finiteNumber(note.start, 0)), Math.max(0, state.editor.loopLength - 0.1)),
+      duration: Math.min(Math.max(0.1, finiteNumber(note.duration, state.editor.defaultDuration)), state.editor.loopLength),
+      frequency: Number.isFinite(importedFrequency) && importedFrequency > 0 ? importedFrequency : null,
+      ratio: String(note.ratio || ""),
+      sourceRatio: String(note.sourceRatio || ""),
+      baseFrequency: note.baseFrequency === null || note.baseFrequency === undefined ? null : finiteNumber(note.baseFrequency, null),
+      generation: Math.max(0, Math.floor(finiteNumber(note.generation, 0))),
+      parentId: note.parentId === null || note.parentId === undefined ? null : String(note.parentId),
+      rootId: String(note.rootId || note.id || ""),
+      absoluteVector: importVector(note.absoluteVector),
+      muted: Boolean(note.muted),
+      lockedPitch: true,
+      volume: Math.max(0, finiteNumber(note.volume, getSettings().volume)),
+      nodes: null,
+    };
+  });
+  const noteIds = new Set(state.editor.notes.map((note) => note.id));
+  state.editor.notes.forEach((note) => {
+    if (!note.rootId || !noteIds.has(note.rootId)) note.rootId = note.id;
+    if (note.parentId && !noteIds.has(note.parentId)) note.parentId = null;
+  });
+  const notesById = new Map(state.editor.notes.map((note) => [note.id, note]));
+  let importFailed = false;
+  state.editor.notes.forEach((note) => {
+    if (importFailed || note.frequency !== null) return;
+    const root = notesById.get(note.rootId);
+    const exact = root?.frequency !== null ? vectorToSafeFraction(note.absoluteVector) : null;
+    if (!exact) {
+      importFailed = true;
+      return;
+    }
+    note.frequency = root.frequency * exact.numerator / exact.denominator;
+  });
+  if (importFailed) {
+    setEditorTransferStatus("importInvalid");
+    state.editor.notes = [];
+    state.editor.links = [];
+    return false;
+  }
+  state.editor.notes.forEach((note) => {
+    const parent = note.parentId ? notesById.get(note.parentId) : null;
+    if (parent) note.baseFrequency = parent.frequency;
+    else note.baseFrequency = null;
+  });
+  const maxNoteId = state.editor.notes.reduce((maxId, note) => {
+    const match = note.id.match(/^e(\d+)$/);
+    return match ? Math.max(maxId, Number(match[1])) : maxId;
+  }, 0);
+  state.editor.nextEditorId = Math.max(state.editor.nextEditorId, maxNoteId + 1);
+  state.editor.links = (Array.isArray(editor.links) ? editor.links : [])
+    .map((link) => ({ id: String(link.id || `l${state.editor.nextEditorLinkId++}`), aId: String(link.aId || ""), bId: String(link.bId || "") }))
+    .filter((link) => link.aId !== link.bId && noteIds.has(link.aId) && noteIds.has(link.bId));
+  const maxLinkId = state.editor.links.reduce((maxId, link) => {
+    const match = link.id.match(/^l(\d+)$/);
+    return match ? Math.max(maxId, Number(match[1])) : maxId;
+  }, 0);
+  state.editor.nextEditorLinkId = Math.max(state.editor.nextEditorLinkId, maxLinkId + 1);
+  state.editor.selectedNoteIds = [];
+  state.editor.selectedRelationKey = null;
+  state.editor.drag = null;
+  state.editor.playbackNotes = [];
+  state.editor.scheduledEvents.clear();
+  if (payload.settings) {
+    if (Number.isFinite(Number(payload.settings.minFreq))) els.minFreq.value = String(payload.settings.minFreq);
+    if (Number.isFinite(Number(payload.settings.maxFreq))) els.maxFreq.value = String(payload.settings.maxFreq);
+    if (Number.isFinite(Number(payload.settings.windowSize))) els.windowSize.value = String(payload.settings.windowSize);
+    if (Number.isFinite(Number(payload.settings.volume))) els.volume.value = String(payload.settings.volume);
+  }
+  render(true);
+  setEditorTransferStatus("importDone");
+  return true;
+}
+
+function importEditorLoop() {
+  applyEditorLoopCode(els.editorTransferCode?.value || "");
+}
+
+function renderEditorSaveSlots() {
+  for (let slot = 1; slot <= 3; slot += 1) {
+    const element = document.querySelector(`#editorSlot${slot}Status`);
+    if (!element) continue;
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(editorSlotStorageKey(slot)) || "null");
+    } catch (_) {
+      saved = null;
+    }
+    if (!saved?.savedAt || !saved?.code) {
+      element.textContent = editorText("slotEmpty", { slot });
+      continue;
+    }
+    const time = new Date(saved.savedAt).toLocaleString(state.currentLanguage === "ja" ? "ja-JP" : "en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    element.textContent = editorText("slotSaved", { slot, time });
+  }
+}
+
+function saveEditorSlot(slot) {
+  localStorage.setItem(editorSlotStorageKey(slot), JSON.stringify({
+    savedAt: new Date().toISOString(),
+    code: createEditorLoopCode(),
+  }));
+  renderEditorSaveSlots();
+}
+
+function loadEditorSlot(slot) {
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem(editorSlotStorageKey(slot)) || "null");
+  } catch (_) {
+    saved = null;
+  }
+  if (!saved?.code) {
+    setEditorTransferStatus("slotEmpty", { slot });
+    return;
+  }
+  applyEditorLoopCode(saved.code);
+}
+
+function loadEditorLoopFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("loop");
+  if (!code) return;
+  if (els.editorTransferCode) els.editorTransferCode.value = code;
+  if (!applyEditorLoopCode(code)) return;
+  setEditorTransferStatus("urlLoaded");
+}
+
 function setRatioBias(nextBias) {
   state.ratioBias = nextBias;
   render();
@@ -1087,6 +1785,12 @@ registerEventBindings({
   setMobileView,
   setMode,
   setEditorRatioSource,
+  exportEditorLoop,
+  exportEditorLoopUrl,
+  shareEditorLoopToTwitter,
+  importEditorLoop,
+  saveEditorSlot,
+  loadEditorSlot,
   syncEditorControls,
   setRatioBias,
   setSeedMode,
@@ -1110,3 +1814,4 @@ loadNamedCommas({
 });
 loadRatioPresets({ renderPresetBrowser, state });
 applyLanguage();
+loadEditorLoopFromUrl();

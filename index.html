@@ -22,7 +22,7 @@
       <header class="topbar">
         <div class="brand">
           <div class="title-row">
-            <h1><span class="title-line">Rational</span><span class="title-line">Flow <span class="version-label">v0.3.1</span></span></h1>
+            <h1><span class="title-line">Rational</span><span class="title-line">Flow <span class="version-label">v0.3.1a</span></span></h1>
           </div>
           <p data-i18n="subtitle">Slowly Evolving Harmonic Currents</p>
         </div>
@@ -70,11 +70,11 @@
 
       <section class="workbench">
         <aside class="controls" aria-label="controls" data-i18n-aria-label="labels.controls">
-          <div class="mode-row" role="group" aria-label="Fraction Mode" data-i18n-aria-label="labels.fractionMode">
+          <div class="mode-row play-only-control" role="group" aria-label="Fraction Mode" data-i18n-aria-label="labels.fractionMode">
             <button id="autoMode" class="seg active" type="button" data-i18n="modes.auto">Auto</button>
             <button id="listMode" class="seg" type="button" data-i18n="modes.list">List</button>
           </div>
-          <p class="hint" data-i18n="hints.fractionMode">比率の作り方。Auto は範囲から生成、List は指定した比率だけを使います。</p>
+          <p class="hint play-only-control" data-i18n="hints.fractionMode">比率の作り方。Auto は範囲から生成、List は指定した比率だけを使います。</p>
 
           <div id="editorControls" class="panel hidden">
             <div class="mode-row" role="group" aria-label="Editor Ratio Source" data-i18n-aria-label="editor.ratioSource">
@@ -86,20 +86,24 @@
               <p class="hint editor-hint" data-i18n="hints.editorPlaceholder">Edit mode is ready. Note editing will be added in the next step.</p>
             </div>
             <label class="check">
-              <input id="editorPairSelect" type="checkbox" data-i18n-checkbox-label="editor.pairSelect" />
-              Pair Select
+              <input id="editorBinderMode" type="checkbox" data-i18n-checkbox-label="editor.binder" />
+              Binder
+            </label>
+            <label class="check">
+              <input id="editorTransposeAll" type="checkbox" data-i18n-checkbox-label="editor.transposeAll" />
+              Transpose All
             </label>
             <div id="editorGridControls">
               <div class="split">
                 <div class="control-group">
                   <label for="editorGridBase" data-i18n="editor.gridBase">Base Partial</label>
-                  <input id="editorGridBase" type="number" min="1" max="256" step="1" value="32" />
+                  <input id="editorGridBase" type="number" min="1" max="256" step="1" value="8" />
                 </div>
                 <div class="control-group">
                   <label for="editorGridDirection" data-i18n="editor.gridDirection">Direction</label>
                   <select id="editorGridDirection">
-                    <option value="both" data-i18n="editor.both">Both</option>
                     <option value="above" data-i18n="editor.above">Above</option>
+                    <option value="both" data-i18n="editor.both">Both</option>
                     <option value="under" data-i18n="editor.under">Under</option>
                   </select>
                 </div>
@@ -107,28 +111,37 @@
               <div class="split">
                 <div class="control-group">
                   <label for="editorGridNumeratorMin" data-i18n="editor.numeratorFrom">Numerator From</label>
-                  <input id="editorGridNumeratorMin" type="number" min="1" max="512" step="1" value="33" />
+                  <input id="editorGridNumeratorMin" type="number" min="1" max="512" step="1" value="8" />
                 </div>
                 <div class="control-group">
                   <label for="editorGridNumeratorMax" data-i18n="editor.numeratorTo">Numerator To</label>
-                  <input id="editorGridNumeratorMax" type="number" min="1" max="512" step="1" value="48" />
+                  <input id="editorGridNumeratorMax" type="number" min="1" max="512" step="1" value="16" />
                 </div>
               </div>
             </div>
             <div id="editorSingleControls" class="hidden">
-              <div class="control-group">
-                <label for="editorSingleRatioInput" data-i18n="editor.singleRatio">Single Ratio</label>
-                <input id="editorSingleRatioInput" type="text" value="3/2" inputmode="text" />
+              <div class="split editor-single-split">
+                <div class="control-group">
+                  <label for="editorSingleRatioInput" data-i18n="editor.singleRatio">Single Ratio</label>
+                  <input id="editorSingleRatioInput" type="text" value="3/2" inputmode="text" />
+                </div>
+                <div class="control-group">
+                  <label for="editorSingleDirection" data-i18n="editor.gridDirection">Direction</label>
+                  <select id="editorSingleDirection">
+                    <option value="above" data-i18n="editor.above">Above</option>
+                    <option value="both" data-i18n="editor.both">Both</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="mode-row three" role="group" aria-label="Ratio Bias" data-i18n-aria-label="labels.ratioBias">
+          <div class="mode-row three play-only-control" role="group" aria-label="Ratio Bias" data-i18n-aria-label="labels.ratioBias">
             <button id="simpleRatioMode" class="seg active" type="button" data-i18n="modes.simple">Simple</button>
             <button id="equalRatioMode" class="seg" type="button" data-i18n="modes.equal">Equal</button>
             <button id="complexRatioMode" class="seg" type="button" data-i18n="modes.complex">Complex</button>
           </div>
-          <p class="hint" data-i18n="hints.ratioBias">比率候補の偏り方。Simple は小さな整数比、Complex は大きな整数比、Equal は均等です。</p>
+          <p class="hint play-only-control" data-i18n="hints.ratioBias">比率候補の偏り方。Simple は小さな整数比、Complex は大きな整数比、Equal は均等です。</p>
 
           <div id="autoControls" class="panel">
             <div class="split">
@@ -162,7 +175,7 @@
             </div>
           </div>
 
-          <div class="split">
+          <div class="split play-only-control">
             <div class="control-group">
               <label for="minDur" data-i18n="labels.durationMin">Duration Min Sec</label>
               <input id="minDur" type="number" min="0.5" max="60" step="0.1" value="5" />
@@ -173,7 +186,7 @@
             </div>
           </div>
 
-          <div class="split">
+          <div class="split play-only-control">
             <div class="control-group">
               <label for="nextMin" data-i18n="labels.nextMin">Next Event Min Sec</label>
               <input id="nextMin" type="number" min="0.05" max="20" step="0.05" value="1" />
@@ -195,12 +208,16 @@
             </div>
           </div>
 
-          <label class="check">
+          <div class="button-row editor-only-control hidden">
+            <button id="editorStorageOpen" class="wide-button" type="button" data-i18n="editor.storageLoop">Storage...</button>
+          </div>
+
+          <label class="check play-only-control">
             <input id="allowDuplication" type="checkbox" data-i18n-checkbox-label="labels.duplicate" />
             Duplicate Frequencies
           </label>
 
-          <div class="control-group">
+          <div class="control-group play-only-control">
             <label for="parentBiasBasis" data-i18n="labels.parentBias">Parent Bias</label>
             <select id="parentBiasBasis">
               <option value="equal" data-i18n="modes.equal">Equal</option>
@@ -215,7 +232,7 @@
             <small data-i18n="hints.parentBias">Parent の選び方。Rooted Depth は root が消えた後も depth 0 を 1 本の tree にだけ引き継ぎます。</small>
           </div>
 
-          <div class="button-row">
+          <div class="button-row play-only-control">
             <button id="detailsOpen" class="wide-button" type="button" data-i18n="labels.settings">Advanced</button>
           </div>
 
@@ -400,6 +417,50 @@
       </form>
     </dialog>
 
+    <dialog id="editorStorageDialog" class="details-dialog">
+      <form method="dialog" class="details-panel">
+        <header class="details-head">
+          <div>
+            <h2 data-i18n="editor.storageLoop">Storage</h2>
+            <p data-i18n="editor.storageIntro">Save or restore the current editor loop in this browser.</p>
+          </div>
+          <button id="editorStorageClose" type="submit" title="Close" data-i18n-title="dialogs.closeTitle">×</button>
+        </header>
+        <section class="setting-block">
+          <h3 data-i18n="editor.transferLoop">Transfer Code</h3>
+          <p class="hint" data-i18n="editor.transferIntro">Export writes the current loop here. Paste a code here and import it to restore the loop.</p>
+          <textarea id="editorTransferCode" class="editor-transfer-code" rows="4" spellcheck="false" autocomplete="off"></textarea>
+          <p id="editorTransferStatus" class="hint editor-transfer-status" aria-live="polite"></p>
+          <div class="mode-row four" role="group" aria-label="Editor Transfer">
+            <button id="editorExport" class="seg" type="button" data-i18n="editor.exportLoop">Export</button>
+            <button id="editorImport" class="seg" type="button" data-i18n="editor.importLoop">Import</button>
+            <button id="editorExportUrl" class="seg" type="button" data-i18n="editor.exportUrl">URL</button>
+            <button id="editorShareTwitter" class="seg" type="button" data-i18n="editor.shareTwitter">Twitter</button>
+          </div>
+        </section>
+        <section class="setting-block">
+          <h3 data-i18n="editor.saveSlots">Save Slots</h3>
+          <div class="editor-save-slots" aria-label="Editor Save Slots">
+            <div class="editor-save-slot">
+              <span id="editorSlot1Status">Slot 1: Empty</span>
+              <button type="button" data-editor-save-slot="1" data-i18n="editor.saveLoop">Save</button>
+              <button type="button" data-editor-load-slot="1" data-i18n="editor.loadLoop">Load</button>
+            </div>
+            <div class="editor-save-slot">
+              <span id="editorSlot2Status">Slot 2: Empty</span>
+              <button type="button" data-editor-save-slot="2" data-i18n="editor.saveLoop">Save</button>
+              <button type="button" data-editor-load-slot="2" data-i18n="editor.loadLoop">Load</button>
+            </div>
+            <div class="editor-save-slot">
+              <span id="editorSlot3Status">Slot 3: Empty</span>
+              <button type="button" data-editor-save-slot="3" data-i18n="editor.saveLoop">Save</button>
+              <button type="button" data-editor-load-slot="3" data-i18n="editor.loadLoop">Load</button>
+            </div>
+          </div>
+        </section>
+      </form>
+    </dialog>
+
     <dialog id="helpDialog" class="details-dialog">
       <form method="dialog" class="details-panel">
         <header class="details-head">
@@ -477,7 +538,7 @@
               音のバーをクリックまたはタップすると、その音を 1 秒だけプレビューできます。空の場所を停止中にクリックすると、その高さに対応する周波数で seed または drone を置いて開始します。
             </p>
           </div>
-          <div id="helpEditorControl" class="setting-block help-block" data-help-page="controls">
+          <div id="helpEditorControl" class="setting-block help-block" data-help-page="about">
             <h3 data-i18n="help.editorTitle">Editor Mode</h3>
             <p data-i18n="help.editorText">
               Edit では固定された loop 上に音を置き、動く再生ヘッドで鳴らします。+ で root note を追加し、bar をドラッグして開始位置を変え、左右端をドラッグして長さを変えます。
