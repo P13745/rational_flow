@@ -59,7 +59,7 @@ window.RF_I18N = {
       "parentBias": "新しい Child の元になる Parent の選び方です。Rooted depth を使うと、最初の root が消えた後も、1本の tree を基準として depth を追えます。",
       "vibrato": "Vibrato を有効にすると、下の速さと深さを編集できます。再生音だけに適用されます。",
       "ratioIntegerLimit": "表示や計算で扱う整数比の大きさの上限です。上限を大きくすると長時間再生時の表示が重くなることがあります。小さくすると候補が減り、生成される音が少なくなる場合があります。",
-      "editorPlaceholder": "Editor mode では、固定された loop 上に音を置いて編集します。まずは切替だけを用意し、音の追加と編集は次の段階で追加します。"
+      "editorPlaceholder": "固定された loop 上で音を編集します。右端の丸い handle から child を作り、Pair Select で2音の interval を確認できます。"
     },
     "labels": {
       "numeratorMax": "分子の上限",
@@ -248,6 +248,8 @@ window.RF_I18N = {
       "plus": "停止中は、現在の Seed/Drone 設定で起点を追加します。再生中は、現在の生成ルールに従って Child を右端に追加します。",
       "canvasTapTitle": "Canvas のタップ",
       "canvasTap": "音のバーをクリックまたはタップすると、その音を短くプレビューできます。停止中に空の場所をクリックすると、その高さに対応する周波数で Seed または Drone を置いて開始します。",
+      "editorTitle": "Editor Mode",
+      "editorText": "Edit では固定された loop 上に音を置き、動く再生ヘッドで鳴らします。+ で root note を追加し、bar をドラッグして開始位置を変え、左右端をドラッグして長さを変えます。右端の丸い handle からドラッグすると、Partial Grid や Single Ratio に従って child を作れます。Pair Select を使うと、スマートフォンでも2音を順に選んで interval を確認できます。",
       "stop": "再生中の Play ボタンは Stop として働きます。押すと新しい生成を止め、音を短くフェードアウトして流れを終えます。",
       "clear": "現在の音、予約済みの音、Timeline を消し、空の状態に戻します。鳴っている音は短くフェードアウトします。",
       "pitchRangeTitle": "音域",
@@ -350,7 +352,7 @@ window.RF_I18N = {
       "parentBias": "How the parent note is chosen. Rooted Depth lets one tree inherit depth 0 after the original root disappears.",
       "vibrato": "Turn on Enable Vibrato to edit the values below.",
       "ratioIntegerLimit": "Ratios whose reduced numerator or denominator exceeds this value are ignored. Larger values can make long playback displays and processing heavier. Smaller values reduce candidates, making child generation more likely to fail and the texture sparser.",
-      "editorPlaceholder": "Edit mode will let you place and edit notes on a fixed loop. This step only adds the workspace shell; note editing comes next."
+      "editorPlaceholder": "Edit notes on a fixed loop. Drag the round handle to create children, and use Pair Select to inspect two-note intervals."
     },
     "labels": {
       "numeratorMax": "Numerator Limit",
@@ -539,6 +541,8 @@ window.RF_I18N = {
       "plus": "While stopped, + adds a starting note using the current Seed/Drone setting. While running, it manually adds a Child at the right edge using the current generation rules.",
       "canvasTapTitle": "Canvas Tap",
       "canvasTap": "Click or tap a note bar to preview that note briefly. While stopped, clicking empty Canvas starts from that height using the current Seed/Drone setting.",
+      "editorTitle": "Editor Mode",
+      "editorText": "Edit places notes on a fixed loop and plays them with a moving playhead. Use + to add a root note, drag a bar to move its start time, and drag either edge to resize it. Drag the round handle on the right edge to create a child from Partial Grid or Single Ratio. Pair Select lets touch users choose two notes in sequence and inspect their interval.",
       "stop": "While running, the Play button acts as Stop. Pressing it stops new generation and fades the current sound out briefly.",
       "clear": "Clears current notes, scheduled notes, and the Timeline. Sounding notes fade out quickly before the Canvas returns to an empty state.",
       "pitchRangeTitle": "Pitch Range",

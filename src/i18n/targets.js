@@ -122,6 +122,8 @@ export const i18nHelpTargets = [
   ["#helpPlusControl p", "help.plus"],
   ["#helpCanvasTapControl h3", "help.canvasTapTitle"],
   ["#helpCanvasTapControl p", "help.canvasTap"],
+  ["#helpEditorControl h3", "help.editorTitle"],
+  ["#helpEditorControl p", "help.editorText"],
   ["#helpRatioSource h3", "dialogs.ratioSourceTitle"],
   ["#helpRatioSource li:nth-child(1) span", "help.ratioAuto"],
   ["#helpRatioSource li:nth-child(2) span", "help.ratioList"],
