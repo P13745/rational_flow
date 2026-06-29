@@ -173,7 +173,7 @@ export function normalizeVectorsToPositive(vectors) {
   const offsets = new Map();
   primes.forEach((prime) => {
     const minExponent = Math.min(...vectors.map((vector) => vector.get(prime) || 0));
-    offsets.set(prime, minExponent < 0 ? -minExponent : 0);
+    offsets.set(prime, -minExponent);
   });
   return vectors.map((vector) => {
     const normalized = new Map();
