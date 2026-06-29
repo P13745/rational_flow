@@ -32,6 +32,10 @@
         </div>
         <div class="transport" aria-label="Transport" data-i18n-aria-label="transport.label" data-tools-open="false">
           <div class="transport-group playback-group-top">
+            <div class="workspace-toggle" role="group" aria-label="Workspace Mode" data-i18n-aria-label="labels.workspaceMode">
+              <button id="playWorkspace" class="seg active" type="button" data-i18n="modes.play">Play</button>
+              <button id="editorWorkspace" class="seg" type="button" data-i18n="modes.edit">Edit</button>
+            </div>
             <button id="startStop" class="primary" type="button" title="Play/Stop" data-i18n-title="transport.startStopTitle">▶</button>
             <button id="pauseResume" type="button" title="Pause/Resume" data-i18n-title="transport.pauseTitle">Ⅱ</button>
             <select id="seedMode" class="transport-select" title="Seed/Drone" data-i18n-title="transport.seedModeTitle">
@@ -71,6 +75,53 @@
             <button id="listMode" class="seg" type="button" data-i18n="modes.list">List</button>
           </div>
           <p class="hint" data-i18n="hints.fractionMode">比率の作り方。Auto は範囲から生成、List は指定した比率だけを使います。</p>
+
+          <div id="editorControls" class="panel hidden">
+            <div class="mode-row" role="group" aria-label="Editor Ratio Source" data-i18n-aria-label="editor.ratioSource">
+              <button id="editorPartialGrid" class="seg active" type="button" data-i18n="editor.partialGrid">Partial Grid</button>
+              <button id="editorSingleRatio" class="seg" type="button" data-i18n="editor.singleRatio">Single Ratio</button>
+            </div>
+            <div class="control-group">
+              <label data-i18n="labels.editor">Editor</label>
+              <p class="hint editor-hint" data-i18n="hints.editorPlaceholder">Edit mode is ready. Note editing will be added in the next step.</p>
+            </div>
+            <label class="check">
+              <input id="editorPairSelect" type="checkbox" data-i18n-checkbox-label="editor.pairSelect" />
+              Pair Select
+            </label>
+            <div id="editorGridControls">
+              <div class="split">
+                <div class="control-group">
+                  <label for="editorGridBase" data-i18n="editor.gridBase">Base Partial</label>
+                  <input id="editorGridBase" type="number" min="1" max="256" step="1" value="32" />
+                </div>
+                <div class="control-group">
+                  <label for="editorGridDirection" data-i18n="editor.gridDirection">Direction</label>
+                  <select id="editorGridDirection">
+                    <option value="both" data-i18n="editor.both">Both</option>
+                    <option value="above" data-i18n="editor.above">Above</option>
+                    <option value="under" data-i18n="editor.under">Under</option>
+                  </select>
+                </div>
+              </div>
+              <div class="split">
+                <div class="control-group">
+                  <label for="editorGridNumeratorMin" data-i18n="editor.numeratorFrom">Numerator From</label>
+                  <input id="editorGridNumeratorMin" type="number" min="1" max="512" step="1" value="33" />
+                </div>
+                <div class="control-group">
+                  <label for="editorGridNumeratorMax" data-i18n="editor.numeratorTo">Numerator To</label>
+                  <input id="editorGridNumeratorMax" type="number" min="1" max="512" step="1" value="48" />
+                </div>
+              </div>
+            </div>
+            <div id="editorSingleControls" class="hidden">
+              <div class="control-group">
+                <label for="editorSingleRatioInput" data-i18n="editor.singleRatio">Single Ratio</label>
+                <input id="editorSingleRatioInput" type="text" value="3/2" inputmode="text" />
+              </div>
+            </div>
+          </div>
 
           <div class="mode-row three" role="group" aria-label="Ratio Bias" data-i18n-aria-label="labels.ratioBias">
             <button id="simpleRatioMode" class="seg active" type="button" data-i18n="modes.simple">Simple</button>

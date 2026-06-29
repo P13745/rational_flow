@@ -4,6 +4,8 @@ import { closeOnBackdrop, openDialog, setHelpPage } from "./dialogs.js";
 
 export function registerEventBindings({
   addManualNote,
+  clearEditorClip,
+  deleteSelectedEditorNotes,
   clearAll,
   drawCanvas,
   loadSelectedPreset,
@@ -15,16 +17,27 @@ export function registerEventBindings({
   setMobileToolsOpen,
   setMobileView,
   setMode,
+  setEditorRatioSource,
+  syncEditorControls,
   setRatioBias,
   setSeedMode,
+  setWorkspaceMode,
   start,
+  startEditorLoop,
   handleCanvasPointer,
   stop,
+  stopEditorLoop,
   syncWakeLock,
   toggleLanguage,
   togglePause,
+  toggleEditorPause,
 }) {
   els.startStop.addEventListener("click", () => {
+    if (state.workspaceMode === "editor") {
+      if (state.editor.isLooping || state.editor.isPaused) stopEditorLoop();
+      else startEditorLoop();
+      return;
+    }
     if (state.isRunning || state.isPaused || state.isDraining) stop();
     else start();
   });
@@ -36,16 +49,26 @@ export function registerEventBindings({
   ].forEach((button) => {
     button.addEventListener("click", () => setMobileView(button.dataset.mobileView));
   });
-  els.pauseResume.addEventListener("click", togglePause);
+  els.playWorkspace.addEventListener("click", () => setWorkspaceMode("play"));
+  els.editorWorkspace.addEventListener("click", () => setWorkspaceMode("editor"));
+  els.pauseResume.addEventListener("click", () => {
+    if (state.workspaceMode === "editor") toggleEditorPause();
+    else togglePause();
+  });
   els.seedMode.addEventListener("change", () => setSeedMode(els.seedMode.value));
   els.seed.addEventListener("click", addManualNote);
-  els.clear.addEventListener("click", clearAll);
+  els.clear.addEventListener("click", () => {
+    if (state.workspaceMode === "editor") clearEditorClip();
+    else clearAll();
+  });
   els.visualizer.addEventListener("pointerdown", handleCanvasPointer);
   els.visualizer.addEventListener("pointermove", handleCanvasPointer);
   els.visualizer.addEventListener("pointerup", handleCanvasPointer);
   els.visualizer.addEventListener("pointercancel", handleCanvasPointer);
   els.autoMode.addEventListener("click", () => setMode("auto"));
   els.listMode.addEventListener("click", () => setMode("list"));
+  els.editorPartialGrid.addEventListener("click", () => setEditorRatioSource("partialGrid"));
+  els.editorSingleRatio.addEventListener("click", () => setEditorRatioSource("single"));
   els.simpleRatioMode.addEventListener("click", () => setRatioBias("simple"));
   els.equalRatioMode.addEventListener("click", () => setRatioBias("equal"));
   els.complexRatioMode.addEventListener("click", () => setRatioBias("complex"));
@@ -145,6 +168,17 @@ export function registerEventBindings({
     els.vibratoDepthMin,
     els.vibratoDepthMax,
   ].forEach((el) => el.addEventListener("input", render));
+  [
+    els.editorGridBase,
+    els.editorGridDirection,
+    els.editorGridNumeratorMin,
+    els.editorGridNumeratorMax,
+    els.editorSingleRatioInput,
+    els.editorPairSelect,
+  ].forEach((el) => el.addEventListener("input", () => {
+    syncEditorControls();
+    render(true);
+  }));
 
   window.addEventListener("resize", drawCanvas);
   document.addEventListener("visibilitychange", () => {
@@ -155,11 +189,18 @@ export function registerEventBindings({
     if (["INPUT", "TEXTAREA", "SELECT"].includes(tagName)) return;
     if (event.code === "Space") {
       event.preventDefault();
-      if (state.isRunning || state.isPaused || state.isDraining) togglePause();
+      if (state.workspaceMode === "editor") {
+        if (state.editor.isLooping || state.editor.isPaused) toggleEditorPause();
+        else startEditorLoop();
+      } else if (state.isRunning || state.isPaused || state.isDraining) togglePause();
       else start();
     }
     if (event.key.toLowerCase() === "n") {
       addManualNote();
+    }
+    if (state.workspaceMode === "editor" && (event.key === "Delete" || event.key === "Backspace")) {
+      event.preventDefault();
+      deleteSelectedEditorNotes();
     }
   });
 }

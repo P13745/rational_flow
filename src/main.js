@@ -39,6 +39,26 @@ import {
   renderDiesisList as renderDiesisListView,
 } from "./diesis/diesis-view.js";
 import {
+  createEditorRootNote,
+  createEditorChildNote,
+  deleteEditorNoteSubtree,
+  moveEditorNote,
+  resizeEditorNoteEnd,
+  resizeEditorNoteStart,
+  selectedEditorInterval,
+  toggleEditorNoteMute,
+} from "./editor/editor-model.js";
+import {
+  fillEditorPlaybackQueue,
+  stopEditorScheduledAudio,
+} from "./editor/editor-playback.js";
+import { renderEditorTable } from "./editor/editor-table.js";
+import {
+  buildPartialGridCandidates,
+  buildSingleRatioCandidate,
+  nearestCandidateByY,
+} from "./editor/ratio-tools.js";
+import {
   activeAt,
   exactRatioBetween,
   hasDuplicateFrequency,
@@ -46,10 +66,13 @@ import {
 import { normalizeNoteGenerations } from "./generation/depth-normalization.js";
 import { fillGenerationEventQueue } from "./generation/scheduler.js";
 import { applyLanguageTargets } from "./i18n/language-ui.js";
+import { t } from "./i18n/i18n.js";
 import { i18nHelpTargets, i18nTargets } from "./i18n/targets.js";
 import { registerEventBindings } from "./ui/event-bindings.js";
 import {
   canvasMetrics as getCanvasMetrics,
+  editorCanvasMetrics as getEditorCanvasMetrics,
+  editorNoteHitAtCanvasPoint as getEditorNoteHitAtCanvasPoint,
   frequencyFromCanvasY as getFrequencyFromCanvasY,
   noteAtCanvasPoint as getNoteAtCanvasPoint,
   rightEdgeOffset as getRightEdgeOffset,
@@ -277,7 +300,51 @@ function frequencyFromCanvasY(clientY) {
 }
 
 function canvasMetrics() {
+  if (state.workspaceMode === "editor") {
+    return getEditorCanvasMetrics({ settings: getSettings(), editor: state.editor });
+  }
   return getCanvasMetrics({ settings: getSettings(), now: timelineNow() });
+}
+
+function syncEditorControls() {
+  state.editor.gridBase = Math.max(1, Math.floor(Number(els.editorGridBase.value) || 32));
+  state.editor.gridNumeratorMin = Math.max(1, Math.floor(Number(els.editorGridNumeratorMin.value) || state.editor.gridBase + 1));
+  state.editor.gridNumeratorMax = Math.max(state.editor.gridNumeratorMin, Math.floor(Number(els.editorGridNumeratorMax.value) || state.editor.gridNumeratorMin));
+  state.editor.gridDirection = ["above", "under", "both"].includes(els.editorGridDirection.value)
+    ? els.editorGridDirection.value
+    : "both";
+  state.editor.singleRatioInput = els.editorSingleRatioInput.value || "3/2";
+  state.editor.pairSelect = els.editorPairSelect.checked;
+}
+
+function editorRatioCandidates() {
+  syncEditorControls();
+  if (state.editor.ratioSource === "single") {
+    const candidate = buildSingleRatioCandidate(state.editor.singleRatioInput);
+    return candidate ? [candidate] : [];
+  }
+  return buildPartialGridCandidates({
+    base: state.editor.gridBase,
+    numeratorMin: state.editor.gridNumeratorMin,
+    numeratorMax: state.editor.gridNumeratorMax,
+    direction: state.editor.gridDirection,
+  });
+}
+
+function selectEditorNote(noteId, { extend = false } = {}) {
+  if (extend) {
+    const selected = new Set(state.editor.selectedNoteIds);
+    if (selected.has(noteId)) selected.delete(noteId);
+    else selected.add(noteId);
+    state.editor.selectedNoteIds = [...selected].slice(-2);
+    return;
+  }
+  if (state.editor.pairSelect && state.editor.selectedNoteIds.length) {
+    const previous = state.editor.selectedNoteIds[state.editor.selectedNoteIds.length - 1];
+    state.editor.selectedNoteIds = previous === noteId ? [noteId] : [previous, noteId];
+    return;
+  }
+  state.editor.selectedNoteIds = [noteId];
 }
 
 function noteAtCanvasPoint(clientX, clientY) {
@@ -317,6 +384,17 @@ function addGeneratedChild(playTime) {
 }
 
 function addManualNote() {
+  if (state.workspaceMode === "editor") {
+    const settings = getSettings();
+    createEditorRootNote({
+      editor: state.editor,
+      frequency: randomBetween(settings.minFreq, settings.maxFreq),
+      settings,
+      start: Math.min(2, Math.max(0, state.editor.loopLength - state.editor.defaultDuration)),
+    });
+    render(true);
+    return;
+  }
   if (state.isPaused) return;
   if (state.isDraining) return;
   if (!state.isRunning) {
@@ -372,8 +450,100 @@ function startCanvasSeedAt(clientY) {
   render(true);
 }
 
+function editorNoteAtCanvasPoint(clientX, clientY) {
+  return getEditorNoteHitAtCanvasPoint(clientX, clientY, canvasMetrics(), state.editor.notes);
+}
+
+function handleEditorCanvasPointer(event) {
+  if (event.type === "pointerdown") {
+    const hit = editorNoteAtCanvasPoint(event.clientX, event.clientY);
+    state.editor.drag = null;
+    if (!hit) {
+      state.editor.selectedNoteIds = [];
+      render(true);
+      return;
+    }
+    const { note, kind } = hit;
+    const metrics = canvasMetrics();
+    const pointerTime = metrics.timeFromX(event.clientX - metrics.rect.left);
+    selectEditorNote(note.id, { extend: event.shiftKey || event.metaKey || event.ctrlKey });
+    previewFrequency(note.frequency);
+    state.editor.drag = {
+      pointerId: event.pointerId,
+      kind,
+      noteId: note.id,
+      grabOffset: pointerTime - note.start,
+      start: note.start,
+      duration: note.duration,
+      originX: event.clientX,
+      originY: event.clientY,
+      candidate: null,
+      candidateFrequency: null,
+      childStart: null,
+    };
+    els.visualizer.setPointerCapture?.(event.pointerId);
+    render(true);
+    return;
+  }
+
+  const drag = state.editor.drag;
+  if (!drag || drag.pointerId !== event.pointerId) return;
+
+  if (event.type === "pointermove") {
+    const note = state.editor.notes.find((item) => item.id === drag.noteId);
+    if (!note) return;
+    const metrics = canvasMetrics();
+    const pointerTime = metrics.timeFromX(event.clientX - metrics.rect.left);
+    if (drag.kind === "resize-start") {
+      resizeEditorNoteStart({ editor: state.editor, note, start: pointerTime });
+    } else if (drag.kind === "resize-end") {
+      resizeEditorNoteEnd({ editor: state.editor, note, end: pointerTime });
+    } else if (drag.kind === "branch") {
+      const pointerY = event.clientY - metrics.rect.top;
+      const nearest = nearestCandidateByY(pointerY, editorRatioCandidates(), metrics, note);
+      if (nearest) {
+        drag.candidate = nearest.candidate;
+        drag.candidateFrequency = nearest.frequency;
+        drag.childStart = Math.min(
+          Math.max(0, pointerTime),
+          Math.max(0, state.editor.loopLength - state.editor.defaultDuration),
+        );
+      }
+    } else {
+      moveEditorNote({ editor: state.editor, note, start: pointerTime - drag.grabOffset });
+    }
+    render();
+    return;
+  }
+
+  if (event.type === "pointerup" && drag.kind === "branch") {
+    const parent = state.editor.notes.find((item) => item.id === drag.noteId);
+    const distance = Math.hypot(event.clientX - drag.originX, event.clientY - drag.originY);
+    if (parent && drag.candidate && drag.candidateFrequency && drag.childStart !== null && distance > 16) {
+      createEditorChildNote({
+        editor: state.editor,
+        parent,
+        candidate: drag.candidate,
+        frequency: drag.candidateFrequency,
+        start: drag.childStart,
+        settings: getSettings(),
+      });
+    }
+  }
+
+  state.editor.drag = null;
+  if (els.visualizer.hasPointerCapture?.(event.pointerId)) {
+    els.visualizer.releasePointerCapture(event.pointerId);
+  }
+  render(true);
+}
+
 function handleCanvasPointer(event) {
   event.preventDefault();
+  if (state.workspaceMode === "editor") {
+    handleEditorCanvasPointer(event);
+    return;
+  }
   if (event.type === "pointerdown") {
     state.canvasPreviewPointerId = event.pointerId;
     state.canvasPreviewLastNoteId = null;
@@ -486,6 +656,18 @@ function findCloseActivePairs(activeNotes) {
 
 function drawCanvas() {
   const metrics = canvasMetrics();
+  if (state.workspaceMode === "editor") {
+    renderVisualizerCanvas({
+      canvas: els.visualizer,
+      closeNoteIds: new Set(),
+      closePairs: [],
+      editorDrag: state.editor.drag,
+      metrics,
+      notes: state.editor.notes,
+      selectedNoteId: state.editor.selectedNoteIds[0] || null,
+    });
+    return;
+  }
   const { now } = metrics;
   const activeNow = state.isRunning || state.isPaused || state.isDraining ? activeAt(now) : [];
   const closePairs = findCloseActivePairs(activeNow);
@@ -504,6 +686,7 @@ function drawCanvas() {
     canvas: els.visualizer,
     closeNoteIds,
     closePairs,
+    editorDrag: null,
     metrics,
     notes: state.notes,
     selectedNoteId: state.selectedNoteId,
@@ -511,6 +694,24 @@ function drawCanvas() {
 }
 
 function renderTable() {
+  if (state.workspaceMode === "editor") {
+    renderEditorTable({
+      onDelete: (noteId) => {
+        deleteEditorNoteSubtree(state.editor, noteId);
+        stopEditorScheduledAudio({ editor: state.editor, stopNode });
+        render(true);
+      },
+      onMute: (noteId) => {
+        const note = state.editor.notes.find((item) => item.id === noteId);
+        if (note) toggleEditorNoteMute(note);
+        stopEditorScheduledAudio({ editor: state.editor, stopNode });
+        render(true);
+      },
+      onSelect: () => render(true),
+      selectNote: selectEditorNote,
+    });
+    return;
+  }
   renderTimelineTable({
     now: timelineNow(),
     settings: getSettings(),
@@ -540,12 +741,51 @@ function renderDiesisList() {
 function updateLabels() {
   updateStatusLabels({
     els,
+    editorIntervalText: editorIntervalText(),
     now: timelineNow(),
     state,
     timerBadgeText,
     updateParentDirectionLabels,
     updateRatioCurveState,
     updateVibratoState,
+  });
+}
+
+function editorIntervalText() {
+  const interval = selectedEditorInterval(state.editor);
+  if (!interval) return "";
+  const ratio = interval.vector ? ratioDisplayFromVector(interval.vector) : interval.ratio;
+  const named = interval.vector ? state.namedCommaByVectorKey.get(vectorKey(interval.vector)) : null;
+  return named
+    ? `${ratio}, ${interval.cents.toFixed(2)} cents, ${named.name}`
+    : `${ratio}, ${interval.cents.toFixed(2)} cents`;
+}
+
+function renderWorkspaceControls() {
+  const isEditor = state.workspaceMode === "editor";
+  const tableHeadings = isEditor
+    ? [t("table.start"), t("table.end"), t("table.hz"), t("table.ratio"), t("table.actions")]
+    : [t("table.start"), t("table.hz"), t("table.duration"), t("table.depth"), t("table.ratio")];
+  els.playWorkspace.classList.toggle("active", !isEditor);
+  els.editorWorkspace.classList.toggle("active", isEditor);
+  els.autoControls.classList.toggle("hidden", isEditor || state.mode !== "auto");
+  els.listControls.classList.toggle("hidden", isEditor || state.mode !== "list");
+  els.editorControls.classList.toggle("hidden", !isEditor);
+  els.editorPartialGrid.classList.toggle("active", state.editor.ratioSource === "partialGrid");
+  els.editorSingleRatio.classList.toggle("active", state.editor.ratioSource === "single");
+  els.editorGridControls.classList.toggle("hidden", state.editor.ratioSource !== "partialGrid");
+  els.editorSingleControls.classList.toggle("hidden", state.editor.ratioSource !== "single");
+  els.editorGridBase.value = String(state.editor.gridBase);
+  els.editorGridNumeratorMin.value = String(state.editor.gridNumeratorMin);
+  els.editorGridNumeratorMax.value = String(state.editor.gridNumeratorMax);
+  els.editorGridDirection.value = state.editor.gridDirection;
+  els.editorSingleRatioInput.value = state.editor.singleRatioInput;
+  els.editorPairSelect.checked = state.editor.pairSelect;
+  els.stage.dataset.workspaceMode = state.workspaceMode;
+  els.listToolbarTitle.textContent = isEditor ? t("labels.graph") : t("labels.timeline");
+  els.mobileListView.textContent = isEditor ? t("labels.graph") : t("labels.timeline");
+  document.querySelectorAll("thead th").forEach((heading, index) => {
+    heading.textContent = tableHeadings[index] || "";
   });
 }
 
@@ -571,7 +811,12 @@ function timerBadgeText() {
 
 function render(forceTable = false) {
   updateLabels();
+  renderWorkspaceControls();
   drawCanvas();
+  if (state.workspaceMode === "editor") {
+    if (forceTable) renderTable();
+    return;
+  }
   const now = performance.now();
   if (forceTable || now - state.lastTableRenderAt >= tableRenderInterval) {
     renderTable();
@@ -583,6 +828,16 @@ function tick() {
   if (state.isRunning && state.timerEndTime !== null && performance.now() / 1000 >= state.timerEndTime) {
     finishTimedRun();
   }
+  if (state.editor.isLooping && state.editor.loopStartWallTime !== null) {
+    const now = performance.now() / 1000;
+    state.editor.playheadTime = (now - state.editor.loopStartWallTime) % state.editor.loopLength;
+    fillEditorPlaybackQueue({
+      editor: state.editor,
+      now,
+      scheduleAudio,
+      settings: getSettings(),
+    });
+  }
   trimNotes();
   if (state.isDraining && !state.notes.length) {
     state.isDraining = false;
@@ -592,7 +847,7 @@ function tick() {
     syncWakeLock();
   }
   render();
-  state.rafId = state.isRunning || state.isDraining ? window.requestAnimationFrame(tick) : null;
+  state.rafId = state.isRunning || state.isDraining || state.editor.isLooping ? window.requestAnimationFrame(tick) : null;
 }
 
 function start() {
@@ -624,6 +879,56 @@ function start() {
 
 function stop() {
   clearAll();
+}
+
+function startEditorLoop() {
+  ensureAudio().resume();
+  if (state.isRunning || state.isPaused || state.isDraining) clearAll();
+  stopEditorScheduledAudio({ editor: state.editor, stopNode });
+  state.workspaceMode = "editor";
+  state.editor.isLooping = true;
+  state.editor.isPaused = false;
+  state.editor.loopStartWallTime = performance.now() / 1000 - state.editor.pausedAtLoopTime;
+  state.editor.playheadTime = state.editor.pausedAtLoopTime;
+  fillEditorPlaybackQueue({
+    editor: state.editor,
+    now: performance.now() / 1000,
+    scheduleAudio,
+    settings: getSettings(),
+  });
+  syncWakeLock();
+  render(true);
+  if (!state.rafId) tick();
+}
+
+function stopEditorLoop() {
+  stopEditorScheduledAudio({ editor: state.editor, stopNode });
+  state.editor.isLooping = false;
+  state.editor.isPaused = false;
+  state.editor.loopStartWallTime = null;
+  state.editor.pausedAtLoopTime = 0;
+  state.editor.playheadTime = 0;
+  syncWakeLock();
+  if (state.rafId && !state.isRunning && !state.isDraining) {
+    window.cancelAnimationFrame(state.rafId);
+    state.rafId = null;
+  }
+  render(true);
+}
+
+function clearEditorClip() {
+  stopEditorLoop();
+  state.editor.notes = [];
+  state.editor.selectedNoteIds = [];
+  state.editor.drag = null;
+  render(true);
+}
+
+function deleteSelectedEditorNotes() {
+  if (!state.editor.selectedNoteIds.length) return;
+  [...state.editor.selectedNoteIds].forEach((noteId) => deleteEditorNoteSubtree(state.editor, noteId));
+  stopEditorScheduledAudio({ editor: state.editor, stopNode });
+  render(true);
 }
 
 function clearAll() {
@@ -692,6 +997,48 @@ function togglePause() {
   else pause();
 }
 
+function toggleEditorPause() {
+  if (!state.editor.isLooping && !state.editor.isPaused) return;
+  if (state.editor.isPaused) {
+    state.editor.isPaused = false;
+    state.editor.isLooping = true;
+    state.editor.loopStartWallTime = performance.now() / 1000 - state.editor.pausedAtLoopTime;
+    fillEditorPlaybackQueue({
+      editor: state.editor,
+      now: performance.now() / 1000,
+      scheduleAudio,
+      settings: getSettings(),
+    });
+    if (!state.rafId) tick();
+  } else {
+    state.editor.playheadTime = state.editor.loopStartWallTime === null
+      ? 0
+      : (performance.now() / 1000 - state.editor.loopStartWallTime) % state.editor.loopLength;
+    state.editor.pausedAtLoopTime = state.editor.playheadTime;
+    state.editor.isLooping = false;
+    state.editor.isPaused = true;
+    stopEditorScheduledAudio({ editor: state.editor, stopNode });
+    if (state.rafId && !state.isRunning && !state.isDraining) {
+      window.cancelAnimationFrame(state.rafId);
+      state.rafId = null;
+    }
+  }
+  syncWakeLock();
+  render(true);
+}
+
+function setWorkspaceMode(nextMode) {
+  const normalizedMode = nextMode === "editor" ? "editor" : "play";
+  if (state.workspaceMode === normalizedMode) return;
+  if (normalizedMode === "editor") {
+    if (state.isRunning || state.isPaused || state.isDraining) clearAll();
+  } else {
+    stopEditorLoop();
+  }
+  state.workspaceMode = normalizedMode;
+  render(true);
+}
+
 function setSeedMode(nextSeedMode) {
   state.seedMode = nextSeedMode === "drone" ? "drone" : "seed";
   render();
@@ -700,6 +1047,11 @@ function setSeedMode(nextSeedMode) {
 function setMode(nextMode) {
   state.mode = nextMode === "list" ? "list" : "auto";
   render();
+}
+
+function setEditorRatioSource(nextSource) {
+  state.editor.ratioSource = nextSource === "single" ? "single" : "partialGrid";
+  render(true);
 }
 
 function setRatioBias(nextBias) {
@@ -721,6 +1073,8 @@ function updateVibratoState() {
 
 registerEventBindings({
   addManualNote,
+  clearEditorClip,
+  deleteSelectedEditorNotes,
   clearAll,
   drawCanvas,
   loadSelectedPreset,
@@ -732,14 +1086,20 @@ registerEventBindings({
   setMobileToolsOpen,
   setMobileView,
   setMode,
+  setEditorRatioSource,
+  syncEditorControls,
   setRatioBias,
   setSeedMode,
+  setWorkspaceMode,
   start,
+  startEditorLoop,
   handleCanvasPointer,
   stop,
+  stopEditorLoop,
   syncWakeLock,
   toggleLanguage,
   togglePause,
+  toggleEditorPause,
 });
 loadNamedCommas({
   isDiesisDialogOpen: () => els.diesisDialog.open,

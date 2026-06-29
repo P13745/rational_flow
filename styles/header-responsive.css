@@ -48,6 +48,7 @@
     --rf-plus-w: 40px;
     --rf-clear-w: 60px;
     --rf-more-w: 66px;
+    --rf-workspace-w: 84px;
   }
 
   .topbar {
@@ -205,6 +206,7 @@
     --rf-plus-w: 34px;
     --rf-clear-w: 54px;
     --rf-more-w: 58px;
+    --rf-workspace-w: 76px;
   }
 
   .transport button,

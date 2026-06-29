@@ -25,6 +25,10 @@ canvas {
   pointer-events: none;
 }
 
+.stage[data-workspace-mode="editor"] .nowline {
+  display: none;
+}
+
 .status {
   position: absolute;
   left: 18px;

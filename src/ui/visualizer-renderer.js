@@ -6,6 +6,7 @@ export function renderVisualizerCanvas({
   canvas,
   closeNoteIds,
   closePairs,
+  editorDrag,
   metrics,
   notes,
   selectedNoteId,
@@ -48,6 +49,15 @@ export function renderVisualizerCanvas({
     }
   }
 
+  if (metrics.mode === "editor") {
+    ctx.strokeStyle = "rgba(239,200,74,0.72)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(clamp(metrics.playheadX, 0, w), 0);
+    ctx.lineTo(clamp(metrics.playheadX, 0, w), h);
+    ctx.stroke();
+  }
+
   const visible = notes.filter((note) => {
     const endX = Number.isFinite(note.duration) ? xOf(note.start + note.duration) : w + 40;
     return endX >= -40 && xOf(note.start) <= w + 40;
@@ -81,7 +91,9 @@ export function renderVisualizerCanvas({
     const isSelected = note.id === selectedNoteId;
     const isBase = !note.ratio;
     const isClose = closeNoteIds.has(note.id);
-    ctx.strokeStyle = isClose ? "#f0574c" : isSelected ? "#efc84a" : isBase ? "#68cfb7" : "rgba(243,241,232,0.84)";
+    ctx.strokeStyle = note.muted
+      ? "rgba(171,181,173,0.34)"
+      : isClose ? "#f0574c" : isSelected ? "#efc84a" : isBase ? "#68cfb7" : "rgba(243,241,232,0.84)";
     ctx.lineWidth = isSelected ? 4 : 2;
     ctx.lineCap = "round";
     ctx.beginPath();
@@ -118,7 +130,56 @@ export function renderVisualizerCanvas({
       ctx.fillStyle = "rgba(104,207,183,0.95)";
       ctx.fillText(`d${note.generation}`, clamp(x0, 18, w - 18), clamp(y - 16, 14, h - 66));
     }
+
+    if (metrics.mode === "editor" && isSelected) {
+      const handleSize = 11;
+      ctx.fillStyle = "#101312";
+      ctx.strokeStyle = "#68cfb7";
+      ctx.lineWidth = 2;
+      [x0, x1].forEach((handleX) => {
+        ctx.beginPath();
+        drawRoundedRect(ctx, handleX - handleSize / 2, y - handleSize / 2, handleSize, handleSize, 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+      ctx.beginPath();
+      ctx.arc(x1 + 18, y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
   });
+
+  if (metrics.mode === "editor" && editorDrag?.kind === "branch" && editorDrag.candidateFrequency !== null) {
+    const parent = notes.find((note) => note.id === editorDrag.noteId);
+    if (parent) {
+      const x0 = xOf(parent.start + parent.duration);
+      const y0 = yOf(parent.frequency);
+      const x1 = xOf(editorDrag.childStart);
+      const y1 = yOf(editorDrag.candidateFrequency);
+      ctx.strokeStyle = "rgba(104,207,183,0.72)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.lineTo(x1, y1);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(16,19,18,0.92)";
+      ctx.strokeStyle = "#68cfb7";
+      const label = editorDrag.candidate?.ratio || "";
+      ctx.font = "12px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      const labelW = ctx.measureText(label).width + 14;
+      const labelH = 24;
+      ctx.beginPath();
+      drawRoundedRect(ctx, clamp(x1 + 8, 4, w - labelW - 4), clamp(y1 - labelH - 8, 4, h - labelH - 58), labelW, labelH, 5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#b8f2e6";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, clamp(x1 + 8, 4, w - labelW - 4) + labelW / 2, clamp(y1 - labelH - 8, 4, h - labelH - 58) + labelH / 2);
+    }
+  }
 
   const occupiedMarkerLabels = [];
   closePairs.forEach((pair, index) => {

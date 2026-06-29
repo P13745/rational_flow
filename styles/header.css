@@ -12,6 +12,7 @@
   --rf-timer-w: 90px;
   --rf-more-w: 72px;
   --rf-brand-w: 340px;
+  --rf-workspace-w: 104px;
 }
 
 .topbar {
@@ -155,7 +156,7 @@
 .playback-group-top {
   grid-area: playback;
   display: grid;
-  grid-template-columns: var(--rf-play-w) var(--rf-pause-w) var(--rf-seed-w) var(--rf-plus-w) var(--rf-clear-w);
+  grid-template-columns: var(--rf-workspace-w) var(--rf-play-w) var(--rf-pause-w) var(--rf-seed-w) var(--rf-plus-w) var(--rf-clear-w);
 }
 
 .transport-lower {
@@ -198,6 +199,24 @@
 #pauseResume,
 #seed {
   font-size: 18px;
+}
+
+.workspace-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  width: 100%;
+  height: var(--rf-control-h);
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--field);
+}
+
+.workspace-toggle .seg {
+  height: 100%;
+  padding: 0 5px;
+  border-radius: 5px;
 }
 
 #seedMode,

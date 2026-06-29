@@ -24,6 +24,25 @@ export function canvasMetrics({ settings, now }) {
   };
 }
 
+export function editorCanvasMetrics({ settings, editor }) {
+  const rect = els.visualizer.getBoundingClientRect();
+  const minLog = Math.log2(settings.minFreq * 0.94);
+  const maxLog = Math.log2(settings.maxFreq * 1.04);
+  const viewStart = editor.viewStart;
+  const viewEnd = Math.max(viewStart + 0.1, editor.viewEnd);
+  return {
+    rect,
+    settings,
+    now: editor.playheadTime,
+    mode: "editor",
+    xOf: (time) => ((time - viewStart) / (viewEnd - viewStart)) * rect.width,
+    yOf: (frequency) => rect.height - 44 - ((Math.log2(frequency) - minLog) / (maxLog - minLog)) * (rect.height - 88),
+    timeFromX: (x) => viewStart + (x / Math.max(1, rect.width)) * (viewEnd - viewStart),
+    playheadX: ((editor.playheadTime - viewStart) / (viewEnd - viewStart)) * rect.width,
+    loopLength: editor.loopLength,
+  };
+}
+
 export function noteAtCanvasPoint(clientX, clientY, metrics) {
   const { rect, xOf, yOf } = metrics;
   const x = clientX - rect.left;
@@ -43,6 +62,36 @@ export function noteAtCanvasPoint(clientX, clientY, metrics) {
     .filter((item) => item.isHit)
     .sort((a, b) => a.dy - b.dy);
   return candidates[0]?.note || null;
+}
+
+export function editorNoteHitAtCanvasPoint(clientX, clientY, metrics, editorNotes) {
+  const { rect, xOf, yOf } = metrics;
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
+  const hitRadius = 12;
+  const handleRadius = 16;
+  const candidates = editorNotes
+    .map((note) => {
+      const x0 = xOf(note.start);
+      const x1 = xOf(note.start + note.duration);
+      const branchX = x1 + 18;
+      const noteY = yOf(note.frequency);
+      const dy = Math.abs(y - noteY);
+      const branch = Math.abs(x - branchX) <= handleRadius && dy <= handleRadius;
+      const leftHandle = Math.abs(x - x0) <= handleRadius && dy <= handleRadius;
+      const rightHandle = Math.abs(x - x1) <= handleRadius && dy <= handleRadius;
+      const body = x >= Math.min(x0, x1) - hitRadius && x <= Math.max(x0, x1) + hitRadius && dy <= hitRadius;
+      const kind = branch ? "branch" : leftHandle ? "resize-start" : rightHandle ? "resize-end" : body ? "move" : null;
+      return {
+        note,
+        kind,
+        distance: Math.min(Math.abs(x - x0), Math.abs(x - x1), dy),
+        x,
+      };
+    })
+    .filter((item) => item.kind)
+    .sort((a, b) => a.distance - b.distance);
+  return candidates[0] || null;
 }
 
 export function rightEdgeOffset(settings) {
