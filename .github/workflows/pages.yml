@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - dev/v0.3.x
   workflow_dispatch:
 
 permissions:
@@ -38,7 +37,7 @@ jobs:
           node -e 'JSON.parse(require("fs").readFileSync("ratio_presets.json", "utf8"))'
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     needs: validate
     permissions:
       contents: read
